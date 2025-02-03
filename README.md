@@ -52,3 +52,47 @@ Para obtener un recurso con el URL http://www.example.com/index.html
 			<p>Hello World, this is a very simple HTML document.</p>
 		</body>
 		</html>
+
+### API de Sockets
+
+![Diagrama](https://media.geeksforgeeks.org/wp-content/uploads/20220330131350/StatediagramforserverandclientmodelofSocketdrawio2-448x660.png)
+
+### Caso Server
+
+1. Creacion del Socket.
+
+		int sockfd = socket(domain, type, protocol)
+
+	- sockfd: descriptor de socket (como un identificador de archivo).
+	- domain: dominio de comunicación. AF_LOCAL para la comunicación entre procesos en el mismo host. AF_INET para la comunicación entre procesos en diferentes hosts conectados por IPv4.
+	- type: tipo de comunicación. SOCK_STREAM: TCP (confiable, orientado a la conexión). SOCK_DGRAM: UDP (no confiable, sin conexión).
+	- protocol: valor de protocolo para el Protocolo de Internet (IP), que es 0.
+
+2. Enlazar el socket
+
+		int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
+
+	Vincula el socket a la dirección y el número de puerto especificados en addr (estructura de datos personalizada). Si vinculamos el servidor al host local, usamos INADDR_ANY para especificar la dirección IP.
+
+		addr
+		– struct sockaddr_in para IPv4
+		– cast (struct sockaddr_in*) a (struct sockaddr*)
+		struct sockaddr_in
+		{
+			short sin_family; // ejemplo AF_INET
+			unsigned short sin_port; // ejemplo htons(3490)
+			struct in_addr sin_addr; // ver struct in_addr
+			char sin_zero[8];
+		};
+		struct in_addr
+		{
+			unsigned long s_addr;
+		};
+
+	Se usa htons() (Host TO Network Short), convierte el número de puerto de orden de bytes del host a orden de bytes de red (Big Endian). Es necesario porque diferentes arquitecturas pueden almacenar enteros en diferentes ordenamientos (endianness), y la red usa Big Endian por convención. Por otro lado, no se usa htonl(INADDR_ANY) porque es innecesario;INADDR_ANY ya está en el orden de bytes correcto.
+
+4. Escuchar conexiones
+
+		int listen(int sockfd, int backlog)
+
+	Pone el socket en modo pasivo, donde espera a que el cliente establezca una conexión. Backlog define la longitud máxima hasta la cual puede crecer la cola de conexiones pendientes para sockfd.
