@@ -8,7 +8,7 @@ GREEN		   = \033[0;92m
 
 # Compiler and flags
 CC             = c++
-CFLAGS         = -std=c++98 -g3
+CFLAGS         = -g3
 
 RM             = rm -rf
 
@@ -33,16 +33,20 @@ CODE_BIN       = $(BIN_DIR)webserv
 # Output executable
 NAME           = webserv
 
-all: $(CODE_BIN)
+all: $(OBJ_DIR) $(CODE_BIN)
 
 $(CODE_BIN): $(OBJ)
+	@echo "Compiling $(CODE_BIN)..."
 	@$(CC) $(CFLAGS) $(OBJ) -o $(CODE_BIN)
 	@echo "$(GREEN)✔ $(BLUE)$(USER_NAME)'s $(PURPLE)$(NAME)$(BLUE) compilation$(DEF_COLOR)"
 
+# Crear obj/ antes de compilar objetos
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
-$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp $(INC) | $(OBJ_DIR)
+# Compilar archivos fuente en objetos
+$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp | $(OBJ_DIR)
+	@echo "Compiling $< -> $@"
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean:

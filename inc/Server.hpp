@@ -9,6 +9,7 @@ individual */
 class Server
 {
 	public:
+		uint32_t						_host; // Host o 127.0.0.1 por defecto
 		uint16_t						_port;  // Puerto en el que escucha (listen)
 		std::string						_server_name; // Debe agregarse a /etc/hosts para funcionar
 		std::string						_root; // Carpeta raíz del directorio del sitio
@@ -23,7 +24,6 @@ class Server
 		// std::vector<std::string>	_cgi_ext;
         struct sockaddr_in 				_server_address; // Identifica la dirección y puerto del servidor.
         int     						_listen_socket; // Identifica al socket que quedará a la espera de conexiones
-		int								_connected_socket;
 
 		Server();
 		~Server();

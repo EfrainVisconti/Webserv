@@ -56,6 +56,7 @@ Para obtener un recurso con el URL http://www.example.com/index.html
 ### API de Sockets
 
 ![Diagrama](https://media.geeksforgeeks.org/wp-content/uploads/20220330131350/StatediagramforserverandclientmodelofSocketdrawio2-448x660.png)
+(fuente: geeksforgeeks.org)
 
 ### Caso Server
 
@@ -89,10 +90,16 @@ Para obtener un recurso con el URL http://www.example.com/index.html
 			unsigned long s_addr;
 		};
 
-	Se usa htons() (Host TO Network Short), convierte el número de puerto de orden de bytes del host a orden de bytes de red (Big Endian). Es necesario porque diferentes arquitecturas pueden almacenar enteros en diferentes ordenamientos (endianness), y la red usa Big Endian por convención. Por otro lado, no se usa htonl(INADDR_ANY) porque es innecesario;INADDR_ANY ya está en el orden de bytes correcto.
+	Se usa htons() (Host TO Network Short), convierte el número de puerto de orden de bytes del host a orden de bytes de red (Big Endian). Es necesario porque diferentes arquitecturas pueden almacenar enteros en diferentes ordenamientos (endianness), y la red usa Big Endian por convención. Por otro lado, no se usa htonl(INADDR_ANY) porque es innecesario; INADDR_ANY ya está en el orden de bytes correcto.
 
-4. Escuchar conexiones
+3. Escuchar conexiones
 
 		int listen(int sockfd, int backlog)
 
 	Pone el socket en modo pasivo, donde espera a que el cliente establezca una conexión. Backlog define la longitud máxima hasta la cual puede crecer la cola de conexiones pendientes para sockfd.
+
+4. Aceptar conexiones
+
+		int new_socket = accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
+
+	Extrae la primera solicitud de conexión en la cola de conexiones pendientes para el socket de escucha y crea un nuevo socket conectado (devolviendo su descriptor de archivo). En este punto, se establece la conexión cliente-servidor y están listos para transferir datos.
