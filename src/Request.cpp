@@ -38,8 +38,8 @@ void    Request::parseSetup(std::string _request) {
     if (std::getline(stream, line)) {
     std::istringstream request_line(line);
     std::string method, path, version;
-    _method = method;
-    _path_req = path;
+    this->setMethod(method);
+    this->setPath(path);
     }
     (void)version;
     while (std::getline(stream, line) && !line.empty()) {
@@ -50,20 +50,20 @@ void    Request::parseSetup(std::string _request) {
         value.erase(0, value.find_first_not_of(" \t"));
         value.erase(value.find_last_not_of(" \t") + 1);
         if (header == "Host") {
-            _host = value;
+            this->setHost(value);
         } else if (header == "User-Agent") {
-            _user_agent = value;
+            this->setUserAgent(value);
         } else if (header == "Accept") {
-            _request_format = value;
+            this->setReqFormat(value);
         } else if (header == "Accept-Language") {
-            _language = value;
+            this->setLanguage(value);
         } else if (header == "Accept-Encoding") {
-            _encoding = value;
+            this->setEncoding(value);
         } else if (header == "Connection") {
             if (value == "keep-alive") {
-                _keep_alive = 1;
+                this->setKeepAlive(1);
             } else {
-                _keep_alive = 0;
+                this->setKeepAlive(0);
             }
         } else if (header == "Content-Length") {
             _body_size = std::stoi(value);
@@ -74,34 +74,33 @@ void    Request::parseSetup(std::string _request) {
 // necesita la request en un buffer, maxbodysize y el host.
 // mbs = max body size :D
 // devuelve 1 si la solicitud es buena, _error_type(404, 405...) si esta mal.
-int parseRequest(std::string _request, int mbs, std::string host){
-    Request data(mbs);
-    data.parseSetup(_request);
+int Request::parseRequest(std::string _request, int mbs, std::string host){
+    this->parseSetup(_request);
     // printRequestClass(const &data);
-    if (data.getBodySize() > data.getMaxBodySize()){ // check de maxbodysize.
-        data.setErrorType(405); // error de bodysize
-        data.clean();
-        return (data.getErrorType());
+    if (this->getBodySize() > this->getMaxBodySize()){ // check de maxbodysize.
+        this->setErrorType(405); // error de bodysize
+        this->clean();
+        return (this->getErrorType());
     }
-    if (data.verifyMethodHost(host) == 0){ // check de metodo y host.
-        data.setErrorType(500); // error de host/metodo.
-        data.clean();
-        return (data.getErrorType());
+    if (this->verifyMethodHost(host) == 0){ // check de metodo y host.
+        this->setErrorType(500); // error de host/metodo.
+        this->clean();
+        return (this->getErrorType());
     }
-    if (access(data.getPath(), R_OK) == -1){ // check de ruta
-        data.setErrorType(404); // error de ruta
-        data.clean();
-        return (data.getErrorType());
+    if (access(this->getPath(), R_OK) == -1){ // check de ruta
+        this->setErrorType(404); // error de ruta
+        this->clean();
+        return (this->getErrorType());
     }
-    if (data.getMethod() == "POST" && data.getRequestFormat().empty()){ // si el metodo es post tiene que tener formato
-        data.setErrorType(406); // error de formato de peticion.
-        data.clean();
-        return (data.getErrorType());
+    if (this->getMethod() == "POST" && this->getRequestFormat().empty()){ // si el metodo es post tiene que tener formato
+        this->setErrorType(406); // error de formato de peticion.
+        this->clean();
+        return (this->getErrorType());
     }
-    if (data.getUserAgent().empty()){ // userAgent vacio
-        data.setErrorType(406); // error de formato de peticion.
-        data.clean();
-        return (data.getErrorType());
+    if (this->getUserAgent().empty()){ // userAgent vacio
+        this->setErrorType(406); // error de formato de peticion.
+        this->clean();
+        return (this->getErrorType());
     }
     return (1);
 }
@@ -177,12 +176,36 @@ void    Request::setMethod(std::string &method){
     this->_method = method;
 }
 
+void    Request::setHost(std::string &host){
+    this->_host = host;
+}
+
+void    Request::setUserAgent(std::string &useragent){
+    this->_user_agent = useragent;
+}
+
+void    Request::setPath(std::string &path){
+    this->_path = path;
+}
+
 void    Request::setBodySize(size_t size){
     this->_body_size = size;
 }
 
 void    Request::setErrorType(int error_type){
     this->_error_type = error_type;
+}
+
+void    Request::setReqFormat(std::string &reqformat){
+    this->_request_format = reqformat;
+}
+
+void    Request::setEncoding(std::string &encoding){
+    this->_encoding = encoding;
+}
+
+void    Request::setLanguage(std::string &language){
+    this->_language = language
 }
 
 bool    Request::setKeepAlive(int to){
