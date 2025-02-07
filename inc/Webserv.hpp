@@ -1,7 +1,8 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
-# include <string> 
+# include <string>
+# include <iostream>
 # include <unistd.h>
 # include <stdio.h>
 # include <stdlib.h>

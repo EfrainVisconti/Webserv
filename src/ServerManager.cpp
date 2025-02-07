@@ -1,5 +1,4 @@
 #include "../inc/ServerManager.hpp"
-#include "../inc/Request.hpp"
 
 ServerManager::ServerManager() {}
 
@@ -12,7 +11,7 @@ void	ServerManager::SetServers(std::vector<Server> servers)
 
 /*
 	Configura la estructura sockaddr_in, en la cual se identifica la
-	familia de la dirección, la dirección IPv4 y el puerto (del socket). 
+	familia de la dirección, la dirección IPv4 y el puerto (del socket).
 */
 void	ServerManager::SetSockaddr_in(Server *server)
 {
@@ -30,7 +29,7 @@ void	ServerManager::SetSockaddr_in(Server *server)
 	* _server_address: identifica la dirección y puerto del servidor.
 
 	* setsockopt() se usa para evitar el error "Address already in use".
-	* fcntl() configura el socket en modo no bloqueante (O_NONBLOCK). 
+	* fcntl() configura el socket en modo no bloqueante (O_NONBLOCK).
 */
 bool	ServerManager::CreateSockets()
 {
@@ -92,7 +91,7 @@ void	ServerManager::LaunchServers()
 {
 	if (CreateSockets() == false)
 		throw ErrorException("Creating sockets failed.");
-	
+
 	int	poll_ret = 0;
 	int	server_status = true;
 	while (server_status)
@@ -128,9 +127,9 @@ void	ServerManager::LaunchServers()
 					Request	req(mbs);
 					HandleRequest(_poll_fds[i].fd, req, mbs, host);
 				}
-            } 
+            }
             else if (_poll_fds[i].revents & POLLOUT)
-			{ 
+			{
 				// class Rsponse;
 				std::string response = "Hola mundo!";
 				send(_poll_fds[i].fd, response.c_str(), response.size(), 0);
@@ -141,7 +140,7 @@ void	ServerManager::LaunchServers()
 			{
 				CloseConnection(_poll_fds[i].fd);
 			}
-        
+
     	}
 	}
 }

@@ -44,9 +44,10 @@ class Request
 		void					setBodySize(size_t size);
 		void					setErrorType(int error_type);
 		bool					setKeepAlive(int to);
+
+	int		parseRequest(std::string request, int mbs, std::string host);
 };
 
-int		parseRequest(std::string request, int mbs, std::string host);
-void	printRequestClass(const Request &req);
+	void	printRequestClass(const Request &req);
 
 #endif
