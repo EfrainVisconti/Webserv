@@ -248,7 +248,7 @@ void	ServerManager::LaunchServers()
 				std::cout << "Sending response..." << std::endl;
 				CloseConnection(_poll_fds[i].fd);
 			}
-            else if (_poll_fds[i].revents & (POLLHUP | POLLERR))
+            else if (_poll_fds[i].revents & (POLLHUP | POLLERR | POLLNVAL))
 				CloseConnection(_poll_fds[i].fd);
     	}
 	}
