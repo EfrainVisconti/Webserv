@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-#include "../inc/Webserv.hpp"
-=======
 #include "../inc/ServerManager.hpp"
->>>>>>> refs/remotes/origin/adrian
 
 ServerManager::ServerManager() {}
 
@@ -49,36 +45,36 @@ void ServerManager::CloseConnection(int fd)
 
 	NOTA: lanza ErrorException() explícita en caso de error.
 */
-void ServerManager::HandleRequest(int client_fd)
-{
-    char buffer[2000];
-    memset(buffer, 0, 2000);
-    ssize_t bytes_read = recv(client_fd, buffer, 2000, 0);
+// void ServerManager::HandleRequest(int client_fd)
+// {
+//     char buffer[2000];
+//     memset(buffer, 0, 2000);
+//     ssize_t bytes_read = recv(client_fd, buffer, 2000, 0);
 
-    if (bytes_read <= 0)
-	{
-		// Gestionar código de error HTTP (errno == EAGAIN || errno == EWOULDBLOCK)
-		CloseConnection(client_fd);
-	}
-	// Se cambiara cuando se implemente la clase Request y Response
-	else
-	{
-		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-		{
-			if (it->fd == client_fd)
-			{
-				it->events = POLLOUT;
-				break;
-			}
-		}
-    }
+//     if (bytes_read <= 0)
+// 	{
+// 		// Gestionar código de error HTTP (errno == EAGAIN || errno == EWOULDBLOCK)
+// 		CloseConnection(client_fd);
+// 	}
+// 	// Se cambiara cuando se implemente la clase Request y Response
+// 	else
+// 	{
+// 		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+// 		{
+// 			if (it->fd == client_fd)
+// 			{
+// 				it->events = POLLOUT;
+// 				break;
+// 			}
+// 		}
+//     }
 
-	if (DEBUG_MODE)
-	{
-		std::cout << GREEN << "Request receive:\n"
-				  << buffer << RESET << std::endl;
-	}
-}
+// 	if (DEBUG_MODE)
+// 	{
+// 		std::cout << GREEN << "Request receive:\n"
+// 				  << buffer << RESET << std::endl;
+// 	}
+// }
 
 
 /*
@@ -256,8 +252,7 @@ void	ServerManager::LaunchServers()
             }
             else if (_poll_fds[i].revents & POLLOUT)
 			{
->>>>>>> refs/remotes/origin/adrian
-				// class Rsponse;
+				// Codigo temporal para enviar respuesta
 				std::string response = defaultResponse();
 				send(_poll_fds[i].fd, response.c_str(), response.size(), 0);
 				std::cout << "Sending response..." << std::endl;
@@ -266,34 +261,18 @@ void	ServerManager::LaunchServers()
             else if (_poll_fds[i].revents & (POLLHUP | POLLERR))
 				CloseConnection(_poll_fds[i].fd);
     	}
->>>>>>> refs/remotes/origin/adrian
 	}
 }
 
-bool	ServerManager::AcceptConnection(int server_fd)
+void	ServerManager::SetServers(std::vector<Server> &servers)
 {
-    struct sockaddr_in	client_addr;
-    socklen_t client_len = sizeof(client_addr);
-	int connected_socket = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
-	if (connected_socket == -1)
-	{
-        std::cerr << RED << "webserv: accept() error found" << RESET << std::endl;
-		return true;
-	}
-
-	if (fcntl(connected_socket, F_SETFL, O_NONBLOCK) == -1)
-	{
-		std::cerr << RED << "webserv: fcntl() error. Stopping execution..." << RESET << std::endl;
-		close(connected_socket);
-		return false;
-	}
-
-    pollfd connected_pollfd = {connected_socket, POLLIN, 0};
-    _poll_fds.push_back(connected_pollfd);
-	return true;
+	_servers = servers;
 }
+
 
 int parseRequest(std::string _request, int mbs, std::string host, Request &req) {
+	(void)mbs;
+	(void)host;
     req.parseSetup(_request, req); // Cambié para pasar el objeto correctamente
     // printRequestClass(req);
     /*if (req.getBodySize() > req.getMaxBodySize()) { // check de maxbodysize.
@@ -356,27 +335,13 @@ void ServerManager::HandleRequest(int client_fd, Request &req, int mbs, std::str
 		CloseConnection(client_fd);
 	}
 	else{
-        for (pollfd &pfd : _poll_fds)
+		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
 		{
-			if (pfd.fd == client_fd)
+			if (it->fd == client_fd)
 			{
-				pfd.events = POLLOUT;
+				it->events = POLLOUT;
 				break;
-            }
-        }
-    }
-}
-
-void ServerManager::CloseConnection(int fd)
-{
-    close(fd);
-
-    for (size_t i = 0; i < _poll_fds.size(); i++)
-	{
-        if (_poll_fds[i].fd == fd)
-		{
-            _poll_fds.erase(_poll_fds.begin() + i);
-            break;
-        }
+			}
+		}
     }
 }

@@ -48,7 +48,7 @@ class ServerManager
 
 		void	CreateSockets();
 		void	SetSockaddr_in(Server *server);
-		bool	AcceptConnection(int server_fd);
+		void	AcceptConnection(int server_fd, Server *server);
 		void	HandleRequest(int connected_fd, Request &req, int mbs, std::string host);
 		void	CloseConnection(int fd);
 };
