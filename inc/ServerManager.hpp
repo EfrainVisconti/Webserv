@@ -24,7 +24,7 @@ class ServerManager
 			public:
 				ErrorException(std::string str) throw()
 				{
-					_message = "webserv error: " + str;
+					_message = "webserv: " + str;
 				}
 
 				char const *what() const throw()
@@ -35,12 +35,13 @@ class ServerManager
 
 	private:
 		std::vector<Server> 		_servers;
-		std::vector<pollfd> 		_poll_fds;
-		std::map<int, Server*>		_server_map;  // Mapea sockets de escucha a sus servidores
+		std::vector<pollfd> 		_poll_fds; // Estructuras pollfd que van a ser monitoreadas
+		std::map<int, Server*>		_server_map;  // Mapea fd de socket de escucha a su Server
+		std::map<int, Server*>		_client_map; // Mapea fd de socket conectado a su Server
 
-		bool	CreateSockets();
+		void	CreateSockets();
 		void	SetSockaddr_in(Server *server);
-		bool	AcceptConnection(int server_fd);
+		void	AcceptConnection(int server_fd, Server *server);
 		void	HandleRequest(int connected_fd);
 		void	CloseConnection(int fd);
 };

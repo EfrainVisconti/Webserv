@@ -3,6 +3,7 @@
 ### HTTP
 Es el protocolo de comunicación que permite las transferencias de información a través de archivos en la web. Está orientado a transacciones y sigue el esquema petición-respuesta entre un cliente y un servidor. El cliente (por ejemplo, un **navegador web**) realiza una petición enviando un mensaje, con un formato específico al servidor. El servidor (comúnmente llamado **servidor web**) le envía un mensaje de respuesta.
 
+
 ### Métodos de petición HTTP implementados
 
 ##### GET
@@ -13,6 +14,17 @@ El método POST solicita que el recurso de destino procese la representación co
 
 ##### DELETE
 Borra el recurso especificado.
+
+
+### Códigos de estado HTTP
+
+En el RFC 7231 se establecen los significados de los códigos de respuesta:
+
+    1xx: Informativo
+    2xx: Éxito (e.g., 200 OK)
+    3xx: Redirección (e.g., 301 Moved Permanently)
+    4xx: Error del cliente (e.g., 404 Not Found)
+    5xx: Error del servidor (e.g., 500 Internal Server Error)
 
 
 ### Ejemplo de diálogo HTTP
@@ -56,6 +68,7 @@ Para obtener un recurso con el URL http://www.example.com/index.html
 ### API de Sockets
 
 ![Diagrama](https://media.geeksforgeeks.org/wp-content/uploads/20220330131350/StatediagramforserverandclientmodelofSocketdrawio2-448x660.png)
+
 (fuente: geeksforgeeks.org)
 
 ### Caso Server
@@ -103,3 +116,39 @@ Para obtener un recurso con el URL http://www.example.com/index.html
 		int new_socket = accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 
 	Extrae la primera solicitud de conexión en la cola de conexiones pendientes para el socket de escucha y crea un nuevo socket conectado (devolviendo su descriptor de archivo). En este punto, se establece la conexión cliente-servidor y están listos para transferir datos.
+
+### Multiplexación I/O
+
+Es la capacidad de realizar operaciones de E/S en múltiples descriptores de archivos. Las operaciones de entrada como read() o accept() se bloquean cuando no hay datos entrantes. Para evitar esto, se proporcionan llamadas de multiplexación de E/S como select() o poll(). En nuestro caso usamos poll().
+
+Un proceso se bloquea en una llamada de poll(), cuando regresa esta llamada, el proceso recibe un conjunto de descriptores de archivos que están listos para E/S. De esta forma se pueden realizar operaciones E/S en estos descriptores de archivos antes de pasar a la siguiente iteración.
+
+	int poll(struct pollfd *fds, nfds_t nfds, int timeout)
+
+Especifica un vector de nfds estructuras del tipo struct pollfd y un tiempo límite timeout en milisegundos.
+
+	struct pollfd {
+        int fd;         /* Descriptor de archivo */
+        short events;   /* Eventos a monitorear */
+    	short revents;  /* Eventos ocurridos (se llena cuando poll() retorna) */
+	};
+
+Los bits posibles en las máscaras (events y revents) están definidos por:
+
+	#define POLLIN    0x0001  /* Hay datos que leer */
+    #define POLLPRI   0x0002  /* Hay datos urgentes que leer */
+    #define POLLOUT   0x0004  /* Se puede escribir sin bloquear */
+    #define POLLERR   0x0008  /* Condición de error */
+	#define POLLHUP   0x0010  /* Colgado */
+	#define POLLNVAL  0x0020  /* Petición inválida: fd no está abierto */
+
+Las funciones como poll() permiten que nuestro programa espere eventos en uno o varios sockets de red y actúe en consecuencia. Por ejemplo, un servidor HTTP necesita saber cuándo:
+- Hay datos disponibles para leer de un cliente.
+- Puede escribir datos a un cliente sin bloquear.
+- Una conexión se cierra.
+
+
+### Referencias
+- https://www.youtube.com/watch?v=XXfdzwEsxFk
+- https://developer.mozilla.org/es/docs/Web/HTTP/Overview
+- https://manpages.ubuntu.com/manpages/focal/es/man2/poll.2.html

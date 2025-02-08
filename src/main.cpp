@@ -37,28 +37,28 @@
 int main() {
     try {
         Server server1;
-        server1._host = INADDR_ANY;
-        server1._port = 8080;
-        server1._server_name = "ServerOne";
-        server1._root = "/var/www/html/server1";
-        server1._client_max_body_size = 1048576;
-        server1._index = "index.html";
+        server1.host = INADDR_ANY;
+        server1.port = 8080;
+        server1.server_name = "ServerOne";
+        server1.root = "/var/www/html/server1";
+        server1.client_max_body_size = 1048576;
+        server1.index = "index.html";
 
         Server server2;
-        server2._host = INADDR_ANY;
-        server2._port = 8081;
-        server2._server_name = "ServerTwo";
-        server2._root = "/var/www/html/server2";
-        server2._client_max_body_size = 2097152;
-        server2._index = "index.html";
+        server2.host = INADDR_ANY;
+        server2.port = 8081;
+        server2.server_name = "ServerTwo";
+        server2.root = "/var/www/html/server2";
+        server2.client_max_body_size = 2097152;
+        server2.index = "index.html";
 
         Server server3;
-        server3._host = INADDR_ANY;
-        server3._port = 9090;
-        server3._server_name = "ServerThree";
-        server3._root = "/var/www/html/server3";
-        server3._client_max_body_size = 5242880;
-        server3._index = "index.html";
+        server3.host = INADDR_ANY;
+        server3.port = 9090;
+        server3.server_name = "ServerThree";
+        server3.root = "/var/www/html/server3";
+        server3.client_max_body_size = 5242880;
+        server3.index = "index.html";
 
         std::vector<Server> servers = {server1, server2, server3};
         ServerManager serverManager;
@@ -66,7 +66,7 @@ int main() {
         serverManager.SetServers(servers);
         serverManager.LaunchServers();
     } catch (const std::exception &e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
+        std::cerr << RED << e.what() << RESET << std::endl;
         return EXIT_FAILURE;
     }
     
