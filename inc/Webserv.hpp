@@ -1,17 +1,20 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
+<<<<<<< HEAD
+# include <string.h> 
+=======
+# include <string>
 # include <iostream>
-# include <string> 
+>>>>>>> refs/remotes/origin/adrian
 # include <unistd.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <cstring>
-# include <exception>
-
-/* Sistema */
-# include <fcntl.h>
 # include <poll.h>
+# include <fcntl.h>
+# include <sstream>
+# include <iostream>
 
 /* STL Containers */
 # include <map>
@@ -24,6 +27,7 @@
 
 /* Clases */
 # include "Server.hpp"
+# include "ServerManager.hpp"
 # include "CgiManager.hpp"
 # include "Request.hpp"
 # include "Response.hpp"

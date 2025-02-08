@@ -9,9 +9,12 @@ class Server;
 los servidores extraidos del archivo de configuración. También establece
 las conexiones con clientes y la gestión de peticiones/respuestas */
 
+class Request;
+class Server;
+
 class ServerManager
 {
-	public:                 
+	public:
 		ServerManager();
 		~ServerManager();
 
@@ -45,9 +48,12 @@ class ServerManager
 
 		void	CreateSockets();
 		void	SetSockaddr_in(Server *server);
-		void	AcceptConnection(int server_fd, Server *server);
-		void	HandleRequest(int connected_fd);
+		bool	AcceptConnection(int server_fd);
+		void	HandleRequest(int connected_fd, Request &req, int mbs, std::string host);
 		void	CloseConnection(int fd);
 };
+
+int			parseRequest(std::string _request, int mbs, std::string host, Request& req);
+std::string	errorResponse(int val);
 
 #endif

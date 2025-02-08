@@ -1,7 +1,6 @@
-#ifndef SERVER_HPP
-#define SERVER_HPP
+#pragma once
 
-#include "Webserv.hpp"
+# include "Webserv.hpp"
 
 /* Server es la clase que contiene la información de cada servidor
 individual */
@@ -33,5 +32,3 @@ class Server
 	private:
 	
 };
-
-#endif

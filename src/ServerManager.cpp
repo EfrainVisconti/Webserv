@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+#include "../inc/Webserv.hpp"
+=======
 #include "../inc/ServerManager.hpp"
+>>>>>>> refs/remotes/origin/adrian
 
 ServerManager::ServerManager() {}
 
@@ -244,13 +248,17 @@ void	ServerManager::LaunchServers()
                     AcceptConnection(_poll_fds[i].fd, it->second);
 				else
 				{
-					HandleRequest(_poll_fds[i].fd);
+					int	mbs = 2420985; // max body size
+					std::string host = "127.0.0.1";
+					Request	req(mbs);
+					HandleRequest(_poll_fds[i].fd, req, mbs, host);
 				}
             }
             else if (_poll_fds[i].revents & POLLOUT)
-			{ 
-				// Codigo temporal para enviar respuesta
-				std::string response = "Hola mundo!";
+			{
+>>>>>>> refs/remotes/origin/adrian
+				// class Rsponse;
+				std::string response = defaultResponse();
 				send(_poll_fds[i].fd, response.c_str(), response.size(), 0);
 				std::cout << "Sending response..." << std::endl;
 				CloseConnection(_poll_fds[i].fd);
@@ -258,11 +266,117 @@ void	ServerManager::LaunchServers()
             else if (_poll_fds[i].revents & (POLLHUP | POLLERR))
 				CloseConnection(_poll_fds[i].fd);
     	}
+>>>>>>> refs/remotes/origin/adrian
 	}
 }
 
-
-void	ServerManager::SetServers(std::vector<Server> &servers)
+bool	ServerManager::AcceptConnection(int server_fd)
 {
-	_servers = servers;
+    struct sockaddr_in	client_addr;
+    socklen_t client_len = sizeof(client_addr);
+	int connected_socket = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
+	if (connected_socket == -1)
+	{
+        std::cerr << RED << "webserv: accept() error found" << RESET << std::endl;
+		return true;
+	}
+
+	if (fcntl(connected_socket, F_SETFL, O_NONBLOCK) == -1)
+	{
+		std::cerr << RED << "webserv: fcntl() error. Stopping execution..." << RESET << std::endl;
+		close(connected_socket);
+		return false;
+	}
+
+    pollfd connected_pollfd = {connected_socket, POLLIN, 0};
+    _poll_fds.push_back(connected_pollfd);
+	return true;
+}
+
+int parseRequest(std::string _request, int mbs, std::string host, Request &req) {
+    req.parseSetup(_request, req); // Cambié para pasar el objeto correctamente
+    // printRequestClass(req);
+    /*if (req.getBodySize() > req.getMaxBodySize()) { // check de maxbodysize.
+        req.setErrorType(405); // error de bodysize
+        req.clean();
+        return (req.getErrorType());
+    }
+    if (req.verifyMethodHost(host) == 0) { // check de metodo y host.
+        req.setErrorType(500); // error de host/metodo.
+        req.clean();
+        return (req.getErrorType());
+    }
+    if (access(req.getPath().c_str(), R_OK) == -1) { // check de ruta
+        req.setErrorType(404); // error de ruta
+        req.clean();
+        return (req.getErrorType());
+    }
+    if (req.getMethod() == "POST" && req.getRequestFormat().empty()) { // si el metodo es post tiene que tener formato
+        req.setErrorType(406); // error de formato de peticion.
+        req.clean();
+        return (req.getErrorType());
+    }
+    if (req.getUserAgent().empty()) { // userAgent vacio
+        req.setErrorType(406); // error de formato de peticion.
+        req.clean();
+        return (req.getErrorType());
+    }*/
+    return (1);
+}
+
+void ServerManager::HandleRequest(int client_fd, Request &req, int mbs, std::string host)
+{
+    char buffer[2000];
+    memset(buffer, 0, 2000);
+    ssize_t bytes_read = recv(client_fd, buffer, 2000, 0);
+	std::string bufferstr = buffer;
+	std::cout << bufferstr << std::endl;
+	int status = parseRequest(bufferstr, mbs, host, req);
+	if (status == 404){
+		std::string error_response = errorResponse(404);
+		send(client_fd, error_response.c_str(), error_response.size(), 0);
+		CloseConnection(client_fd);
+	}
+	if (status == 405){
+		std::string error_response = errorResponse(405);
+		send(client_fd, error_response.c_str(), error_response.size(), 0);
+		CloseConnection(client_fd);
+	}
+	if (status == 406){
+		std::string error_response = errorResponse(406);
+		send(client_fd, error_response.c_str(), error_response.size(), 0);
+		CloseConnection(client_fd);
+	}
+	if (status == 500){
+		std::string error_response = errorResponse(500);
+		send(client_fd, error_response.c_str(), error_response.size(), 0);
+		CloseConnection(client_fd);
+	}
+	if (bytes_read <= 0 || status == 0){
+		CloseConnection(client_fd);
+	}
+	else{
+        for (pollfd &pfd : _poll_fds)
+		{
+			if (pfd.fd == client_fd)
+			{
+				pfd.events = POLLOUT;
+				break;
+            }
+        }
+    }
+}
+
+void ServerManager::CloseConnection(int fd)
+{
+    close(fd);
+
+    for (size_t i = 0; i < _poll_fds.size(); i++)
+	{
+        if (_poll_fds[i].fd == fd)
+		{
+            _poll_fds.erase(_poll_fds.begin() + i);
+            break;
+        }
+    }
 }
