@@ -60,7 +60,10 @@ int main() {
         server3.client_max_body_size = 5242880;
         server3.index = "index.html";
 
-        std::vector<Server> servers = {server1, server2, server3};
+        std::vector<Server> servers;
+        servers.push_back(server1);
+        servers.push_back(server2);
+        servers.push_back(server3);
         ServerManager serverManager;
         
         serverManager.SetServers(servers);

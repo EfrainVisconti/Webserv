@@ -3,13 +3,17 @@
 ServerManager::ServerManager() {}
 
 
-ServerManager::~ServerManager() {}
+ServerManager::~ServerManager()
+{
+	// Cerrar todos los sockets
+}
 
 
 /* 
 	Cierra la conexión del socket identificado por fd.
-	Se cierra el socket y se elimina la estructura pollfd del vector
-	_poll_fds.
+	Se cierra el socket, se elimina la estructura pollfd vinculada
+	del vector _poll_fds y la posición vinculada
+	del map<fd, Server> _client_map.
 */
 void ServerManager::CloseConnection(int fd)
 {
@@ -19,14 +23,15 @@ void ServerManager::CloseConnection(int fd)
 	if (_client_map.find(fd) != _client_map.end())
 		_client_map.erase(fd);
 
-    for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-    {
-        if (it->fd == fd)
-        {
-            _poll_fds.erase(it);
-            break;
-        }
-    }
+	for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end();)
+	{
+		if (it->fd == fd)
+		{
+			it = _poll_fds.erase(it);
+			break;
+		}
+		++it;
+	}
 }
 
 
@@ -49,20 +54,20 @@ void ServerManager::HandleRequest(int client_fd)
 
     if (bytes_read <= 0)
 	{
-		// Gestionar código de error HTTP
+		// Gestionar código de error HTTP (errno == EAGAIN || errno == EWOULDBLOCK)
 		CloseConnection(client_fd);
 	}
 	// Se cambiara cuando se implemente la clase Request y Response
 	else
 	{
-        for (pollfd &pfd : _poll_fds)
+		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
 		{
-			if (pfd.fd == client_fd)
+			if (it->fd == client_fd)
 			{
-				pfd.events = POLLOUT;
+				it->events = POLLOUT;
 				break;
-            }
-        }
+			}
+		}
     }
 
 	if (DEBUG_MODE)
@@ -98,7 +103,8 @@ void	ServerManager::AcceptConnection(int server_fd, Server *server)
 	if (connected_socket == -1)
 		throw ErrorException("accept() error. Stopping execution...");
 
-	if (fcntl(connected_socket, F_SETFL, O_NONBLOCK) == -1)
+	int flags = fcntl(connected_socket, F_GETFL, 0);
+	if (flags == -1 || fcntl(connected_socket, F_SETFL, flags | O_NONBLOCK) == -1) 
 	{
 		close(connected_socket);
 		throw ErrorException("fcntl() error. Stopping execution...");
@@ -106,7 +112,7 @@ void	ServerManager::AcceptConnection(int server_fd, Server *server)
 
     pollfd connected_pollfd = {connected_socket, POLLIN, 0};
     _poll_fds.push_back(connected_pollfd);
-	_client_map[connected_socket] = server;
+	_client_map[connected_socket] = server; // NOTA: Esta por revisar si es necesario
 
 	if (DEBUG_MODE)
 	{
@@ -164,6 +170,8 @@ void	ServerManager::CreateSockets()
 			throw ErrorException("setsockopt() error. Stopping execution...");
 		}
 
+		int flags = fcntl(it->listen_socket, F_GETFL, 0);
+		if (flags == -1 || fcntl(it->listen_socket, F_SETFL, flags | O_NONBLOCK) == -1) 
 		if (fcntl(it->listen_socket, F_SETFL, O_NONBLOCK) == -1)
 		{
 			close(it->listen_socket);
@@ -255,7 +263,7 @@ void	ServerManager::LaunchServers()
 }
 
 
-void	ServerManager::SetServers(std::vector<Server> servers)
+void	ServerManager::SetServers(std::vector<Server> &servers)
 {
 	_servers = servers;
 }

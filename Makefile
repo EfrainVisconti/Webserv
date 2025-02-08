@@ -8,7 +8,7 @@ GREEN		   = \033[0;92m
 
 # Compiler and flags
 CC             = c++
-CFLAGS         = -g3
+CFLAGS         = -Wall -Wextra -Werror -std=c++98 -g3
 
 RM             = rm -rf
 
