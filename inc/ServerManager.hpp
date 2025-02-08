@@ -1,13 +1,16 @@
 #ifndef SERVERMANAGER_HPP
 # define SERVERMANAGER_HPP
 
-# include "Webserv.hpp"
 # include "Server.hpp"
 # include "Request.hpp"
+# include "Webserv.hpp"
 
 /* ServerManager es la clase principal del programa, se encarga de ejecutar
 los servidores extraidos del archivo de configuración. También establece
 las conexiones con clientes y la gestión de peticiones/respuestas */
+
+class Request;
+class Server;
 
 class ServerManager
 {
@@ -43,8 +46,11 @@ class ServerManager
 		bool	CreateSockets();
 		void	SetSockaddr_in(Server *server);
 		bool	AcceptConnection(int server_fd);
-		void	HandleRequest(int connected_fd, Request req, int mbs, int host);
+		void	HandleRequest(int connected_fd, Request &req, int mbs, std::string host);
 		void	CloseConnection(int fd);
 };
+
+int			parseRequest(std::string _request, int mbs, std::string host, Request& req);
+std::string	errorResponse(int val);
 
 #endif

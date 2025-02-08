@@ -1,5 +1,4 @@
-# ifndef SERVER_HPP
-# define SERVER_HPP
+#pragma once
 
 # include "Webserv.hpp"
 
@@ -33,5 +32,3 @@ class Server
 	private:
 	
 };
-
-#endif

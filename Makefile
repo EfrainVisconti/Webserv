@@ -47,7 +47,7 @@ $(OBJ_DIR):
 # Compilar archivos fuente en objetos
 $(OBJ_DIR)%.o: $(SRC_DIR)%.cpp | $(OBJ_DIR)
 	@echo "Compiling $< -> $@"
-	c++ $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	@$(RM) $(OBJ_DIR)

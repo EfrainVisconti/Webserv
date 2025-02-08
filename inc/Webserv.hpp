@@ -1,7 +1,7 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
-# include <string> 
+# include <string.h> 
 # include <unistd.h>
 # include <stdio.h>
 # include <stdlib.h>
@@ -9,6 +9,7 @@
 # include <poll.h>
 # include <fcntl.h>
 # include <sstream>
+# include <iostream>
 
 /* STL Containers */
 # include <map>

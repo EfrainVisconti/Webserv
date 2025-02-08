@@ -1,3 +1,4 @@
+#include "../inc/Webserv.hpp"
 #include "../inc/Request.hpp"
 
 Request::Request(void){
@@ -14,34 +15,34 @@ Request::Request(void){
     _error_type = 404; // error de salida en caso de no estar bien la solicitud.
 }
 
-Request::Request(int max_body_size) { // usare esta con el dato del conf.yaml
+Request::Request(int max_body_size) {
     _method = "";
     _path_req = "";
-	_host = "";
+    _host = "";
     _user_agent = "";
     _request_format = "";
-	_language = "";
+    _language = "";
     _encoding = "";
-	_keep_alive = -1;
-	_max_body_size = max_body_size;
-	_body_size = -1;
+    _keep_alive = -1;
+    _max_body_size = max_body_size;
+    _body_size = -1;
     _error_type = -1;
 }
 
-Request::~Request(void){
-    return ;
+Request::~Request(void) {
+    return;
 }
 
-void    Request::parseSetup(std::string _request) {
-    std::istringstream  stream(_request);
-    std::string         line;
+void Request::parseSetup(std::string _request, Request& req) { // Cambié const Request& a Request&
+    std::istringstream stream(_request);
+    std::string line;
     if (std::getline(stream, line)) {
-    std::istringstream request_line(line);
-    std::string method, path, version;
-    this->setMethod(method);
-    this->setPath(path);
+        std::istringstream request_line(line);
+        std::string method, path, version;
+        request_line >> method >> path;
+        req.setMethod(method);
+        req.setPath(path);
     }
-    (void)version;
     while (std::getline(stream, line) && !line.empty()) {
         std::istringstream header_stream(line);
         std::string header, value;
@@ -49,73 +50,40 @@ void    Request::parseSetup(std::string _request) {
         std::getline(header_stream, value);
         value.erase(0, value.find_first_not_of(" \t"));
         value.erase(value.find_last_not_of(" \t") + 1);
+        
         if (header == "Host") {
-            this->setHost(value);
+            req.setHost(value);
         } else if (header == "User-Agent") {
-            this->setUserAgent(value);
+            req.setUserAgent(value);
         } else if (header == "Accept") {
-            this->setReqFormat(value);
+            req.setReqFormat(value);
         } else if (header == "Accept-Language") {
-            this->setLanguage(value);
+            req.setLanguage(value);
         } else if (header == "Accept-Encoding") {
-            this->setEncoding(value);
+            req.setEncoding(value);
         } else if (header == "Connection") {
             if (value == "keep-alive") {
-                this->setKeepAlive(1);
+                req.setKeepAlive(1);
             } else {
-                this->setKeepAlive(0);
+                req.setKeepAlive(0);
             }
         } else if (header == "Content-Length") {
-            _body_size = std::stoi(value);
+            req.setBodySize(std::stoi(value));
         }
     }
 }
 
-// necesita la request en un buffer, maxbodysize y el host.
-// mbs = max body size :D
-// devuelve 1 si la solicitud es buena, _error_type(404, 405...) si esta mal.
-int Request::parseRequest(std::string _request, int mbs, std::string host){
-    this->parseSetup(_request);
-    // printRequestClass(const &data);
-    if (this->getBodySize() > this->getMaxBodySize()){ // check de maxbodysize.
-        this->setErrorType(405); // error de bodysize
-        this->clean();
-        return (this->getErrorType());
-    }
-    if (this->verifyMethodHost(host) == 0){ // check de metodo y host.
-        this->setErrorType(500); // error de host/metodo.
-        this->clean();
-        return (this->getErrorType());
-    }
-    if (access(this->getPath(), R_OK) == -1){ // check de ruta
-        this->setErrorType(404); // error de ruta
-        this->clean();
-        return (this->getErrorType());
-    }
-    if (this->getMethod() == "POST" && this->getRequestFormat().empty()){ // si el metodo es post tiene que tener formato
-        this->setErrorType(406); // error de formato de peticion.
-        this->clean();
-        return (this->getErrorType());
-    }
-    if (this->getUserAgent().empty()){ // userAgent vacio
-        this->setErrorType(406); // error de formato de peticion.
-        this->clean();
-        return (this->getErrorType());
-    }
-    return (1);
-}
-
-void    Request::clean(void){
+void Request::clean(void) {
     this->_method = "";
     this->_path_req = "";
-	this->_host = "";
+    this->_host = "";
     this->_user_agent = "";
     this->_request_format = "";
-	this->_language = "";
+    this->_language = "";
     this->_encoding = "";
-	this->_keep_alive = 1;
-	this->_max_body_size = 0;
-	this->_body_size = 0;
+    this->_keep_alive = 1;
+    this->_max_body_size = 0;
+    this->_body_size = 0;
 }
 
 int Request::verifyMethodHost(std::string host){
@@ -128,47 +96,47 @@ int Request::verifyMethodHost(std::string host){
     return (0);
 }
 
-std::string  &Request::getMethod(void){
+const std::string&    Request::getMethod(void) const{
     return (this->_method);
 }
 
-std::string &Request::getPath(void){
+const std::string&    Request::getPath(void) const{
     return (this->_path_req);
 }
 
-std::string &Request::getHost(void){
+const std::string&    Request::getHost(void) const{
     return (this->_host);
 }
 
-std::string &Request::getUserAgent(void){
+const std::string&    Request::getUserAgent(void) const{
     return (this->_user_agent);
 }
 
-std::string &Request::getRequestFormat(void){
+const std::string&    Request::getRequestFormat(void) const{
     return (this->_request_format);
 }
 
-std::string &Request::getLanguage(void){
+const std::string&    Request::getLanguage(void) const{
     return (this->_language);
 }
 
-std::string &Request::getEncoding(void){
+const std::string&    Request::getEncoding(void) const{
     return (this->_encoding);
 }
 
-bool    Request::getKeepAliveState(void){
+bool    Request::getKeepAliveState(void) const{
     return (this->_keep_alive);
 }
 
-size_t  Request::getMaxBodySize(void){
+size_t  Request::getMaxBodySize(void) const{
     return (this->_max_body_size);
 }
 
-size_t  Request::getBodySize(void){
+size_t  Request::getBodySize(void) const{
     return (this->_body_size);
 }
 
-int Request::getErrorType(void){
+int Request::getErrorType(void) const{
     return (this->_error_type);
 }
         
@@ -185,7 +153,7 @@ void    Request::setUserAgent(std::string &useragent){
 }
 
 void    Request::setPath(std::string &path){
-    this->_path = path;
+    this->_path_req = path;
 }
 
 void    Request::setBodySize(size_t size){
@@ -205,11 +173,12 @@ void    Request::setEncoding(std::string &encoding){
 }
 
 void    Request::setLanguage(std::string &language){
-    this->_language = language
+    this->_language = language;
 }
 
 bool    Request::setKeepAlive(int to){
     this->_keep_alive = to;
+    return true;
 }
 
 void    printRequestClass(const Request &req){

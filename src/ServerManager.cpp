@@ -1,5 +1,4 @@
-#include "../inc/ServerManager.hpp"
-#include "../inc/Request.hpp"
+#include "../inc/Webserv.hpp"
 
 ServerManager::ServerManager() {}
 
@@ -92,7 +91,7 @@ void	ServerManager::LaunchServers()
 {
 	if (CreateSockets() == false)
 		throw ErrorException("Creating sockets failed.");
-	
+
 	int	poll_ret = 0;
 	int	server_status = true;
 	while (server_status)
@@ -124,31 +123,27 @@ void	ServerManager::LaunchServers()
 				else
 				{
 					int	mbs = 2420985; // max body size
-					int host = INADDR_ANY;
+					std::string host = "127.0.0.1";
 					Request	req(mbs);
 					HandleRequest(_poll_fds[i].fd, req, mbs, host);
 				}
-            } 
-            else if (_poll_fds[i].revents & POLLOUT)
+            }
+			else if (_poll_fds[i].revents & POLLOUT)
 			{ 
 				// class Rsponse;
-				std::string response = "Hola mundo!";
+				std::string response = defaultResponse();
 				send(_poll_fds[i].fd, response.c_str(), response.size(), 0);
 				std::cout << "Sending response..." << std::endl;
 				CloseConnection(_poll_fds[i].fd);
 			}
-            else if (_poll_fds[i].revents & (POLLHUP | POLLERR))
+        	else if (_poll_fds[i].revents & (POLLHUP | POLLERR))
 			{
 				CloseConnection(_poll_fds[i].fd);
 			}
-        
-    	}
+		}
 	}
 }
 
-/*
-
-*/
 bool	ServerManager::AcceptConnection(int server_fd)
 {
     struct sockaddr_in	client_addr;
@@ -172,17 +167,69 @@ bool	ServerManager::AcceptConnection(int server_fd)
 	return true;
 }
 
-void ServerManager::HandleRequest(int client_fd, Request req, int mbs, int host)
+int parseRequest(std::string _request, int mbs, std::string host, Request &req) {
+    req.parseSetup(_request, req); // Cambié para pasar el objeto correctamente
+    // printRequestClass(req);
+    /*if (req.getBodySize() > req.getMaxBodySize()) { // check de maxbodysize.
+        req.setErrorType(405); // error de bodysize
+        req.clean();
+        return (req.getErrorType());
+    }
+    if (req.verifyMethodHost(host) == 0) { // check de metodo y host.
+        req.setErrorType(500); // error de host/metodo.
+        req.clean();
+        return (req.getErrorType());
+    }
+    if (access(req.getPath().c_str(), R_OK) == -1) { // check de ruta
+        req.setErrorType(404); // error de ruta
+        req.clean();
+        return (req.getErrorType());
+    }
+    if (req.getMethod() == "POST" && req.getRequestFormat().empty()) { // si el metodo es post tiene que tener formato
+        req.setErrorType(406); // error de formato de peticion.
+        req.clean();
+        return (req.getErrorType());
+    }
+    if (req.getUserAgent().empty()) { // userAgent vacio
+        req.setErrorType(406); // error de formato de peticion.
+        req.clean();
+        return (req.getErrorType());
+    }*/
+    return (1);
+}
+
+void ServerManager::HandleRequest(int client_fd, Request &req, int mbs, std::string host)
 {
     char buffer[2000];
     memset(buffer, 0, 2000);
     ssize_t bytes_read = recv(client_fd, buffer, 2000, 0);
 	std::string bufferstr = buffer;
-	int status = req.parseRequest(bufferstr, mbs, host);
-	if (bytes_read <= 0 || status == 0)
+	std::cout << bufferstr << std::endl;
+	int status = parseRequest(bufferstr, mbs, host, req);
+	if (status == 404){
+		std::string error_response = errorResponse(404);
+		send(client_fd, error_response.c_str(), error_response.size(), 0);
 		CloseConnection(client_fd);
-	else
-	{
+	}
+	if (status == 405){
+		std::string error_response = errorResponse(405);
+		send(client_fd, error_response.c_str(), error_response.size(), 0);
+		CloseConnection(client_fd);
+	}
+	if (status == 406){
+		std::string error_response = errorResponse(406);
+		send(client_fd, error_response.c_str(), error_response.size(), 0);
+		CloseConnection(client_fd);
+	}
+	if (status == 500){
+		std::string error_response = errorResponse(500);
+		send(client_fd, error_response.c_str(), error_response.size(), 0);
+		CloseConnection(client_fd);
+	}
+	if (bytes_read <= 0 || status == 0){
+		CloseConnection(client_fd);
+	}
+	else{
         for (pollfd &pfd : _poll_fds)
 		{
 			if (pfd.fd == client_fd)
