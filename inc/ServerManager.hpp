@@ -5,6 +5,8 @@
 # include "Request.hpp"
 # include "Webserv.hpp"
 
+class Server;
+
 /* ServerManager es la clase principal del programa, se encarga de ejecutar
 los servidores extraidos del archivo de configuración. También establece
 las conexiones con clientes y la gestión de peticiones/respuestas */
@@ -14,7 +16,7 @@ class Server;
 
 class ServerManager
 {
-	public:                 
+	public:
 		ServerManager();
 		~ServerManager();
 

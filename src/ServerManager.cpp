@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #include "../inc/Webserv.hpp"
+=======
+#include "../inc/ServerManager.hpp"
+>>>>>>> refs/remotes/origin/adrian
 
 ServerManager::ServerManager() {}
 
@@ -11,7 +15,7 @@ void	ServerManager::SetServers(std::vector<Server> servers)
 
 /*
 	Configura la estructura sockaddr_in, en la cual se identifica la
-	familia de la dirección, la dirección IPv4 y el puerto (del socket). 
+	familia de la dirección, la dirección IPv4 y el puerto (del socket).
 */
 void	ServerManager::SetSockaddr_in(Server *server)
 {
@@ -29,7 +33,7 @@ void	ServerManager::SetSockaddr_in(Server *server)
 	* _server_address: identifica la dirección y puerto del servidor.
 
 	* setsockopt() se usa para evitar el error "Address already in use".
-	* fcntl() configura el socket en modo no bloqueante (O_NONBLOCK). 
+	* fcntl() configura el socket en modo no bloqueante (O_NONBLOCK).
 */
 bool	ServerManager::CreateSockets()
 {
@@ -128,8 +132,13 @@ void	ServerManager::LaunchServers()
 					HandleRequest(_poll_fds[i].fd, req, mbs, host);
 				}
             }
+<<<<<<< HEAD
 			else if (_poll_fds[i].revents & POLLOUT)
 			{ 
+=======
+            else if (_poll_fds[i].revents & POLLOUT)
+			{
+>>>>>>> refs/remotes/origin/adrian
 				// class Rsponse;
 				std::string response = defaultResponse();
 				send(_poll_fds[i].fd, response.c_str(), response.size(), 0);
@@ -140,7 +149,12 @@ void	ServerManager::LaunchServers()
 			{
 				CloseConnection(_poll_fds[i].fd);
 			}
+<<<<<<< HEAD
 		}
+=======
+
+    	}
+>>>>>>> refs/remotes/origin/adrian
 	}
 }
 
