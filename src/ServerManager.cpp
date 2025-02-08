@@ -20,8 +20,7 @@ void ServerManager::CloseConnection(int fd)
     if (close(fd) == -1)
 		return;
 
-	if (_client_map.find(fd) != _client_map.end())
-		_client_map.erase(fd);
+	_client_map.erase(fd);
 
 	for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end();)
 	{
@@ -256,7 +255,7 @@ void	ServerManager::LaunchServers()
 				std::cout << "Sending response..." << std::endl;
 				CloseConnection(_poll_fds[i].fd);
 			}
-            else if (_poll_fds[i].revents & (POLLHUP | POLLERR | POLLNVAL))
+            else if (_poll_fds[i].revents & (POLLHUP | POLLERR))
 				CloseConnection(_poll_fds[i].fd);
     	}
 	}

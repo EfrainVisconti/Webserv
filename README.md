@@ -119,7 +119,7 @@ Para obtener un recurso con el URL http://www.example.com/index.html
 
 ### Multiplexación I/O
 
-Es la capacidad de realizar operaciones de E/S en múltiples descriptores de archivos. Las operaciones de entrada como read() o accept() se bloquean cuando no hay datos entrantes. Para evitar esto, se proporcionan llamadas de multiplexación de E/S como select() o poll(). En nuestro caso usamos poll().
+Es la capacidad de realizar operaciones de E/S en múltiples descriptores de archivos. Las operaciones de entrada como recv() o accept() bloquean la ejecución del programa cuando no hay datos entrantes. Para evitar esto, se proporcionan llamadas de multiplexación de E/S como select() o poll(). En nuestro caso usamos poll().
 
 Un proceso se bloquea en una llamada de poll(), cuando regresa esta llamada, el proceso recibe un conjunto de descriptores de archivos que están listos para E/S. De esta forma se pueden realizar operaciones E/S en estos descriptores de archivos antes de pasar a la siguiente iteración.
 
@@ -139,14 +139,21 @@ Los bits posibles en las máscaras (events y revents) están definidos por:
     #define POLLPRI   0x0002  /* Hay datos urgentes que leer */
     #define POLLOUT   0x0004  /* Se puede escribir sin bloquear */
     #define POLLERR   0x0008  /* Condición de error */
-	#define POLLHUP   0x0010  /* Colgado */
+	#define POLLHUP   0x0010  /* El cliente cerró la conexión. */
 	#define POLLNVAL  0x0020  /* Petición inválida: fd no está abierto */
+
+Aplicación: normalmente, cuando un cliente se conecta, lo monitoreamos solo para lectura (POLLIN), porque estamos esperando una petición. Pero una vez que hemos leído su petición, queremos enviarle una respuesta, por lo que cambiamos a POLLOUT para que el próximo poll() nos avise cuando el socket esté listo para escribir.
 
 Las funciones como poll() permiten que nuestro programa espere eventos en uno o varios sockets de red y actúe en consecuencia. Por ejemplo, un servidor HTTP necesita saber cuándo:
 - Hay datos disponibles para leer de un cliente.
 - Puede escribir datos a un cliente sin bloquear.
 - Una conexión se cierra.
 
+### Nonblocking I/O
+
+	int fcntl(int fd, F_SETFL, O_NONBLOCK)
+
+poll() por sí solo no evita bloqueos en accept(), recv(), y send() solo dice cuándo un socket tiene datos listos o puede escribir. Por dar un ejemplo, send() no puede enviar todos los datos de inmediato, se bloquearía hasta que el socket esté listo para continuar. Para evitar bloqueos, se debe marcar el socket como no bloqueante (O_NONBLOCK), permitiendo que las funciones devuelvan EWOULDBLOCK en lugar de quedarse esperando.
 
 ### Referencias
 - https://www.youtube.com/watch?v=XXfdzwEsxFk
