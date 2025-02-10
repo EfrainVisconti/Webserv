@@ -50,7 +50,6 @@ void Request::parseSetup(std::string _request, Request& req) { // Cambié const 
         std::getline(header_stream, value);
         value.erase(0, value.find_first_not_of(" \t"));
         value.erase(value.find_last_not_of(" \t") + 1);
-        
         if (header == "Host") {
             req.setHost(value);
         } else if (header == "User-Agent") {
@@ -92,6 +91,8 @@ int Request::verifyMethodHost(std::string host){
     if (getMethod() == "GET")
         return (1);
     if (getMethod() == "POST")
+        return (1);
+    if (getMethod() == "DELETE")
         return (1);
     return (0);
 }

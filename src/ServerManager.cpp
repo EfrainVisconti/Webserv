@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 #include "../inc/Webserv.hpp"
-=======
-#include "../inc/ServerManager.hpp"
->>>>>>> refs/remotes/origin/adrian
 
 ServerManager::ServerManager() {}
 
@@ -132,13 +128,8 @@ void	ServerManager::LaunchServers()
 					HandleRequest(_poll_fds[i].fd, req, mbs, host);
 				}
             }
-<<<<<<< HEAD
-			else if (_poll_fds[i].revents & POLLOUT)
-			{ 
-=======
             else if (_poll_fds[i].revents & POLLOUT)
 			{
->>>>>>> refs/remotes/origin/adrian
 				// class Rsponse;
 				std::string response = defaultResponse();
 				send(_poll_fds[i].fd, response.c_str(), response.size(), 0);
@@ -149,12 +140,7 @@ void	ServerManager::LaunchServers()
 			{
 				CloseConnection(_poll_fds[i].fd);
 			}
-<<<<<<< HEAD
 		}
-=======
-
-    	}
->>>>>>> refs/remotes/origin/adrian
 	}
 }
 
@@ -184,7 +170,7 @@ bool	ServerManager::AcceptConnection(int server_fd)
 int parseRequest(std::string _request, int mbs, std::string host, Request &req) {
     req.parseSetup(_request, req); // Cambié para pasar el objeto correctamente
     // printRequestClass(req);
-    /*if (req.getBodySize() > req.getMaxBodySize()) { // check de maxbodysize.
+    if (req.getMethod() == "POST" && req.getBodySize() > req.getMaxBodySize()) { // check de maxbodysize.
         req.setErrorType(405); // error de bodysize
         req.clean();
         return (req.getErrorType());
@@ -194,7 +180,7 @@ int parseRequest(std::string _request, int mbs, std::string host, Request &req) 
         req.clean();
         return (req.getErrorType());
     }
-    if (access(req.getPath().c_str(), R_OK) == -1) { // check de ruta
+    if (req.getPath().size() > 1 && access(req.getPath().c_str(), R_OK) == -1) { // check de ruta
         req.setErrorType(404); // error de ruta
         req.clean();
         return (req.getErrorType());
@@ -208,7 +194,7 @@ int parseRequest(std::string _request, int mbs, std::string host, Request &req) 
         req.setErrorType(406); // error de formato de peticion.
         req.clean();
         return (req.getErrorType());
-    }*/
+    }
     return (1);
 }
 
@@ -218,7 +204,7 @@ void ServerManager::HandleRequest(int client_fd, Request &req, int mbs, std::str
     memset(buffer, 0, 2000);
     ssize_t bytes_read = recv(client_fd, buffer, 2000, 0);
 	std::string bufferstr = buffer;
-	std::cout << bufferstr << std::endl;
+	// std::cout << bufferstr << std::endl;
 	int status = parseRequest(bufferstr, mbs, host, req);
 	if (status == 404){
 		std::string error_response = errorResponse(404);
