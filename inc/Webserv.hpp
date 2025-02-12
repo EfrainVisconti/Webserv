@@ -1,12 +1,6 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
-<<<<<<< HEAD
-# include <string.h> 
-=======
-# include <string>
-# include <iostream>
->>>>>>> refs/remotes/origin/adrian
 # include <unistd.h>
 # include <stdio.h>
 # include <stdlib.h>
@@ -15,6 +9,7 @@
 # include <fcntl.h>
 # include <sstream>
 # include <iostream>
+#include <cstdlib>
 
 /* STL Containers */
 # include <map>

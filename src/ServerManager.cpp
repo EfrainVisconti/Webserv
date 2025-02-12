@@ -123,7 +123,7 @@ void	ServerManager::LaunchServers()
 				else
 				{
 					int	mbs = 2420985; // max body size
-					std::string host = "127.0.0.1";
+					std::string host = "localhost:8080";
 					Request	req(mbs);
 					HandleRequest(_poll_fds[i].fd, req, mbs, host);
 				}
@@ -170,7 +170,7 @@ bool	ServerManager::AcceptConnection(int server_fd)
 int parseRequest(std::string _request, int mbs, std::string host, Request &req) {
     req.parseSetup(_request, req); // Cambié para pasar el objeto correctamente
     // printRequestClass(req);
-    if (req.getMethod() == "POST" && req.getBodySize() > req.getMaxBodySize()) { // check de maxbodysize.
+    if (req.getMethod() == "POST" && req.getBodySize() > (size_t)mbs) { // check de maxbodysize.
         req.setErrorType(405); // error de bodysize
         req.clean();
         return (req.getErrorType());
@@ -180,11 +180,11 @@ int parseRequest(std::string _request, int mbs, std::string host, Request &req) 
         req.clean();
         return (req.getErrorType());
     }
-    if (req.getPath().size() > 1 && access(req.getPath().c_str(), R_OK) == -1) { // check de ruta
+    /*if (req.getPath().size() > 1 && access(req.getPath().c_str(), R_OK) == -1) { // check de ruta
         req.setErrorType(404); // error de ruta
         req.clean();
         return (req.getErrorType());
-    }
+    }*/
     if (req.getMethod() == "POST" && req.getRequestFormat().empty()) { // si el metodo es post tiene que tener formato
         req.setErrorType(406); // error de formato de peticion.
         req.clean();

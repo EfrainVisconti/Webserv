@@ -48,8 +48,12 @@ void Request::parseSetup(std::string _request, Request& req) { // Cambié const 
         std::string header, value;
         std::getline(header_stream, header, ':');
         std::getline(header_stream, value);
-        value.erase(0, value.find_first_not_of(" \t"));
-        value.erase(value.find_last_not_of(" \t") + 1);
+        size_t first_non_space = value.find_first_not_of(" \t");
+        size_t last_non_space = value.find_last_not_of(" \t");
+        if (first_non_space != std::string::npos)
+            value = value.substr(first_non_space, last_non_space - first_non_space + 1);
+        else
+            value = "";
         if (header == "Host") {
             req.setHost(value);
         } else if (header == "User-Agent") {
@@ -67,7 +71,7 @@ void Request::parseSetup(std::string _request, Request& req) { // Cambié const 
                 req.setKeepAlive(0);
             }
         } else if (header == "Content-Length") {
-            req.setBodySize(std::stoi(value));
+            req.setBodySize(atoi(value.c_str()));
         }
     }
 }
@@ -86,8 +90,12 @@ void Request::clean(void) {
 }
 
 int Request::verifyMethodHost(std::string host){
-    if (host != getHost())
-        return (0);
+    //std::cout << "method " << getMethod() << "\n";
+    //std::cout << "host " << getHost() << "\n";
+    //std::cout << "host " << host << "\n";
+    //if (host != getHost())
+    //    return (0);
+    (void)host;
     if (getMethod() == "GET")
         return (1);
     if (getMethod() == "POST")

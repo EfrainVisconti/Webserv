@@ -1,5 +1,4 @@
 #include "../inc/Webserv.hpp"
-#include <cstdlib>
 
 const std::string errorHtml01 = R"(
     <!DOCTYPE html>
@@ -34,24 +33,26 @@ std::string	errorResponse(int val){
     char buffer[50];
     std::sprintf(buffer, "%d", val);
 	std::string num(buffer);
-    if (num == 404){
-        std::string message = "Unable to find HTTP Request path.";
+    std::string message = "";
+    if (val == 404){
+        message = "Unable to find HTTP Request path.";
     }
-    if (num == 405){
-        std::string message = "Request body size exceed 'config' max body size.";
+    if (val == 405){
+        message = "Request body size exceed 'config' max body size.";
     }
-    if (num == 406){
-        std::string message = "POST format error.";
+    if (val == 406){
+        message = "POST format error.";
     }
-    if (num == 500){
-        std::string message = "Method/Host error.";
+    if (val == 500){
+        message = "Method/Host error.";
     }
 	std::string response = "HTTP/1.1 " + num + " Not Found\r\n"
                            "Date: Tue, 08 Feb 2025 14:00:00 GMT\r\n"
-                           "Server: MySimpleServer/1.0\r\n"
+                           "Server: WebServ/1.0\r\n"
                            "Content-Type: text/html; charset=UTF-8\r\n"
-                           "Content-Length: " + std::to_string(errorHtml01.size() + errorHtml02.size()) + "\r\n"
-                           "Connection: close\r\n"
-                           "\r\n" + errorHtml01 + num + errorHtml02 + "ERROR " + num + message;
+                           "Content-Length: " + std::to_string(errorHtml01.size() + errorHtml02.size() + errorHtml03.size() + errorHtml04.size() + 100) + "\r\n"
+                           "Connection: close\n"
+                           "\r" + errorHtml01 + num + errorHtml02 + "ERROR " + num + errorHtml03 + message + errorHtml04;
+    std::cout << response << std::endl;
 	return (response);
 }
