@@ -171,7 +171,6 @@ void	ServerManager::CreateSockets()
 
 		int flags = fcntl(it->listen_socket, F_GETFL, 0);
 		if (flags == -1 || fcntl(it->listen_socket, F_SETFL, flags | O_NONBLOCK) == -1) 
-		if (fcntl(it->listen_socket, F_SETFL, O_NONBLOCK) == -1)
 		{
 			close(it->listen_socket);
 			throw ErrorException("fcntl() error. Stopping execution...");
