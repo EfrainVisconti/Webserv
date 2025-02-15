@@ -1,5 +1,5 @@
 #ifndef RESPONSE_HPP
-#define RESPONSE_HPP
+# define RESPONSE_HPP
 
 # include "Webserv.hpp"
 
@@ -16,5 +16,6 @@ class Response
 };
 
 std::string defaultResponse(void);
+std::string	errorResponse(int val);
 
 #endif
