@@ -49,7 +49,7 @@ class ServerManager
 		void	CreateSockets();
 		void	SetSockaddr_in(Server *server);
 		void	AcceptConnection(int server_fd, Server *server);
-		void	HandleRequest(int connected_fd, Request &req, int mbs, std::string host);
+		void	HandleRequest(int connected_fd);
 		void	CloseConnection(int fd);
 };
 

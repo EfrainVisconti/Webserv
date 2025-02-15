@@ -242,12 +242,10 @@ void	ServerManager::LaunchServers()
 				if (it != _server_map.end())
                     AcceptConnection(_poll_fds[i].fd, it->second);
 				else
-				{
-					int	mbs = 2420985; // max body size
-					std::string host = "localhost:8080";
-					Request	req(mbs);
-					HandleRequest(_poll_fds[i].fd, req, mbs, host);
-				}
+					// int	mbs = 2420985; // max body size
+					// std::string host = "localhost:8080";
+					// Request	req(mbs);
+					HandleRequest(_poll_fds[i].fd);
             }
             else if (_poll_fds[i].revents & POLLOUT)
 			{

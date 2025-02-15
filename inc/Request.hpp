@@ -17,8 +17,9 @@ class Request
 		size_t								_max_body_size;
 		size_t								_body_size;
 		int									_error_type;
-	public:
+
 		Request();
+	public:
 		Request(int max_body_size);
 		~Request();
 
