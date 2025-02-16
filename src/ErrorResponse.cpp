@@ -36,9 +36,6 @@ std::string errorResponse(int val) {
     std::string num(buffer);
 
     std::string message = "";
-    if (val == 404) {
-        message = "Unable to find HTTP Request path.";
-    }
     if (val == 413) {
         message = "Request Entity Too Large.";
     }

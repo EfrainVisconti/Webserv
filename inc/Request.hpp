@@ -23,6 +23,7 @@ class Request
 		Request(unsigned long max_body_size);
 		~Request();
 
+		int						parseRequest(std::string _request, std::string host);
 		void					parseSetup(std::string _request);
 		int						verifyMethodHost(std::string host);
 	// getters

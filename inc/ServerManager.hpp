@@ -3,14 +3,13 @@
 
 #include "Webserv.hpp"
 
+class Request;
 class Server;
+class Response;
 
 /* ServerManager es la clase principal del programa, se encarga de ejecutar
 los servidores extraidos del archivo de configuración. También establece
 las conexiones con clientes y la gestión de peticiones/respuestas */
-
-class Request;
-class Server;
 
 class ServerManager
 {
@@ -44,15 +43,17 @@ class ServerManager
 		std::vector<pollfd> 		_poll_fds; // Estructuras pollfd que van a ser monitoreadas
 		std::map<int, Server*>		_server_map;  // Mapea fd de socket de escucha a su Server
 		std::map<int, Server*>		_client_map; // Mapea fd de socket conectado a su Server
+		std::map<int, Response*>	_response_map; // Mapea fd de socket conectado a su Response
 
 		void	CreateSockets();
 		void	SetSockaddr_in(Server *server);
 		void	AcceptConnection(int server_fd, Server *server);
 		void	HandleRequest(int connected_fd);
 		void	CloseConnection(int fd);
+		void	ResponseManager(int client_fd, Request &req);
+		void	HandleResponse(int client_fd);
 };
 
-int			parseRequest(std::string _request, std::string host, Request& req);
 std::string	errorResponse(int val);
 
 #endif

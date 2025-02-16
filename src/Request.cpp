@@ -33,6 +33,28 @@ Request::~Request(void) {
     return;
 }
 
+int Request::parseRequest(std::string _request, std::string host) {
+    this->parseSetup(_request);
+
+    if (this->getMethod() == "POST" && this->getBodySize() > this->getMaxBodySize()) { // check de maxbodysize.
+        this->setErrorType(413); // error de bodysize
+        return (413);
+    }
+    if (this->verifyMethodHost(host) == 0) { // check de metodo y host.
+        this->setErrorType(500); // error de host/metodo.
+        return (500);
+    }
+    if (this->getMethod() == "POST" && this->getRequestFormat().empty()) { // si el metodo es post tiene que tener formato
+        this->setErrorType(406); // error de formato de peticion.
+        return (406);
+    }
+    if (this->getUserAgent().empty()) { // userAgent vacio
+        this->setErrorType(406); // error de formato de peticion.
+        return (406);
+    }
+    return (1);
+}
+
 void Request::parseSetup(std::string _request) {
     std::istringstream stream(_request);
     std::string line;
