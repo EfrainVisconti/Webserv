@@ -34,47 +34,103 @@ void ServerManager::CloseConnection(int fd)
 }
 
 
+int parseRequest(std::string _request, std::string host, Request &req) {
+    req.parseSetup(_request);
+
+    if (req.getMethod() == "POST" && req.getBodySize() > req.getMaxBodySize()) { // check de maxbodysize.
+        req.setErrorType(413); // error de bodysize
+        return (413);
+    }
+    if (req.verifyMethodHost(host) == 0) { // check de metodo y host.
+        req.setErrorType(500); // error de host/metodo.
+        return (500);
+    }
+    /*if (req.getPath().size() > 1 && access(req.getPath().c_str(), R_OK) == -1) { // check de ruta
+        req.setErrorType(404); // error de ruta
+        return (404);
+    }*/
+    if (req.getMethod() == "POST" && req.getRequestFormat().empty()) { // si el metodo es post tiene que tener formato
+        req.setErrorType(406); // error de formato de peticion.
+        return (406);
+    }
+    if (req.getUserAgent().empty()) { // userAgent vacio
+        req.setErrorType(406); // error de formato de peticion.
+        return (406);
+    }
+    return (1);
+}
+
+
 /* 
 	Se llama a recv() para recibir los datos por el socket conectado
 	identificado con client_fd.
-	Se llama al metodo  parseRequest() de Request para almacenar y
-	procesar la petición.
+	Se instancia un objeto Request y se le pasa el tamaño máximo del cuerpo
+	de la solicitud.
+	Se llama a parseRequest() para procesar la petición.
 
 	* bytes_read: cantidad de bytes leídos.
 	Si bytes_read es menor o igual a 0, se llama a CloseConnection().
 
 	NOTA: lanza ErrorException() explícita en caso de error.
 */
-// void ServerManager::HandleRequest(int client_fd)
-// {
-//     char buffer[2000];
-//     memset(buffer, 0, 2000);
-//     ssize_t bytes_read = recv(client_fd, buffer, 2000, 0);
+void ServerManager::HandleRequest(int client_fd)
+{
+	Server *server = _client_map.find(client_fd)->second;
+	std::string host = server->server_name; // REVISAR SI ES HOST O SERVER_NAME
+	Request	req(server->client_max_body_size);
+    char buffer[8192];
+    memset(buffer, 0, 8192);
+    ssize_t bytes_read = recv(client_fd, buffer, 8192, 0);
+	if (bytes_read <= 0)
+	{
+		// Gestionar código de error HTTP (errno == EAGAIN || errno == EWOULDBLOCK)
+		CloseConnection(client_fd);
+		return ;
+	}
 
-//     if (bytes_read <= 0)
-// 	{
-// 		// Gestionar código de error HTTP (errno == EAGAIN || errno == EWOULDBLOCK)
-// 		CloseConnection(client_fd);
-// 	}
-// 	// Se cambiara cuando se implemente la clase Request y Response
-// 	else
-// 	{
-// 		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-// 		{
-// 			if (it->fd == client_fd)
-// 			{
-// 				it->events = POLLOUT;
-// 				break;
-// 			}
-// 		}
-//     }
-
-// 	if (DEBUG_MODE)
-// 	{
-// 		std::cout << GREEN << "Request receive:\n"
-// 				  << buffer << RESET << std::endl;
-// 	}
-// }
+	std::string bufferstr = buffer;
+	int status = parseRequest(bufferstr, host, req);
+	if (status == 404){
+		std::string error_response = errorResponse(404);
+		send(client_fd, error_response.c_str(), error_response.size(), 0);
+		CloseConnection(client_fd);
+		return ;
+	}
+	if (status == 406){
+		std::string error_response = errorResponse(406);
+		send(client_fd, error_response.c_str(), error_response.size(), 0);
+		CloseConnection(client_fd);
+		return ;
+	}
+	if (status == 500){
+		std::string error_response = errorResponse(500);
+		send(client_fd, error_response.c_str(), error_response.size(), 0);
+		CloseConnection(client_fd);
+		return ;
+	}
+	if (status == 413){
+		std::string error_response = errorResponse(413);
+		send(client_fd, error_response.c_str(), error_response.size(), 0);
+		CloseConnection(client_fd);
+		return ;
+	}
+	else
+	{
+		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+		{
+			if (it->fd == client_fd)
+			{
+				it->events = POLLOUT;
+				break;
+			}
+		}
+    }
+	if (DEBUG_MODE)
+	{
+		std::cout << GREEN << "Request receive:\n"
+				  << buffer << RESET << std::endl;
+	}
+}
 
 
 /*
@@ -111,7 +167,7 @@ void	ServerManager::AcceptConnection(int server_fd, Server *server)
 
     pollfd connected_pollfd = {connected_socket, POLLIN, 0};
     _poll_fds.push_back(connected_pollfd);
-	_client_map[connected_socket] = server; // NOTA: Esta por revisar si es necesario
+	_client_map[connected_socket] = server;
 
 	if (DEBUG_MODE)
 	{
@@ -242,9 +298,6 @@ void	ServerManager::LaunchServers()
 				if (it != _server_map.end())
                     AcceptConnection(_poll_fds[i].fd, it->second);
 				else
-					// int	mbs = 2420985; // max body size
-					// std::string host = "localhost:8080";
-					// Request	req(mbs);
 					HandleRequest(_poll_fds[i].fd);
             }
             else if (_poll_fds[i].revents & POLLOUT)
@@ -261,84 +314,8 @@ void	ServerManager::LaunchServers()
 	}
 }
 
+
 void	ServerManager::SetServers(std::vector<Server> &servers)
 {
 	_servers = servers;
-}
-
-
-int parseRequest(std::string _request, int mbs, std::string host, Request &req) {
-	(void)mbs;
-	(void)host;
-    req.parseSetup(_request, req); // Cambié para pasar el objeto correctamente
-    // printRequestClass(req);
-    if (req.getMethod() == "POST" && req.getBodySize() > (size_t)mbs) { // check de maxbodysize.
-        req.setErrorType(405); // error de bodysize
-        req.clean();
-        return (req.getErrorType());
-    }
-    if (req.verifyMethodHost(host) == 0) { // check de metodo y host.
-        req.setErrorType(500); // error de host/metodo.
-        req.clean();
-        return (req.getErrorType());
-    }
-    /*if (req.getPath().size() > 1 && access(req.getPath().c_str(), R_OK) == -1) { // check de ruta
-        req.setErrorType(404); // error de ruta
-        req.clean();
-        return (req.getErrorType());
-    }*/
-    if (req.getMethod() == "POST" && req.getRequestFormat().empty()) { // si el metodo es post tiene que tener formato
-        req.setErrorType(406); // error de formato de peticion.
-        req.clean();
-        return (req.getErrorType());
-    }
-    if (req.getUserAgent().empty()) { // userAgent vacio
-        req.setErrorType(406); // error de formato de peticion.
-        req.clean();
-        return (req.getErrorType());
-    }
-    return (1);
-}
-
-void ServerManager::HandleRequest(int client_fd, Request &req, int mbs, std::string host)
-{
-    char buffer[2000];
-    memset(buffer, 0, 2000);
-    ssize_t bytes_read = recv(client_fd, buffer, 2000, 0);
-	std::string bufferstr = buffer;
-	// std::cout << bufferstr << std::endl;
-	int status = parseRequest(bufferstr, mbs, host, req);
-	if (status == 404){
-		std::string error_response = errorResponse(404);
-		send(client_fd, error_response.c_str(), error_response.size(), 0);
-		CloseConnection(client_fd);
-	}
-	if (status == 405){
-		std::string error_response = errorResponse(405);
-		send(client_fd, error_response.c_str(), error_response.size(), 0);
-		CloseConnection(client_fd);
-	}
-	if (status == 406){
-		std::string error_response = errorResponse(406);
-		send(client_fd, error_response.c_str(), error_response.size(), 0);
-		CloseConnection(client_fd);
-	}
-	if (status == 500){
-		std::string error_response = errorResponse(500);
-		send(client_fd, error_response.c_str(), error_response.size(), 0);
-		CloseConnection(client_fd);
-	}
-	if (bytes_read <= 0 || status == 0){
-		CloseConnection(client_fd);
-	}
-	else{
-		for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-		{
-			if (it->fd == client_fd)
-			{
-				it->events = POLLOUT;
-				break;
-			}
-		}
-    }
 }

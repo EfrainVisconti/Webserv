@@ -1,4 +1,4 @@
-#include "../inc/Webserv.hpp"
+
 #include "../inc/Request.hpp"
 
 Request::Request(void){
@@ -10,12 +10,12 @@ Request::Request(void){
 	_language = ""; // idioma preferido del cliente
     _encoding = ""; // tipos de codificacion que maneja el cliente.
 	_keep_alive = 1; // 1 mantener conexion viva 0 cerrarla
-	_max_body_size = -1; // limite de conf.yaml de memoria
+	_max_body_size = 0; // limite de conf.yaml de memoria
 	_body_size = 0; // espacio que ocupa la solicitud
     _error_type = 404; // error de salida en caso de no estar bien la solicitud.
 }
 
-Request::Request(int max_body_size) {
+Request::Request(unsigned long max_body_size) {
     _method = "";
     _path_req = "";
     _host = "";
@@ -23,9 +23,9 @@ Request::Request(int max_body_size) {
     _request_format = "";
     _language = "";
     _encoding = "";
-    _keep_alive = -1;
+    _keep_alive = 0;
     _max_body_size = max_body_size;
-    _body_size = -1;
+    _body_size = 0;
     _error_type = -1;
 }
 
@@ -33,15 +33,15 @@ Request::~Request(void) {
     return;
 }
 
-void Request::parseSetup(std::string _request, Request& req) { // Cambié const Request& a Request&
+void Request::parseSetup(std::string _request) {
     std::istringstream stream(_request);
     std::string line;
     if (std::getline(stream, line)) {
         std::istringstream request_line(line);
         std::string method, path, version;
         request_line >> method >> path;
-        req.setMethod(method);
-        req.setPath(path);
+        this->setMethod(method);
+        this->setPath(path);
     }
     while (std::getline(stream, line) && !line.empty()) {
         std::istringstream header_stream(line);
@@ -55,38 +55,25 @@ void Request::parseSetup(std::string _request, Request& req) { // Cambié const 
         else
             value = "";
         if (header == "Host") {
-            req.setHost(value);
+            this->setHost(value);
         } else if (header == "User-Agent") {
-            req.setUserAgent(value);
+            this->setUserAgent(value);
         } else if (header == "Accept") {
-            req.setReqFormat(value);
+            this->setReqFormat(value);
         } else if (header == "Accept-Language") {
-            req.setLanguage(value);
+            this->setLanguage(value);
         } else if (header == "Accept-Encoding") {
-            req.setEncoding(value);
+            this->setEncoding(value);
         } else if (header == "Connection") {
-            if (value == "keep-alive") {
-                req.setKeepAlive(1);
+            if (value == "keep-alive\r") { // Añadí \r para que funcione
+                this->setKeepAlive(1);
             } else {
-                req.setKeepAlive(0);
+                this->setKeepAlive(0);
             }
         } else if (header == "Content-Length") {
-            req.setBodySize(atoi(value.c_str()));
+            this->setBodySize(atoi(value.c_str()));
         }
     }
-}
-
-void Request::clean(void) {
-    this->_method = "";
-    this->_path_req = "";
-    this->_host = "";
-    this->_user_agent = "";
-    this->_request_format = "";
-    this->_language = "";
-    this->_encoding = "";
-    this->_keep_alive = 1;
-    this->_max_body_size = 0;
-    this->_body_size = 0;
 }
 
 int Request::verifyMethodHost(std::string host){
@@ -185,9 +172,8 @@ void    Request::setLanguage(std::string &language){
     this->_language = language;
 }
 
-bool    Request::setKeepAlive(int to){
+void    Request::setKeepAlive(bool to){
     this->_keep_alive = to;
-    return true;
 }
 
 void    printRequestClass(const Request &req){

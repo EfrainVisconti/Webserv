@@ -43,7 +43,6 @@ class ServerManager
 		std::vector<Server> 		_servers;
 		std::vector<pollfd> 		_poll_fds; // Estructuras pollfd que van a ser monitoreadas
 		std::map<int, Server*>		_server_map;  // Mapea fd de socket de escucha a su Server
-		//NOTA: esta por revisar si es necesaria
 		std::map<int, Server*>		_client_map; // Mapea fd de socket conectado a su Server
 
 		void	CreateSockets();
@@ -53,7 +52,7 @@ class ServerManager
 		void	CloseConnection(int fd);
 };
 
-int			parseRequest(std::string _request, int mbs, std::string host, Request& req);
+int			parseRequest(std::string _request, std::string host, Request& req);
 std::string	errorResponse(int val);
 
 #endif

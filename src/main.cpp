@@ -40,7 +40,7 @@ int main() {
         server1.host = INADDR_ANY;
         server1.port = 8080;
         server1.server_name = "ServerOne";
-        server1.root = "/var/www/html/server1";
+        server1.root = "/html";
         server1.client_max_body_size = 1048576;
         server1.index = "index.html";
 
@@ -48,7 +48,7 @@ int main() {
         server2.host = INADDR_ANY;
         server2.port = 8081;
         server2.server_name = "ServerTwo";
-        server2.root = "/var/www/html/server2";
+        server2.root = "/html";
         server2.client_max_body_size = 2097152;
         server2.index = "index.html";
 
@@ -56,7 +56,7 @@ int main() {
         server3.host = INADDR_ANY;
         server3.port = 9090;
         server3.server_name = "ServerThree";
-        server3.root = "/var/www/html/server3";
+        server3.root = "/html";
         server3.client_max_body_size = 5242880;
         server3.index = "index.html";
 

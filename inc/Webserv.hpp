@@ -10,8 +10,7 @@
 # include <poll.h>
 # include <fcntl.h>
 # include <sstream>
-# include <iostream>
-#include <cstdlib>
+# include <cstdlib>
 
 /* STL Containers */
 # include <map>

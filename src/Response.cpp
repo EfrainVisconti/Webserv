@@ -2,7 +2,7 @@
 # include <fstream>
 
 std::string defaultResponse(void) {
-    std::ifstream file("docs/index.html");
+    std::ifstream file("html/index.html");
     if (!file.is_open()) {
         return "Error al cargar la página.";
     }
@@ -16,7 +16,7 @@ std::string defaultResponse(void) {
     std::string contentsize_str = ss.str();
     std::string baseresponse = "HTTP/1.1 200 OK\r\n"
                                "Date: Tue, 08 Feb 2025 14:00:00 GMT\r\n"
-                               "Server: WebServ/1.0\r\n"
+                               "Server: webserv/1.0\r\n"
                                "Content-Type: text/html; charset=UTF-8\r\n"
                                "Content-Length: " + contentsize_str + "\r\n"
                                "Connection: close\r\n\r\n"

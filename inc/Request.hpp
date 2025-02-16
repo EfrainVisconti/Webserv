@@ -20,11 +20,10 @@ class Request
 
 		Request();
 	public:
-		Request(int max_body_size);
+		Request(unsigned long max_body_size);
 		~Request();
 
-		void					parseSetup(std::string _request, Request& req);
-		void					clean();
+		void					parseSetup(std::string _request);
 		int						verifyMethodHost(std::string host);
 	// getters
 		const std::string& getMethod() const;
@@ -49,7 +48,7 @@ class Request
 		void					setHost(std::string &host);
 		void					setBodySize(size_t size);
 		void					setErrorType(int error_type);
-		bool					setKeepAlive(int to);
+		void					setKeepAlive(bool to);
 };
 
 void	printRequestClass(const Request &req);
