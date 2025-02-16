@@ -2,6 +2,7 @@
 # define WEBSERV_HPP
 
 # include <string>
+# include <fstream>
 # include <iostream>
 # include <unistd.h>
 # include <stdio.h>

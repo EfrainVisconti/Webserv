@@ -1,73 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WEBSERVER</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-        
-        .container {
-            text-align: center;
-            padding: 20px;
-        }
-
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 30px;
-            color: #333;
-        }
-
-        .button {
-            font-size: 1.2rem;
-            padding: 10px 20px;
-            margin: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .button:hover {
-            background-color: #0056b3;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Choose HTTP Method</h1>
-        <div class="button-container">
-            <button class="button" onclick="sendRequest('GET')">GET</button>
-            <button class="button" onclick="sendRequest('POST')">POST</button>
-            <button class="button" onclick="sendRequest('DELETE')">DELETE</button>
+<html>
+    <body>
+        <div class="container">
+            <h1>Choose HTTP Method</h1>
+            <div class="button-container">
+                <button class="button" onclick="sendRequest('GET')">GET</button>
+                <button class="button" onclick="sendRequest('POST')">POST</button>
+                <button class="button" onclick="sendRequest('DELETE')">DELETE</button>
+            </div>
         </div>
-    </div>
-
-    <script>
-        function sendRequest(method) {
-            fetch('/', {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ method: method })
-            })
-            .then(response => response.text())
-            .then(data => {
-                console.log(data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-    </script>
-</body>
+    
+        <script>
+            function sendRequest(method) {
+                fetch('/', {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ method: method })
+                })
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        </script>
+    </body>
 </html>

@@ -35,7 +35,6 @@ Request::~Request(void) {
 
 int Request::parseRequest(std::string _request, std::string host) {
     this->parseSetup(_request);
-
     if (this->getMethod() == "POST" && this->getBodySize() > this->getMaxBodySize()) { // check de maxbodysize.
         this->setErrorType(413); // error de bodysize
         return (413);
@@ -99,11 +98,6 @@ void Request::parseSetup(std::string _request) {
 }
 
 int Request::verifyMethodHost(std::string host){
-    //std::cout << "method " << getMethod() << "\n";
-    //std::cout << "host " << getHost() << "\n";
-    //std::cout << "host " << host << "\n";
-    //if (host != getHost())
-    //    return (0);
     (void)host;
     if (getMethod() == "GET")
         return (1);
