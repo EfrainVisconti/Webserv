@@ -5,20 +5,18 @@
 
 class Location
 {
-	private:
-		std::string					_path;
-		std::string					_root;
-		bool						_autoindex;
-		std::string					_index;
-		std::vector<short>			_methods;
-		std::string					_return;
-		std::string					_alias;
-		std::vector<std::string>	_cgi_path;
-		std::vector<std::string>	_cgi_ext;
-		unsigned long				_client_max_body_size;
-
 	public:
-		std::map<std::string, std::string> _ext_path;
+
+		std::string			path;
+		std::string			root;
+		bool				autoindex;
+		std::string			index;
+		std::vector<short>	methods;
+		std::string			redirection;
+
+		Location();
+		~Location();
+
 };
 
 #endif

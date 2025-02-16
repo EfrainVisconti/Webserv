@@ -1,6 +1,9 @@
-#pragma once
+#ifndef SERVER_HPP
+#define SERVER_HPP
 
 # include "Webserv.hpp"
+
+class Location;
 
 /* Server es la clase que contiene la información de cada servidor
 individual */
@@ -15,12 +18,7 @@ class Server
 		unsigned long					client_max_body_size; // Limita el tamaño máximo del cuerpo de una solicitud HTTP
 		std::string						index; // Cuando un usuario accede a un directorio sin especificar un archivo
 		std::map<short, std::string>	error_pages; // Ejemplo: Error 404
-		// std::vector<Location> 			_locations;
-		// std::string					_root_location;
-		// std::string					_index_location;
-		// std::vector<short>			_methods_location; // GET POST DELETE
-		// std::vector<std::string>	_cgi_path;
-		// std::vector<std::string>	_cgi_ext;
+		std::vector<Location> 			locations;
         struct sockaddr_in 				server_address; // Identifica la dirección y puerto del servidor.
         int     						listen_socket; // Identifica al socket que quedará a la espera de conexiones
 
@@ -32,3 +30,5 @@ class Server
 	private:
 	
 };
+
+#endif

@@ -27,6 +27,7 @@
 # include "CgiManager.hpp"
 # include "Request.hpp"
 # include "Response.hpp"
+# include "Location.hpp"
 
 /* Utils */
 
@@ -35,7 +36,11 @@
 #define RESET "\033[0m"
 
 #define MAX_CONN 512
-#define DEBUG_MODE 1
-#define TIMEOUT 60000 // 60 segs.
+#define DEBUG_MODE 0
+#define TIMEOUT -1 // 60000 // 60 segs.
+
+#define GET 1
+#define POST 2
+#define DELETE 3
 
 #endif

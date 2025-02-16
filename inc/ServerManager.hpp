@@ -14,10 +14,9 @@ las conexiones con clientes y la gestión de peticiones/respuestas */
 class ServerManager
 {
 	public:
-		ServerManager();
+		ServerManager(std::vector<Server> &server);
 		~ServerManager();
 
-		void	SetServers(std::vector<Server> &servers);
 		void	LaunchServers();
 
 		class ErrorException : public std::exception
@@ -45,6 +44,7 @@ class ServerManager
 		std::map<int, Server*>		_client_map; // Mapea fd de socket conectado a su Server
 		std::map<int, Response*>	_response_map; // Mapea fd de socket conectado a su Response
 
+		ServerManager();
 		void	CreateSockets();
 		void	SetSockaddr_in(Server *server);
 		void	AcceptConnection(int server_fd, Server *server);

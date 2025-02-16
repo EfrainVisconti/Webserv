@@ -1,6 +1,9 @@
 #include "../inc/ServerManager.hpp"
 
-ServerManager::ServerManager() {}
+ServerManager::ServerManager(std::vector<Server> &servers) : _servers(servers) 
+{
+
+}
 
 
 ServerManager::~ServerManager()
@@ -30,6 +33,12 @@ void	ServerManager::HandleResponse(int client_fd)
 void	ServerManager::ResponseManager(int client_fd, Request &req)
 {
 	Response *response = new Response(req, *_client_map.find(client_fd)->second);
+	std::cout << _client_map.find(client_fd)->second->server_name << std::endl;
+	std::cout << _client_map.find(client_fd)->second->locations.size() << std::endl;
+	for (size_t i = 0; i < _client_map.find(client_fd)->second->locations.size(); i++)
+    {
+        std::cout << "Server1 Location " << i << ": " << _client_map.find(client_fd)->second->locations[i].path << std::endl;
+    }
 	_response_map[client_fd] = response;
 
 	response->GenerateResponse();
@@ -95,7 +104,7 @@ void ServerManager::HandleRequest(int client_fd)
     ssize_t bytes_read = recv(client_fd, buffer, 8192, 0);
 	if (bytes_read <= 0)
 	{
-		// Gestionar código de error HTTP (errno == EAGAIN || errno == EWOULDBLOCK)
+		// 500 INTERNAL SERVER ERROR
 		CloseConnection(client_fd);
 		return ;
 	}
@@ -176,8 +185,8 @@ void	ServerManager::AcceptConnection(int server_fd, Server *server)
 	if (DEBUG_MODE)
 	{
 		std::cout << GREEN << "Connection accepted by "
-				  << server->server_name << " CLIENT:"
-				  << inet_ntoa(client_addr.sin_addr) << RESET << std::endl;
+				  << server->server_name << " Connected Socket: "
+				  << connected_socket << RESET << std::endl;
 	}
 }
 
@@ -310,10 +319,4 @@ void	ServerManager::LaunchServers()
 				CloseConnection(_poll_fds[i].fd);
     	}
 	}
-}
-
-
-void	ServerManager::SetServers(std::vector<Server> &servers)
-{
-	_servers = servers;
 }

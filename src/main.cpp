@@ -31,8 +31,6 @@
 //     return 0;
 // }
 
-#include <vector>
-#include <iostream>
 
 int main() {
     try {
@@ -64,9 +62,8 @@ int main() {
         servers.push_back(server1);
         servers.push_back(server2);
         servers.push_back(server3);
-        ServerManager serverManager;
-        
-        serverManager.SetServers(servers);
+
+        ServerManager serverManager(servers);
         serverManager.LaunchServers();
     } catch (const std::exception &e) {
         std::cerr << RED << e.what() << RESET << std::endl;
