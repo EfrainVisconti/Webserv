@@ -13,7 +13,7 @@
 		// std::vector<short>	methods;
 		// std::string			redirection;
 
-Response::Response(const Request &req, const Server &server) : _server(server)
+Response::Response(const Request &req, const Server &server) : _server(&server)
 {
     _req_path = req.getPath(); // path recibido de la request
     _req_method = req.getMethod(); // metodo recibido de la request
@@ -27,28 +27,45 @@ Response::Response(const Request &req, const Server &server) : _server(server)
     _auto_index = false;
 }
 
-
 Response::~Response()
 {
 
 }
 
+Response::Response(const Response &other) : _server(other._server)
+{
+    *this = other;
+}
+
+Response &Response::operator=(const Response &other)
+{
+    if (this != &other)
+    {
+        _server = other._server;
+        _req_path = other._req_path;
+        _req_method = other._req_method;
+        _real_location = other._real_location;
+        _content = other._content;
+        _content_length = other._content_length;
+        _content_type = other._content_type;
+        _body = other._body;
+        _status_message = other._status_message;
+        _status_code = other._status_code;
+        _auto_index = other._auto_index;
+    }
+    return *this;
+}
+
 
 void    Response::GetRealLocation()
 {
-    std::vector<Location>::const_iterator it = _server.locations.begin();
-    for (; it != _server.locations.end(); ++it)
+    std::vector<Location>::const_iterator it = _server->locations.begin();
+    for (; it != _server->locations.end(); ++it)
     {
-        std::cout << it->root << std::endl;
-        std::cout << _req_path << std::endl;
-        std::cout << _real_location << std::endl;
         if (_req_path.find(it->path) == 0 && 
         (_req_path.length() == it->path.length() ||
         _req_path[it->path.length()] == '/'))
         {
-            std::cout << it->root << std::endl;
-            std::cout << _req_path << std::endl;
-            std::cout << _real_location << std::endl;
             _auto_index = it->autoindex;
             if (it->root == "/")
             {
@@ -61,8 +78,7 @@ void    Response::GetRealLocation()
             return ;
         }
     }
-    std::cout << _req_path << std::endl;
-    _real_location = _server.root + _req_path;
+    _real_location = _server->root + _req_path;
 }
 
 

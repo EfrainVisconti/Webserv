@@ -9,7 +9,7 @@
 class Response
 {
 	private:
-		const Server	&_server; // Servidor asociado
+		const Server	*_server; // Servidor asociado
         std::string	_req_path;	// path recibido de la request
 		std::string	_req_method; // metodo recibido de la request
         std::string	_real_location; // Ubicación del archivo despues de revisar las locations
@@ -25,6 +25,8 @@ class Response
 
 	public:
 		Response(const Request &req, const Server &server);
+		Response(const Response &other);
+		Response &operator=(const Response &other);
 		~Response();
 
 		void		GenerateResponse();

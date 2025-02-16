@@ -22,6 +22,8 @@ void	ServerManager::HandleResponse(int client_fd)
     {
         std::string response_str = it->second->GetResponse();
         send(client_fd, response_str.c_str(), response_str.size(), 0);
+		delete it->second;
+		_response_map.erase(it);
         CloseConnection(client_fd);
     }
 }
@@ -33,12 +35,6 @@ void	ServerManager::HandleResponse(int client_fd)
 void	ServerManager::ResponseManager(int client_fd, Request &req)
 {
 	Response *response = new Response(req, *_client_map.find(client_fd)->second);
-	std::cout << _client_map.find(client_fd)->second->server_name << std::endl;
-	std::cout << _client_map.find(client_fd)->second->locations.size() << std::endl;
-	for (size_t i = 0; i < _client_map.find(client_fd)->second->locations.size(); i++)
-    {
-        std::cout << "Server1 Location " << i << ": " << _client_map.find(client_fd)->second->locations[i].path << std::endl;
-    }
 	_response_map[client_fd] = response;
 
 	response->GenerateResponse();
@@ -63,7 +59,7 @@ void	ServerManager::ResponseManager(int client_fd, Request &req)
 void ServerManager::CloseConnection(int fd)
 {
     if (close(fd) == -1)
-		return;
+		return ;
 
 	_client_map.erase(fd);
 

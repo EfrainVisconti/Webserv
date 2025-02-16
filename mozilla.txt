@@ -1,0 +1,53 @@
+[1;32mServer created[1] NAME:ServerOne HOST:0 PORT:8080[0m
+[1;32mServer created[2] NAME:ServerTwo HOST:0 PORT:8081[0m
+[1;32mServer created[3] NAME:ServerThree HOST:0 PORT:9090[0m
+[1;32mConnection accepted by ServerOne CLIENT:127.0.0.1[0m
+[1;32mRequest receive:
+GET / HTTP/1.1
+Host: localhost:8080
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+[0m
+[1;32mConnection accepted by ServerThree CLIENT:127.0.0.1[0m
+[1;32mRequest receive:
+GET / HTTP/1.1
+Host: localhost:9090
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Priority: u=0, i
+
+[0m
+[1;32mConnection accepted by ServerThree CLIENT:127.0.0.1[0m
+[1;32mRequest receive:
+GET /favicon.ico HTTP/1.1
+Host: localhost:9090
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:135.0) Gecko/20100101 Firefox/135.0
+Accept: image/avif,image/webp,image/png,image/svg+xml,image/*;q=0.8,*/*;q=0.5
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Connection: keep-alive
+Referer: http://localhost:9090/
+Sec-Fetch-Dest: image
+Sec-Fetch-Mode: no-cors
+Sec-Fetch-Site: same-origin
+Priority: u=6
+
+[0m

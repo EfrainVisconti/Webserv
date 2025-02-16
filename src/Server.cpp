@@ -27,11 +27,11 @@ Server::Server()
     location2.autoindex = true;
 
     Location location3;
-    location3.path = "/location3";
+    location3.path = "/kapouet";
     location3.methods.push_back(GET);
     location3.methods.push_back(POST);
     location3.methods.push_back(DELETE);
-    location3.root = "/html/hola";
+    location3.root = "/tmp/www";
     location3.index = "index.html";
     location3.autoindex = false;
 
@@ -61,6 +61,7 @@ Server &Server::operator=(const Server &other)
         this->error_pages = other.error_pages;
         this->server_address = other.server_address;
         this->listen_socket = other.listen_socket;
+        this->locations = other.locations;
     }
     return *this;
 }
