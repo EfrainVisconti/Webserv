@@ -3,6 +3,8 @@
 
 # include "Webserv.hpp"
 
+class Location;
+
 /* Response es la clase que se encarga de gestionar las respuestas HTTP,
  las construye y prepara para ser usadas */
 
@@ -21,8 +23,8 @@ class Response
         short		_status_code; // Código de estado
 		bool		_auto_index;
 
-		void	GetRealLocation();
-		short	CheckMethod(const Location &location);
+		void	CheckMatchingLocation();
+		void	CheckMethod(const Location &location);
 
 	public:
 		Response(const Request &req, const Server &server);
@@ -32,7 +34,27 @@ class Response
 
 		void		GenerateResponse();
 		std::string	GetResponse();
-};
 
+		class ResponseErrorException : public std::exception
+		{
+			private:
+			short	_code;
+
+			public:
+			ResponseErrorException(short code) throw() : _code(code) {}
+
+			virtual ~ResponseErrorException() throw() {}
+
+			short getCode() const throw()
+			{
+				return _code;
+			}
+
+			virtual const char* what() const throw()
+			{
+				return "Error generating HTTP Response";
+			}
+		};
+};
 
 #endif

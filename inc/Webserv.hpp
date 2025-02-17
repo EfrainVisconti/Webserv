@@ -13,6 +13,7 @@
 # include <cstdlib>
 
 /* STL Containers */
+# include <algorithm>
 # include <map>
 # include <vector>
 

@@ -9,9 +9,9 @@
 		// std::string			path; DONE
 		// std::string			root; DONE
 		// bool				autoindex; DONE
-		// std::string			index;
+		// std::string			index; Se gestiona segun el metodo
 		// std::vector<std::string>	methods; DONE
-		// std::string			redirection;
+		// std::string			redirection; TODO en GetRealLocation
 
 Response::Response(const Request &req, const Server &server) : _server(&server)
 {
@@ -57,18 +57,17 @@ Response &Response::operator=(const Response &other)
 }
 
 //405 Method Not Allowed (HTTP 405)
-short   Response::CheckMethod(const Location &location)
+void    Response::CheckMethod(const Location &location)
 {
-    for (short i = 0; i < location.methods.size(); i++)
+    if (std::find(location.methods.begin(), location.methods.end(), _req_method) != location.methods.end())
     {
-        if (_req_method == location.methods[i])
-            return (200);
+        return ;
     }
-    return (405);
+    throw Response::ResponseErrorException(405);
 }
 
 
-void    Response::GetRealLocation()
+void    Response::CheckMatchingLocation()
 {
     std::vector<Location>::const_iterator it = _server->locations.begin();
     for (; it != _server->locations.end(); ++it)
@@ -77,8 +76,8 @@ void    Response::GetRealLocation()
         (_req_path.length() == it->path.length() ||
         _req_path[it->path.length()] == '/'))
         {
+            CheckMethod(*it);
             _auto_index = it->autoindex;
-            _status_code = CheckMethod(*it);
             if (it->root == "/")
             {
                 _real_location = _req_path;
@@ -96,8 +95,9 @@ void    Response::GetRealLocation()
 
 void    Response::GenerateResponse()
 {
-    GetRealLocation();
+    CheckMatchingLocation();
 }
+
 
 std::string Response::GetResponse()
 {
