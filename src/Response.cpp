@@ -6,11 +6,11 @@
 //Todos los root se asumen NO terminan en / (excepto root "/" propiamente)
 
     //class Location
-		// std::string			path;
-		// std::string			root;
-		// bool				autoindex;
+		// std::string			path; DONE
+		// std::string			root; DONE
+		// bool				autoindex; DONE
 		// std::string			index;
-		// std::vector<short>	methods;
+		// std::vector<std::string>	methods; DONE
 		// std::string			redirection;
 
 Response::Response(const Request &req, const Server &server) : _server(&server)
@@ -23,7 +23,7 @@ Response::Response(const Request &req, const Server &server) : _server(&server)
     _content_type = ""; // Tipo de contenido
     _body = ""; // Cuerpo de la respuesta
     _status_message = ""; // Mensaje de estado
-    _status_code = 0; // Codigo de estado
+    _status_code = 200; // Codigo de estado
     _auto_index = false;
 }
 
@@ -56,6 +56,17 @@ Response &Response::operator=(const Response &other)
     return *this;
 }
 
+//405 Method Not Allowed (HTTP 405)
+short   Response::CheckMethod(const Location &location)
+{
+    for (short i = 0; i < location.methods.size(); i++)
+    {
+        if (_req_method == location.methods[i])
+            return (200);
+    }
+    return (405);
+}
+
 
 void    Response::GetRealLocation()
 {
@@ -67,6 +78,7 @@ void    Response::GetRealLocation()
         _req_path[it->path.length()] == '/'))
         {
             _auto_index = it->autoindex;
+            _status_code = CheckMethod(*it);
             if (it->root == "/")
             {
                 _real_location = _req_path;

@@ -31,16 +31,12 @@
 
 /* Utils */
 
-#define RED "\033[1;31m"
-#define GREEN "\033[1;32m"
-#define RESET "\033[0m"
+# define RED "\033[1;31m"
+# define GREEN "\033[1;32m"
+# define RESET "\033[0m"
 
-#define MAX_CONN 512
-#define DEBUG_MODE 0
-#define TIMEOUT -1 // 60000 // 60 segs.
-
-#define GET 1
-#define POST 2
-#define DELETE 3
+# define MAX_CONN 512
+# define DEBUG_MODE 0
+# define TIMEOUT -1 // 60000 // 60 segs.
 
 #endif

@@ -11,7 +11,7 @@ class Location
 		std::string			root;
 		bool				autoindex;
 		std::string			index;
-		std::vector<short>	methods;
+		std::vector<std::string>	methods;
 		std::string			redirection;
 
 		Location();

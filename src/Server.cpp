@@ -12,25 +12,25 @@ Server::Server()
     
     Location location1;
     location1.path = "/location1";
-    location1.methods.push_back(GET);
-    location1.methods.push_back(POST);
+    location1.methods.push_back("GET");
+    location1.methods.push_back("POST");
     location1.root = "/";
     location1.index = "index_location1.html";
     location1.autoindex = false;
 
     Location location2;
     location2.path = "/location2";
-    location2.methods.push_back(GET);
-    location2.methods.push_back(POST);
+    location2.methods.push_back("GET");
+    location2.methods.push_back("POST");
     //location2.root = "/location2";
     location2.index = "index_location2.html";
     location2.autoindex = true;
 
     Location location3;
     location3.path = "/kapouet";
-    location3.methods.push_back(GET);
-    location3.methods.push_back(POST);
-    location3.methods.push_back(DELETE);
+    location3.methods.push_back("GET");
+    location3.methods.push_back("POST");
+    location3.methods.push_back("DELETE");
     location3.root = "/tmp/www";
     location3.index = "index.html";
     location3.autoindex = false;

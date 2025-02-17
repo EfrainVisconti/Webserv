@@ -22,6 +22,7 @@ class Response
 		bool		_auto_index;
 
 		void	GetRealLocation();
+		short	CheckMethod(const Location &location);
 
 	public:
 		Response(const Request &req, const Server &server);

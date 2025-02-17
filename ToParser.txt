@@ -1,12 +1,21 @@
--Todos los root, ya sea de bloque server o de bloque location NO DEBEN terminar
+1. Todos los root, ya sea de bloque server o de bloque location NO DEBEN terminar
 en "/", excepto root "/" sin mas nada. Y SI DEBEN empezar con "/"
 Ejemplo: root /html
 SOLUCION: Podemos aceptar root /html/ pero durante el parseo convertirla en /html
 
--Las location DEBEN empezar en "/" siempre y no deben terminar en "/". 
+2. Las location DEBEN empezar en "/" siempre y no deben terminar en "/". 
 Ejemplo: location /loc1
 SOLUCION: Podemos aceptar location /loc1/ pero durante el parseo convertirla en /loc1
 
 PUNTO DEL SUBJECT: Define a directory or a file from where the file should be searched (for example,
 if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is
 /tmp/www/pouic/toto/pouet).
+
+3. Si no hay root en algun bloque location, es valido y se deja root = "".
+Por otro lado, siempre debe haber root en el bloque server, si no: ERROR.
+
+4. Implementar allow_methods en las location (std::vector<std::string> methods).
+Por defecto siempre permitir GET y POST aunque no este en el config_file.
+DELETE sera opcional.
+
+PUNTO DEL SUBJECT: Make it work with POST and GET methods.
