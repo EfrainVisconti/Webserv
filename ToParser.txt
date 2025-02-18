@@ -15,7 +15,14 @@ if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is
 Por otro lado, siempre debe haber root en el bloque server, si no: ERROR.
 
 4. Implementar allow_methods en las location (std::vector<std::string> methods).
-Por defecto siempre permitir GET y POST aunque no este en el config_file.
-DELETE sera opcional.
+Por defecto siempre permitir "GET" y "POST" aunque no este en el config_file.
+"DELETE" sera opcional.
 
 PUNTO DEL SUBJECT: Make it work with POST and GET methods.
+
+5. Haremos redirecciones HTTP mediante return en las location. Ej. return /newpath/page.html
+Deben empezar siempre con /. Si no: ERROR. Sin embargo, si no hay return inicializarla "".
+
+PUNTO DEL SUBJECT:  Define a HTTP redirection.
+
+6. Si en la location no hay autoindex, es valido y es off (false) por defecto.
