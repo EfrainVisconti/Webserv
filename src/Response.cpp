@@ -2,6 +2,9 @@
 
 //301 Moved Permanently (HTTP 301)
 //405 Method Not Allowed (HTTP 405)
+//404 Not Found (HTTP 404)
+//403 Forbidden (HTTP 403)
+//500 Internal Server Error (HTTP 500)
 
 // Las directivas dentro de un bloque location sobrescriben las del bloque 
 // server si aplican a la misma solicitud.
@@ -44,7 +47,13 @@ Response::Response(const Request &req, const Server &server) : _server(&server)
     _body = ""; // Cuerpo de la respuesta
     _status_message = ""; // Mensaje de estado
     _status_code = 200; // Codigo de estado
-    _auto_index = false;
+    _auto_index = false; // off por defecto
+    _is_dir = false;
+
+    if (server.index != "")
+        _index = server.root + "/" + server.index;
+    else
+        _index = "";
 }
 
 Response::~Response()
@@ -72,6 +81,8 @@ Response &Response::operator=(const Response &other)
         _status_message = other._status_message;
         _status_code = other._status_code;
         _auto_index = other._auto_index;
+        _is_dir = other._is_dir;
+        _index = other._index;
     }
     return *this;
 }
@@ -100,7 +111,8 @@ void    Response::CheckMethod(const Location &location)
     Si la location tiene una redirección, se establece el status code a 301 y se establece
     la nueva ubicación.
     Se establece el autoindex de la location (false por defecto).
-
+    Si la location tiene un index, se establece el index de la location para la response,
+    el cual debe estar alojado en la raíz de la location.
 */
 void    Response::CheckMatchingLocation()
 {
@@ -119,6 +131,8 @@ void    Response::CheckMatchingLocation()
                 return ;
             }
             _auto_index = it->autoindex;
+            if (it->index != "")
+                _index = it->root + "/" + it->index;
             if (it->root == "/")
             {
                 _real_location = _req_path;
@@ -134,28 +148,88 @@ void    Response::CheckMatchingLocation()
 }
 
 
-short   Response::CheckPath(const std::string &path)
+void    Response::GenerateAutoIndex()
 {
-    struct stat sb;
+  return ;
+}
 
-    if (stat(path.c_str(), &sb) != 0)
-        return PATH_NOT_FOUND;
-    if (S_ISREG(sb.st_mode))
-        return PATH_IS_FILE;
-    if (S_ISDIR(sb.st_mode))
-        return PATH_IS_DIRECTORY;
-    return PATH_NOT_FOUND;
+
+/*
+    En el archivo de configuración se establece index para el server y para cada location. Si no se
+    encuentra index en las configuraciones, se establece index inexistente ("").
+    El index debe estar alojado en la raíz de la location o en la raiz del Server si no hay
+    location para esa request.
+*/
+void    Response::HandleAutoIndex()
+{
+    if (_index == "")
+    {
+        if (_auto_index == true)
+            //GenerateAutoIndex(); TODO
+            std::cout << "Autoindex" << std::endl;
+        throw Response::ResponseErrorException(403);
+    }
+    _real_location = _index;
+}
+
+
+/*
+    Revisa exhaustivamente si la ubicación del recurso solicitado existe, es un directorio
+    o es un archivo. Se revisa la existencia de la ubicación con stat() y si no es un directorio,
+    se intenta abrir el archivo con open().
+
+    - Si la ubicación no existe, se establece el status code a 404.
+    - Si la ubicación es un directorio y no termina en /, se establece el status code a 301 y se
+    establece la nueva ubicación con / al final.
+    - Si la ubicación es un archivo y no se puede abrir, se establece el status code a 403.
+    - En cualquier otro caso de error, se establece el status code a 500.
+*/
+void    Response::ExhaustivePathCheck(const std::string &path)
+{
+    struct stat buffer;
+    if (stat(path.c_str(), &buffer) == -1)
+    {
+        if (errno == ENOENT)
+            throw Response::ResponseErrorException(404);
+        if (errno != EACCES)
+            throw Response::ResponseErrorException(500);
+    }
+
+    if (S_ISDIR(buffer.st_mode))
+    {
+        _is_dir = true;
+        if (path[path.length() - 1] != '/')
+        {
+            _status_code = 301;
+            _real_location = path + "/";
+        }
+        return;
+    }
+
+    int open_return = open(path.c_str(), O_RDONLY);
+    if (open_return == -1)
+    {
+        if (errno == EACCES)
+            throw Response::ResponseErrorException(403);
+        throw Response::ResponseErrorException(500);
+    }
+    close(open_return);
 }
 
 
 void    Response::GenerateResponse()
 {
-    CheckMatchingLocation();
-
-    short path_status = CheckPath(_real_location);
-    if (path_status == PATH_NOT_FOUND)
-        throw Response::ResponseErrorException(404);
-    if (path_status == PATH_IS_DIRECTORY)
+    try
+    {
+        CheckMatchingLocation();
+        ExhaustivePathCheck(_real_location);
+        if (_is_dir == true)
+            HandleAutoIndex();
+    }
+	catch (const Response::ResponseErrorException &e)
+	{
+		std::cout << e.getCode() << std::endl;
+	}
 
 }
 

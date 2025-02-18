@@ -26,3 +26,8 @@ Deben empezar siempre con /. Si no: ERROR. Sin embargo, si no hay return inicial
 PUNTO DEL SUBJECT:  Define a HTTP redirection.
 
 6. Si en la location no hay autoindex, es valido y es off (false) por defecto.
+
+7. Por simplicidad si index no esta definido en la location, definirlo como: "".
+Si tampoco hay index en el bloque server, definirlo como: "".
+Index siempre debera ser un archivo sin / en ningun lado. Ej. "index.html".
+Un index como "/index.html" o "index.html/": ERROR.

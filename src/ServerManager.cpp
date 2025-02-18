@@ -37,14 +37,7 @@ void	ServerManager::ResponseManager(int client_fd, Request &req)
 	Response *response = new Response(req, *_client_map.find(client_fd)->second);
 	_response_map[client_fd] = response;
 
-	try
-	{
-		response->GenerateResponse();
-	}
-	catch (const Response::ResponseErrorException &e)
-	{
-		std::cout << e.getCode() << std::endl;
-	}
+	response->GenerateResponse();
 
 	for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
 	{

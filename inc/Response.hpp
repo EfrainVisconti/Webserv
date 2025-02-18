@@ -20,12 +20,15 @@ class Response
 		std::string	_content_type; // Tipo de contenido
         std::string	_body; // Cuerpo de la respuesta
 		std::string	_status_message; // Mensaje de estado
+		std::string _index;
         short		_status_code; // Código de estado
 		bool		_auto_index;
+		bool		_is_dir;
 
 		void	CheckMatchingLocation();
 		void	CheckMethod(const Location &location);
-		short	CheckPath(const std::string &path);
+		void   ExhaustivePathCheck(const std::string &path);
+		void  HandleAutoIndex();
 
 	public:
 		Response(const Request &req, const Server &server);
