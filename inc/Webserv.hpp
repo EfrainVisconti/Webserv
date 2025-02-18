@@ -11,6 +11,7 @@
 # include <fcntl.h>
 # include <sstream>
 # include <cstdlib>
+# include <sys/stat.h>
 
 /* STL Containers */
 # include <algorithm>
@@ -39,5 +40,9 @@
 # define MAX_CONN 512
 # define DEBUG_MODE 0
 # define TIMEOUT -1 // 60000 // 60 segs.
+
+# define PATH_NOT_FOUND 0
+# define PATH_IS_FILE 1
+# define PATH_IS_DIRECTORY 2
 
 #endif

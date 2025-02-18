@@ -25,6 +25,7 @@ class Response
 
 		void	CheckMatchingLocation();
 		void	CheckMethod(const Location &location);
+		short	CheckPath(const std::string &path);
 
 	public:
 		Response(const Request &req, const Server &server);
