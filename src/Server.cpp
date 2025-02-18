@@ -10,34 +10,34 @@ Server::Server()
 	this->index = "";
 	this->listen_socket = 0;
     
-    Location location1;
-    location1.path = "/location1";
-    location1.methods.push_back("GET");
-    location1.methods.push_back("POST");
-    location1.root = "/";
-    location1.index = "index_location1.html";
-    location1.autoindex = false;
+    Location loc1;
+    loc1.path = "/loc1";
+    loc1.methods.push_back("GET");
+    loc1.methods.push_back("POST");
+    loc1.root = "";
+    loc1.index = "index.html";
+    loc1.autoindex = true;
 
-    Location location2;
-    location2.path = "/location2";
-    location2.methods.push_back("GET");
-    location2.methods.push_back("POST");
+    Location loc2;
+    loc2.path = "/loc2";
+    loc2.methods.push_back("GET");
+    loc2.methods.push_back("POST");
     //location2.root = "/location2";
-    location2.index = "index_location2.html";
-    location2.autoindex = true;
+    loc2.index = "index.html";
+    loc2.autoindex = true;
 
-    Location location3;
-    location3.path = "/kapouet";
-    location3.methods.push_back("GET");
-    location3.methods.push_back("POST");
-    location3.methods.push_back("DELETE");
-    location3.root = "/tmp/www";
-    location3.index = "index.html";
-    location3.autoindex = false;
+    Location loc3;
+    loc3.path = "/kapouet";
+    loc3.methods.push_back("GET");
+    loc3.methods.push_back("POST");
+    loc3.methods.push_back("DELETE");
+    loc3.root = "/tmp/www";
+    loc3.index = "index.html";
+    loc3.autoindex = false;
 
-    this->locations.push_back(location1);
-    this->locations.push_back(location2);
-    this->locations.push_back(location3);
+    this->locations.push_back(loc1);
+    this->locations.push_back(loc2);
+    this->locations.push_back(loc3);
 
 }
 

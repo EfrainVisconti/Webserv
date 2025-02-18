@@ -12,6 +12,8 @@
 # include <sstream>
 # include <cstdlib>
 # include <sys/stat.h>
+# include <dirent.h>
+# include <cerrno>
 
 /* STL Containers */
 # include <algorithm>

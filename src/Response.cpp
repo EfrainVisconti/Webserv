@@ -148,9 +148,45 @@ void    Response::CheckMatchingLocation()
 }
 
 
-void    Response::GenerateAutoIndex()
+void    Response::GenerateAutoIndex(const std::string &path)
 {
-  return ;
+    DIR *dir = opendir(path.c_str());
+    if (dir == NULL)
+        throw Response::ResponseErrorException(500);
+
+    struct dirent *entry;
+    std::vector<std::string> files;
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (std::string(entry->d_name) != "." && std::string(entry->d_name) != "..")
+            files.push_back(entry->d_name);
+    }
+    closedir(dir);
+
+    std::sort(files.begin(), files.end());
+
+    std::ostringstream html;
+    html << "<html><head><title>Index of " << path << "</title></head><body>";
+    html << "<h1>Index of " << path << "</h1><hr><ul>";
+
+    for (std::size_t i = 0; i < files.size(); i++)
+    {
+        std::string filePath = path + "/" + files[i];
+        struct stat buffer;
+        stat(filePath.c_str(), &buffer);
+        if (S_ISDIR(buffer.st_mode))
+        {
+            html << "<li><a href=\"" << files[i] << "/\">" << files[i] << "/</a></li>";
+        }
+        else
+        {
+            html << "<li><a href=\"" << files[i] << "\">" << files[i] << "</a></li>";
+        }
+    }
+
+    html << "</ul><hr></body></html>";
+    _body = html.str();
 }
 
 
@@ -165,8 +201,10 @@ void    Response::HandleAutoIndex()
     if (_index == "")
     {
         if (_auto_index == true)
-            //GenerateAutoIndex(); TODO
-            std::cout << "Autoindex" << std::endl;
+        {
+            GenerateAutoIndex(_real_location);
+            return ;
+        }
         throw Response::ResponseErrorException(403);
     }
     _real_location = _index;
@@ -191,8 +229,9 @@ void    Response::ExhaustivePathCheck(const std::string &path)
     {
         if (errno == ENOENT)
             throw Response::ResponseErrorException(404);
-        if (errno != EACCES)
-            throw Response::ResponseErrorException(500);
+        if (errno == EACCES)
+            throw Response::ResponseErrorException(403);
+        throw Response::ResponseErrorException(500);
     }
 
     if (S_ISDIR(buffer.st_mode))
@@ -221,14 +260,18 @@ void    Response::GenerateResponse()
 {
     try
     {
-        CheckMatchingLocation();
-        ExhaustivePathCheck(_real_location);
-        if (_is_dir == true)
-            HandleAutoIndex();
+        if (_req_method == "GET")
+        {
+            CheckMatchingLocation();
+            ExhaustivePathCheck("/home/usuario/Documents/Webserv" + _real_location);
+            if (_is_dir == true)
+                HandleAutoIndex();
+        }
+
     }
 	catch (const Response::ResponseErrorException &e)
 	{
-		std::cout << e.getCode() << std::endl;
+		_status_code = e.getCode();
 	}
 
 }
@@ -236,5 +279,18 @@ void    Response::GenerateResponse()
 
 std::string Response::GetResponse()
 {
-    return _real_location;
+    std::ostringstream response;
+    response << _req_path << "\r\n";
+    response << _req_method << "\r\n";
+    response << _real_location << "\r\n";
+    response << _content << "\r\n";
+    response << "HTTP/1.1 " << _status_code << " " << _status_message << "\r\n";
+    response << "Server: webserv/1.0\r\n";
+    response << "Date: " << "Fri, 14 Feb 2025 12:00:00 GMT" << "\r\n";
+    response << "Content-Type: " << _content_type << "\r\n";
+    response << "Content-Length: " << _content_length << "\r\n";
+    response << "Connection: close\r\n";
+    response << "\r\n";
+    response << _body;
+    return response.str();
 }

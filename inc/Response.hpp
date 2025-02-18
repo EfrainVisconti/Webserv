@@ -27,8 +27,9 @@ class Response
 
 		void	CheckMatchingLocation();
 		void	CheckMethod(const Location &location);
-		void   ExhaustivePathCheck(const std::string &path);
-		void  HandleAutoIndex();
+		void	ExhaustivePathCheck(const std::string &path);
+		void	HandleAutoIndex();
+		void	GenerateAutoIndex(const std::string &path);
 
 	public:
 		Response(const Request &req, const Server &server);
