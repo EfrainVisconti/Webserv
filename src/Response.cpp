@@ -34,17 +34,6 @@
 //   <body><h1>Hello, world!</h1></body>
 // </html>
 
-static std::string GetAbsolutePath()
-{
-    char buffer[255];
-    if (getcwd(buffer, 255) != 0)
-        return std::string(buffer);
-    return std::string("");
-}
-
-std::string Response::_pwd = GetAbsolutePath();
-
-
 
 Response::Response(const Request &req, const Server &server) : _server(&server)
 {
@@ -163,8 +152,8 @@ void    Response::CheckMatchingLocation()
 
 void    Response::GenerateAutoIndex(const std::string &path)
 {
-    std::string absolute_path = _pwd + path;
-    DIR *dir = opendir(absolute_path.c_str());
+    std::string path_aux = path.substr(1);
+    DIR *dir = opendir(path_aux.c_str());
     if (dir == NULL)
         throw Response::ResponseErrorException(500);
 
@@ -238,9 +227,9 @@ void    Response::HandleAutoIndex()
 */
 void    Response::ExhaustivePathCheck(const std::string &path)
 {
-    std::string absolute_path = _pwd + path;
+    std::string path_aux = path.substr(1);
     struct stat buffer;
-    if (stat(absolute_path.c_str(), &buffer) == -1)
+    if (stat(path_aux.c_str(), &buffer) == -1)
     {
         if (errno == ENOENT)
             throw Response::ResponseErrorException(404);
@@ -260,7 +249,7 @@ void    Response::ExhaustivePathCheck(const std::string &path)
         return;
     }
 
-    int open_return = open(absolute_path.c_str(), O_RDONLY);
+    int open_return = open(path_aux.c_str(), O_RDONLY);
     if (open_return == -1)
     {
         if (errno == EACCES)

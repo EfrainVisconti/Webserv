@@ -11,7 +11,6 @@ class Location;
 class Response
 {
 	private:
-		static std::string _pwd; // Directorio actual
 		const Server	*_server; // Servidor asociado
         std::string	_req_path;	// path recibido de la request
 		std::string	_req_method; // metodo recibido de la request
