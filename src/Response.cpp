@@ -34,6 +34,16 @@
 //   <body><h1>Hello, world!</h1></body>
 // </html>
 
+static std::string GetAbsolutePath()
+{
+    char buffer[255];
+    if (getcwd(buffer, 255) != 0)
+        return std::string(buffer);
+    return std::string("");
+}
+
+std::string Response::_pwd = GetAbsolutePath();
+
 
 
 Response::Response(const Request &req, const Server &server) : _server(&server)
@@ -87,6 +97,7 @@ Response &Response::operator=(const Response &other)
     return *this;
 }
 
+
 /*
     Revisa si el método de la request esta permitido en la location.
 */
@@ -133,6 +144,8 @@ void    Response::CheckMatchingLocation()
             _auto_index = it->autoindex;
             if (it->index != "")
                 _index = it->root + "/" + it->index;
+            else
+                _index = "";
             if (it->root == "/")
             {
                 _real_location = _req_path;
@@ -150,7 +163,8 @@ void    Response::CheckMatchingLocation()
 
 void    Response::GenerateAutoIndex(const std::string &path)
 {
-    DIR *dir = opendir(path.c_str());
+    std::string absolute_path = _pwd + path;
+    DIR *dir = opendir(absolute_path.c_str());
     if (dir == NULL)
         throw Response::ResponseErrorException(500);
 
@@ -224,8 +238,9 @@ void    Response::HandleAutoIndex()
 */
 void    Response::ExhaustivePathCheck(const std::string &path)
 {
+    std::string absolute_path = _pwd + path;
     struct stat buffer;
-    if (stat(path.c_str(), &buffer) == -1)
+    if (stat(absolute_path.c_str(), &buffer) == -1)
     {
         if (errno == ENOENT)
             throw Response::ResponseErrorException(404);
@@ -245,11 +260,12 @@ void    Response::ExhaustivePathCheck(const std::string &path)
         return;
     }
 
-    int open_return = open(path.c_str(), O_RDONLY);
+    int open_return = open(absolute_path.c_str(), O_RDONLY);
     if (open_return == -1)
     {
         if (errno == EACCES)
             throw Response::ResponseErrorException(403);
+        std::cout << "here" << std::endl;
         throw Response::ResponseErrorException(500);
     }
     close(open_return);
@@ -263,11 +279,10 @@ void    Response::GenerateResponse()
         if (_req_method == "GET")
         {
             CheckMatchingLocation();
-            ExhaustivePathCheck("/home/usuario/Documents/Webserv" + _real_location);
+            ExhaustivePathCheck(_real_location);
             if (_is_dir == true)
                 HandleAutoIndex();
         }
-
     }
 	catch (const Response::ResponseErrorException &e)
 	{
@@ -283,7 +298,6 @@ std::string Response::GetResponse()
     response << _req_path << "\r\n";
     response << _req_method << "\r\n";
     response << _real_location << "\r\n";
-    response << _content << "\r\n";
     response << "HTTP/1.1 " << _status_code << " " << _status_message << "\r\n";
     response << "Server: webserv/1.0\r\n";
     response << "Date: " << "Fri, 14 Feb 2025 12:00:00 GMT" << "\r\n";

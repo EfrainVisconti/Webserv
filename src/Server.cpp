@@ -15,7 +15,7 @@ Server::Server()
     loc1.methods.push_back("GET");
     loc1.methods.push_back("POST");
     loc1.root = "";
-    loc1.index = "index.html";
+    loc1.index = "";
     loc1.autoindex = true;
 
     Location loc2;

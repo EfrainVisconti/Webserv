@@ -35,3 +35,4 @@ std::string	errorResponse(int val){
                            "\r\n" + notFoundHtml;
 	return (response);
 }
+

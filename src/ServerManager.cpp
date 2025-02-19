@@ -1,5 +1,6 @@
 #include "../inc/ServerManager.hpp"
 
+
 ServerManager::ServerManager(std::vector<Server> &servers) : _servers(servers) 
 {
 
