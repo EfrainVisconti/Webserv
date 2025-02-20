@@ -3,7 +3,7 @@
 // Las directivas dentro de un bloque location sobrescriben las del bloque 
 // server si aplican a la misma solicitud.
 
-//Todos los root se asumen NO terminan en / (excepto root "/" propiamente)
+// Todos los root se asumen NO terminan en / (excepto root "/" propiamente)
 
     //class Location
 		// std::string			path; DONE
@@ -12,7 +12,6 @@
 		// std::string			index; DONE
 		// std::vector<std::string>	methods; DONE
 		// std::string			redirection; DONE
-
 
 const std::map<std::string, std::string>    Response::_mime_types = Response::SetMIMETypes();
 
@@ -275,18 +274,14 @@ void    Response::GenerateResponse()
     try
     {
         InitialStatusCodeCheck();
-        // if (cumple condicion de ser CGI)
-        // {
-        //     Implementa el cgi entero teniendo en cuenta posibles errores.
-        //     Si hay error en el cgi, se lanza ResponseErrorException con el status code correspondiente.
-        //     La respuesta de error se arma afuera automaticamente.
-        //     Si no hay error establece el _body, _content_length, _content_type, _status_code, _status_message.
-        //     La respuesta sin error tambien se arma afuera automaticamente.
-        //     return ;
-        // }
+        CheckMatchingLocation();
+        if (_req_path.find("/cgi-bin") == 0 && parseCgi() == true){
+            HandleCgi();
+            SetResponse(true);
+            return ;
+        }
         if (_req_method == "GET")
         {
-            CheckMatchingLocation();
             ExhaustivePathCheck(_real_location);
             if (_is_dir == true)
             {
@@ -303,7 +298,6 @@ void    Response::GenerateResponse()
 		_status_code = e.getCode();
         SetResponse(false);
 	}
-
 }
 
 

@@ -29,7 +29,6 @@
 /* Clases */
 # include "Server.hpp"
 # include "ServerManager.hpp"
-# include "CgiManager.hpp"
 # include "Request.hpp"
 # include "Response.hpp"
 # include "Location.hpp"
