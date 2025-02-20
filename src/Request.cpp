@@ -12,7 +12,7 @@ Request::Request(void){
 	_keep_alive = 1; // 1 mantener conexion viva 0 cerrarla
 	_max_body_size = 0; // limite de conf.yaml de memoria
 	_body_size = 0; // espacio que ocupa la solicitud
-    _error_type = 404; // error de salida en caso de no estar bien la solicitud.
+    _error_type = 400; // error de salida en caso de no estar bien la solicitud.
 }
 
 Request::Request(unsigned long max_body_size) {
@@ -33,26 +33,26 @@ Request::~Request(void) {
     return;
 }
 
-int Request::parseRequest(std::string _request, std::string host) {
+short Request::parseRequest(std::string _request) {
     this->parseSetup(_request);
 
     if (this->getMethod() == "POST" && this->getBodySize() > this->getMaxBodySize()) { // check de maxbodysize.
         this->setErrorType(413); // error de bodysize
         return (413);
     }
-    if (this->verifyMethodHost(host) == 0) { // check de metodo y host.
-        this->setErrorType(500); // error de host/metodo.
-        return (500);
+    if (this->verifyMethod() == 0) { // check de metodo
+        this->setErrorType(405); // error de metodo
+        return (405);
     }
     if (this->getMethod() == "POST" && this->getRequestFormat().empty()) { // si el metodo es post tiene que tener formato
-        this->setErrorType(406); // error de formato de peticion.
-        return (406);
+        this->setErrorType(400); // error de formato de peticion.
+        return (400);
     }
     if (this->getUserAgent().empty()) { // userAgent vacio
-        this->setErrorType(406); // error de formato de peticion.
-        return (406);
+        this->setErrorType(400); // error de formato de peticion.
+        return (400);
     }
-    return (1);
+    return (200);
 }
 
 void Request::parseSetup(std::string _request) {
@@ -98,13 +98,7 @@ void Request::parseSetup(std::string _request) {
     }
 }
 
-int Request::verifyMethodHost(std::string host){
-    //std::cout << "method " << getMethod() << "\n";
-    //std::cout << "host " << getHost() << "\n";
-    //std::cout << "host " << host << "\n";
-    //if (host != getHost())
-    //    return (0);
-    (void)host;
+int Request::verifyMethod(){
     if (getMethod() == "GET")
         return (1);
     if (getMethod() == "POST")

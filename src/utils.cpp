@@ -1,38 +1,85 @@
-#include "../inc/ServerMaganer.hpp"
-#include <cstdlib>
+#include "../inc/Webserv.hpp"
 
-const std::string notFoundHtml = R"(
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>404 Not Found</title>
-        <style>
-            body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-            h1 { color: #d9534f; }
-            p { color: #5bc0de; }
-        </style>
-    </head>
-    <body>
-        <h1>404 Not Found</h1>
-        <p>The requested URL was not found on this server.</p>
-        <hr>
-        <p><a href="/">Go back to the homepage</a></p>
-    </body>
-    </html>
-    )";    
+const std::string errorHtml01 = 
+    "<!DOCTYPE html>\n"
+    "<html lang=\"en\">\n"
+    "<head>\n"
+    "    <meta charset=\"UTF-8\">\n"
+    "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+    "    <title>error: ";
 
-std::string	errorResponse(int val){
-	char num[42];
-    itoa(val, num, 10);
-	std::string response = "HTTP/1.1" << num << "Not Found\r\n"
-                           "Date: Tue, 08 Feb 2025 14:00:00 GMT\r\n"
-                           "Server: MySimpleServer/1.0\r\n"
-                           "Content-Type: text/html; charset=UTF-8\r\n"
-                           "Content-Length: " + std::to_string(notFoundHtml.size()) + "\r\n"
-                           "Connection: close\r\n"
-                           "\r\n" + notFoundHtml;
-	return (response);
+const std::string errorHtml02 = 
+    "</title>\n"
+    "<style>\n"
+    "    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }\n"
+    "    h1 { color: #d9534f; }\n"
+    "    p { color: #5bc0de; }\n"
+    "</style>\n"
+    "</head>\n"
+    "<body>\n"
+    "    <h1>";
+
+const std::string errorHtml03 = 
+    "</h1>\n"
+    "    <p>";
+
+const std::string errorHtml04 = 
+    "</p>\n"
+    "    <hr>\n"
+    "    <p><a href=\"/\">Go back to the homepage</a></p>\n"
+    "</body>\n"
+    "</html>\n";
+
+std::string errorResponse(short val) {
+    char buffer[50];
+    sprintf(buffer, "%d", val);
+    std::string num(buffer);
+
+    std::string message = "";
+    if (val == 413)
+        message = "Request Entity Too Large.";
+    else if (val == 400)
+        message = "Bad Request";
+    else if (val == 405)
+        message = "Method Not Allowed";
+    else if (val == 404)
+        message = "Not Found";
+    else if (val == 403)
+        message = "Forbidden";
+    else if (val == 500)
+        message = "Internal Server Error";
+
+    std::string body = errorHtml01 + num + errorHtml02 + "ERROR " + num + errorHtml03 + message + errorHtml04;
+    std::size_t contentLength = body.size();
+
+    std::ostringstream  response;
+    response << "HTTP/1.1 " << val << " " << message << "\r\n";
+    response << "Server: webserv/1.0\r\n";
+    response << GetDate() << "\r\n";
+    response << "Content-Type: text/html\r\n";
+    response << "Content-Length: " << contentLength << "\r\n";
+    response << "Connection: close\r\n";
+    response << "\r\n";
+    response << body;
+
+    if (DEBUG_MODE_RESPONSE)
+    	std::cout << GREEN << "Error response: " << response.str() << RESET <<std::endl;
+    return response.str();
 }
 
+
+/*
+    Obtiene la fecha actual en formato GMT.
+*/
+std::string GetDate()
+{
+    time_t      _time;
+    struct tm   *timeinfo;
+    char        buffer[100];
+
+    time(&_time);
+    timeinfo = localtime(&_time);
+
+    strftime(buffer, 100, "%a, %d %b %Y %H:%M:%S GMT", timeinfo);
+    return ("Date: " + std::string(buffer));
+}

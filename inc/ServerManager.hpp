@@ -50,10 +50,9 @@ class ServerManager
 		void	AcceptConnection(int server_fd, Server *server);
 		void	HandleRequest(int connected_fd);
 		void	CloseConnection(int fd);
-		void	ResponseManager(int client_fd, Request &req);
+		void	ResponseManager(int client_fd, Request &req, short status);
 		void	HandleResponse(int client_fd);
 };
 
-std::string	errorResponse(int val);
 
 #endif

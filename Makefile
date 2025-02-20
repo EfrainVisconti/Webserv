@@ -19,8 +19,8 @@ OBJ_DIR        = obj/
 BIN_DIR        = ./
 
 # Source files
-SRC_FILE       = main.cpp Server.cpp ServerManager.cpp CgiManager.cpp Request.cpp Response.cpp ErrorResponse.cpp Location.cpp
-INC_FILE       = main.hpp Server.hpp ServerManager.hpp CgiManager.hpp Request.hpp Response.hpp Response.hpp Location.hpp
+SRC_FILE       = main.cpp utils.cpp Server.cpp ServerManager.cpp CgiManager.cpp Request.cpp Response.cpp Location.cpp
+INC_FILE       = Webserv.hpp Server.hpp ServerManager.hpp CgiManager.hpp Request.hpp Response.hpp Location.hpp
 
 SRC            = $(addprefix $(SRC_DIR), $(SRC_FILE))
 INC            = $(addprefix $(INC_DIR), $(INC_FILE))

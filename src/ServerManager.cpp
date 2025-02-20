@@ -33,9 +33,9 @@ void	ServerManager::HandleResponse(int client_fd)
 /*
 
 */
-void	ServerManager::ResponseManager(int client_fd, Request &req)
+void	ServerManager::ResponseManager(int client_fd, Request &req, short status)
 {
-	Response *response = new Response(req, *_client_map.find(client_fd)->second);
+	Response *response = new Response(req, *_client_map.find(client_fd)->second, status);
 	_response_map[client_fd] = response;
 
 	response->GenerateResponse();
@@ -94,46 +94,18 @@ void ServerManager::CloseConnection(int fd)
 void ServerManager::HandleRequest(int client_fd)
 {
 	Server *server = _client_map.find(client_fd)->second;
-	std::string host = server->server_name; // REVISAR SI ES HOST O SERVER_NAME
 	Request	req(server->client_max_body_size);
     char buffer[8192];
     memset(buffer, 0, 8192);
     ssize_t bytes_read = recv(client_fd, buffer, 8192, 0);
 	if (bytes_read <= 0)
-	{
-		// 500 INTERNAL SERVER ERROR
-		CloseConnection(client_fd);
-		return ;
-	}
-
-	std::string bufferstr = buffer;
-	int status = req.parseRequest(bufferstr, host);
-	if (status == 404){
-		std::string error_response = errorResponse(404);
-		send(client_fd, error_response.c_str(), error_response.size(), 0);
-		CloseConnection(client_fd);
-		return ;
-	}
-	if (status == 406){
-		std::string error_response = errorResponse(406);
-		send(client_fd, error_response.c_str(), error_response.size(), 0);
-		CloseConnection(client_fd);
-		return ;
-	}
-	if (status == 500){
-		std::string error_response = errorResponse(500);
-		send(client_fd, error_response.c_str(), error_response.size(), 0);
-		CloseConnection(client_fd);
-		return ;
-	}
-	if (status == 413){
-		std::string error_response = errorResponse(413);
-		send(client_fd, error_response.c_str(), error_response.size(), 0);
-		CloseConnection(client_fd);
-		return ;
-	}
+		ResponseManager(client_fd, req, 500);
 	else
-		ResponseManager(client_fd, req);
+	{
+		std::string bufferstr = buffer;
+		short status = req.parseRequest(bufferstr);
+		ResponseManager(client_fd, req, status);
+	}
 
 	if (DEBUG_MODE)
 	{

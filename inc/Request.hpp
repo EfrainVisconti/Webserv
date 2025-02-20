@@ -23,9 +23,9 @@ class Request
 		Request(unsigned long max_body_size);
 		~Request();
 
-		int						parseRequest(std::string _request, std::string host);
+		short					parseRequest(std::string _request);
 		void					parseSetup(std::string _request);
-		int						verifyMethodHost(std::string host);
+		int						verifyMethod();
 	// getters
 		const std::string& getMethod() const;
 		const std::string& getPath() const;

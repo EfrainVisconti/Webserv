@@ -16,7 +16,7 @@ class Response
         std::string	_req_path;	// path recibido de la request
 		std::string	_req_method; // metodo recibido de la request
         std::string	_real_location; // Ubicación del archivo despues de revisar las locations
-        std::string	_content; // Contenido de la respuesta (incluidos headers)
+        std::string	_response; // Contenido de la respuesta (incluidos headers)
         size_t		_content_length; // Tamaño del contenido
 		std::string	_content_type; // Tipo de contenido
         std::string	_body; // Cuerpo de la respuesta
@@ -26,7 +26,9 @@ class Response
 		bool		_auto_index;
 		bool		_is_dir;
 
+		Response();
 		static const std::map<std::string, std::string>	&SetMIMETypes();
+		void		InitialStatusCodeCheck();
 		void		CheckMatchingLocation();
 		void		CheckMethod(const Location &location);
 		void		ExhaustivePathCheck(const std::string &path);
@@ -34,10 +36,10 @@ class Response
 		void		GenerateAutoIndex(const std::string &path);
 		void		GetContentType(const std::string &path);
 		void		GetBody(std::string path);
-		std::string	GetDate();
+		void		SetResponse(bool status);
 
 	public:
-		Response(const Request &req, const Server &server);
+		Response(const Request &req, const Server &server, short status);
 		Response(const Response &other);
 		Response &operator=(const Response &other);
 		~Response();

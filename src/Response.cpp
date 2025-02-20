@@ -1,11 +1,5 @@
 #include "../inc/Webserv.hpp"
 
-//301 Moved Permanently (HTTP 301)
-//405 Method Not Allowed (HTTP 405)
-//404 Not Found (HTTP 404)
-//403 Forbidden (HTTP 403)
-//500 Internal Server Error (HTTP 500)
-
 // Las directivas dentro de un bloque location sobrescriben las del bloque 
 // server si aplican a la misma solicitud.
 
@@ -22,17 +16,16 @@
 
 const std::map<std::string, std::string>    Response::_mime_types = Response::SetMIMETypes();
 
-Response::Response(const Request &req, const Server &server) : _server(&server)
+Response::Response(const Request &req, const Server &server, short status) : _server(&server), _status_code(status)
 {
     _req_path = req.getPath(); // path recibido de la request
     _req_method = req.getMethod(); // metodo recibido de la request
     _real_location = ""; // Ubicación del archivo despues de revisar las locations
-    _content = ""; // Contenido de la respuesta (incluidos headers)
+    _response = ""; // Contenido de la respuesta (incluidos headers)
     _content_length = 0; // Tamaño del contenido
     _content_type = ""; // Tipo de contenido
     _body = ""; // Cuerpo de la respuesta
     _status_message = "OK"; // Mensaje de estado
-    _status_code = 200; // Codigo de estado
     _auto_index = false; // off por defecto
     _is_dir = false;
 
@@ -60,7 +53,7 @@ Response &Response::operator=(const Response &other)
         _req_path = other._req_path;
         _req_method = other._req_method;
         _real_location = other._real_location;
-        _content = other._content;
+        _response = other._response;
         _content_length = other._content_length;
         _content_type = other._content_type;
         _body = other._body;
@@ -191,23 +184,6 @@ bool    Response::HandleAutoIndex()
 }
 
 
-/*
-    Obtiene la fecha actual en formato GMT.
-*/
-std::string Response::GetDate()
-{
-    time_t      _time;
-    struct tm   *timeinfo;
-    char        buffer[100];
-
-    time(&_time);
-    timeinfo = localtime(&_time);
-
-    strftime(buffer, 100, "%a, %d %b %Y %H:%M:%S GMT", timeinfo);
-    return ("Date: " + std::string(buffer));
-}
-
-
 void    Response::GetBody(std::string path)
 {
     path = path.substr(1);
@@ -225,7 +201,7 @@ void    Response::GetBody(std::string path)
 
 void    Response::GetContentType(const std::string &path)
 {
-    std::string extension = path.substr(path.find_last_of("."));
+    std::string extension = path.substr(path.find_last_of(".") + 1);
     std::map<std::string, std::string>::const_iterator it = _mime_types.find(extension);
     if (it == _mime_types.end())
         _content_type = "text/plain";
@@ -281,10 +257,33 @@ void    Response::ExhaustivePathCheck(const std::string &path)
 }
 
 
+void    Response::InitialStatusCodeCheck()
+{
+    if (_status_code == 400)
+        throw Response::ResponseErrorException(400);
+    if (_status_code == 405)
+        throw Response::ResponseErrorException(405);
+    if (_status_code == 413)
+        throw Response::ResponseErrorException(413);
+    if (_status_code == 500)
+        throw Response::ResponseErrorException(500);
+}
+
+
 void    Response::GenerateResponse()
 {
     try
     {
+        InitialStatusCodeCheck();
+        // if (cumple condicion de ser CGI)
+        // {
+        //     Implementa el cgi entero teniendo en cuenta posibles errores.
+        //     Si hay error en el cgi, se lanza ResponseErrorException con el status code correspondiente.
+        //     La respuesta de error se arma afuera automaticamente.
+        //     Si no hay error establece el _body, _content_length, _content_type, _status_code, _status_message.
+        //     La respuesta sin error tambien se arma afuera automaticamente.
+        //     return ;
+        // }
         if (_req_method == "GET")
         {
             CheckMatchingLocation();
@@ -296,32 +295,46 @@ void    Response::GenerateResponse()
             }
             GetContentType(_real_location);
             GetBody(_real_location);
+            SetResponse(true);
         }
     }
 	catch (const Response::ResponseErrorException &e)
 	{
 		_status_code = e.getCode();
-        std::cout << e.what() << "" << e.getCode() << std::endl;
+        SetResponse(false);
 	}
 
 }
 
 
+void    Response::SetResponse(bool status)
+{
+    if (status)
+    {
+        std::ostringstream  aux;
+        aux << "HTTP/1.1 " << _status_code << " " << _status_message << "\r\n";
+        aux << "Server: webserv/1.0\r\n";
+        aux << ::GetDate() << "\r\n";
+        aux << "Content-Type: " << _content_type << "\r\n";
+        aux << "Content-Length: " << _content_length << "\r\n";
+        aux << "Connection: close\r\n";
+        aux << "\r\n";
+        aux << _body;
+
+        _response = aux.str();
+
+        if (DEBUG_MODE_RESPONSE)
+            std::cout << GREEN << "Successful response: " << _response << RESET <<std::endl;
+    }
+    else
+        _response = errorResponse(_status_code);
+        //TODO Manejar paginas de error desde archivo de conf.
+}
+
+
 std::string Response::GetResponse()
 {
-    std::ostringstream  response;
-    response << "HTTP/1.1 " << _status_code << " " << _status_message << "\r\n";
-    response << "Server: webserv/1.0\r\n";
-    response << GetDate() << "\r\n";
-    response << "Content-Type: " << _content_type << "\r\n";
-    response << "Content-Length: " << _content_length << "\r\n";
-    response << "Connection: close\r\n";
-    response << _real_location << "\r\n";
-    response << "\r\n";
-    response << _body;
-
-    std::cout << response.str() << std::endl;
-    return response.str();
+    return _response;
 }
 
 
@@ -331,18 +344,18 @@ const std::map<std::string, std::string>  &Response::SetMIMETypes()
 
     if (aux.empty())
     {
-        aux[".html"] = "text/html";
-        aux[".css"] = "text/css";
-        aux[".js"] = "application/javascript";
-        aux[".jpg"] = "image/jpeg";
-        aux[".jpeg"] = "image/jpeg";
-        aux[".png"] = "image/png";
-        aux[".gif"] = "image/gif";
-        aux[".mp4"] = "video/mp4";
-        aux[".mp3"] = "audio/mpeg";
-        aux[".txt"] = "text/plain";
-        aux[".json"] = "application/json";
-        aux[".pdf"] = "application/pdf";
+        aux["html"] = "text/html";
+        aux["css"] = "text/css";
+        aux["js"] = "application/javascript";
+        aux["jpg"] = "image/jpeg";
+        aux["jpeg"] = "image/jpeg";
+        aux["png"] = "image/png";
+        aux["gif"] = "image/gif";
+        aux["mp4"] = "video/mp4";
+        aux["mp3"] = "audio/mpeg";
+        aux["txt"] = "text/plain";
+        aux["json"] = "application/json";
+        aux["pdf"] = "application/pdf";
     }
     return aux;
 }
