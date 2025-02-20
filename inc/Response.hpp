@@ -11,6 +11,7 @@ class Location;
 class Response
 {
 	private:
+		static const std::map<std::string, std::string> _mime_types;
 		const Server	*_server; // Servidor asociado
         std::string	_req_path;	// path recibido de la request
 		std::string	_req_method; // metodo recibido de la request
@@ -25,11 +26,15 @@ class Response
 		bool		_auto_index;
 		bool		_is_dir;
 
-		void	CheckMatchingLocation();
-		void	CheckMethod(const Location &location);
-		void	ExhaustivePathCheck(const std::string &path);
-		void	HandleAutoIndex();
-		void	GenerateAutoIndex(const std::string &path);
+		static const std::map<std::string, std::string>	&SetMIMETypes();
+		void		CheckMatchingLocation();
+		void		CheckMethod(const Location &location);
+		void		ExhaustivePathCheck(const std::string &path);
+		bool		HandleAutoIndex();
+		void		GenerateAutoIndex(const std::string &path);
+		void		GetContentType(const std::string &path);
+		void		GetBody(std::string path);
+		std::string	GetDate();
 
 	public:
 		Response(const Request &req, const Server &server);

@@ -1,6 +1,7 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
+# include <fstream>
 # include <string>
 # include <iostream>
 # include <unistd.h>

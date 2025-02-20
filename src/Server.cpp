@@ -11,19 +11,19 @@ Server::Server()
 	this->listen_socket = 0;
     
     Location loc1;
-    loc1.path = "/loc1";
+    loc1.path = "/location1";
     loc1.methods.push_back("GET");
     loc1.methods.push_back("POST");
     loc1.root = "";
-    loc1.index = "";
+    loc1.index = "index.html";
     loc1.autoindex = true;
 
     Location loc2;
-    loc2.path = "/loc2";
+    loc2.path = "/location2";
     loc2.methods.push_back("GET");
     loc2.methods.push_back("POST");
     //location2.root = "/location2";
-    loc2.index = "index.html";
+    loc2.index = "";
     loc2.autoindex = true;
 
     Location loc3;

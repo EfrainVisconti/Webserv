@@ -14,26 +14,13 @@
     //class Location
 		// std::string			path; DONE
 		// std::string			root; DONE
-		// bool				autoindex; QUASI DONE
-		// std::string			index; Se gestiona segun el metodo
+		// bool				autoindex; DONE
+		// std::string			index; DONE
 		// std::vector<std::string>	methods; DONE
 		// std::string			redirection; DONE
 
-// HTTP/1.1 200 OK
-// Server: nginx/1.21.3
-// Date: Fri, 14 Feb 2025 12:00:00 GMT
-// Content-Type: text/html; charset=UTF-8
-// Content-Length: 1234
-// Connection: keep-alive
-// Last-Modified: Tue, 13 Feb 2025 10:00:00 GMT
-// ETag: "5d8c72a5-4d2"
-// Accept-Ranges: bytes
 
-// <html>
-//   <head><title>Welcome to NGINX</title></head>
-//   <body><h1>Hello, world!</h1></body>
-// </html>
-
+const std::map<std::string, std::string>    Response::_mime_types = Response::SetMIMETypes();
 
 Response::Response(const Request &req, const Server &server) : _server(&server)
 {
@@ -44,7 +31,7 @@ Response::Response(const Request &req, const Server &server) : _server(&server)
     _content_length = 0; // Tamaño del contenido
     _content_type = ""; // Tipo de contenido
     _body = ""; // Cuerpo de la respuesta
-    _status_message = ""; // Mensaje de estado
+    _status_message = "OK"; // Mensaje de estado
     _status_code = 200; // Codigo de estado
     _auto_index = false; // off por defecto
     _is_dir = false;
@@ -127,6 +114,7 @@ void    Response::CheckMatchingLocation()
             if (it->redirection != "")
             {
                 _status_code = 301;
+                _status_message = "Moved Permanently";
                 _real_location = it->redirection;
                 return ;
             }
@@ -167,29 +155,17 @@ void    Response::GenerateAutoIndex(const std::string &path)
     }
     closedir(dir);
 
-    std::sort(files.begin(), files.end());
-
     std::ostringstream html;
     html << "<html><head><title>Index of " << path << "</title></head><body>";
     html << "<h1>Index of " << path << "</h1><hr><ul>";
 
     for (std::size_t i = 0; i < files.size(); i++)
-    {
-        std::string filePath = path + "/" + files[i];
-        struct stat buffer;
-        stat(filePath.c_str(), &buffer);
-        if (S_ISDIR(buffer.st_mode))
-        {
-            html << "<li><a href=\"" << files[i] << "/\">" << files[i] << "/</a></li>";
-        }
-        else
-        {
-            html << "<li><a href=\"" << files[i] << "\">" << files[i] << "</a></li>";
-        }
-    }
+        html << "<li><a href=\"" << files[i] << "\">" << files[i] << "</a></li>";
 
     html << "</ul><hr></body></html>";
     _body = html.str();
+    _content_length = _body.length();
+    _content_type = "text/html";
 }
 
 
@@ -199,18 +175,62 @@ void    Response::GenerateAutoIndex(const std::string &path)
     El index debe estar alojado en la raíz de la location o en la raiz del Server si no hay
     location para esa request.
 */
-void    Response::HandleAutoIndex()
+bool    Response::HandleAutoIndex()
 {
     if (_index == "")
     {
         if (_auto_index == true)
         {
             GenerateAutoIndex(_real_location);
-            return ;
+            return true;
         }
         throw Response::ResponseErrorException(403);
     }
     _real_location = _index;
+    return false;
+}
+
+
+/*
+    Obtiene la fecha actual en formato GMT.
+*/
+std::string Response::GetDate()
+{
+    time_t      _time;
+    struct tm   *timeinfo;
+    char        buffer[100];
+
+    time(&_time);
+    timeinfo = localtime(&_time);
+
+    strftime(buffer, 100, "%a, %d %b %Y %H:%M:%S GMT", timeinfo);
+    return ("Date: " + std::string(buffer));
+}
+
+
+void    Response::GetBody(std::string path)
+{
+    path = path.substr(1);
+    std::ifstream file(path.c_str(), std::ios::binary);
+    if (!file)
+        throw Response::ResponseErrorException(500);
+
+    std::ostringstream content;
+    content << file.rdbuf();
+    file.close();
+    _body = content.str();
+    _content_length = _body.length();
+}
+
+
+void    Response::GetContentType(const std::string &path)
+{
+    std::string extension = path.substr(path.find_last_of("."));
+    std::map<std::string, std::string>::const_iterator it = _mime_types.find(extension);
+    if (it == _mime_types.end())
+        _content_type = "text/plain";
+    else
+        _content_type = it->second;
 }
 
 
@@ -244,6 +264,7 @@ void    Response::ExhaustivePathCheck(const std::string &path)
         if (path[path.length() - 1] != '/')
         {
             _status_code = 301;
+            _status_message = "Moved Permanently";
             _real_location = path + "/";
         }
         return;
@@ -254,7 +275,6 @@ void    Response::ExhaustivePathCheck(const std::string &path)
     {
         if (errno == EACCES)
             throw Response::ResponseErrorException(403);
-        std::cout << "here" << std::endl;
         throw Response::ResponseErrorException(500);
     }
     close(open_return);
@@ -270,12 +290,18 @@ void    Response::GenerateResponse()
             CheckMatchingLocation();
             ExhaustivePathCheck(_real_location);
             if (_is_dir == true)
-                HandleAutoIndex();
+            {
+                if (HandleAutoIndex() == true)
+                    return ;
+            }
+            GetContentType(_real_location);
+            GetBody(_real_location);
         }
     }
 	catch (const Response::ResponseErrorException &e)
 	{
 		_status_code = e.getCode();
+        std::cout << e.what() << "" << e.getCode() << std::endl;
 	}
 
 }
@@ -283,17 +309,40 @@ void    Response::GenerateResponse()
 
 std::string Response::GetResponse()
 {
-    std::ostringstream response;
-    response << _req_path << "\r\n";
-    response << _req_method << "\r\n";
-    response << _real_location << "\r\n";
+    std::ostringstream  response;
     response << "HTTP/1.1 " << _status_code << " " << _status_message << "\r\n";
     response << "Server: webserv/1.0\r\n";
-    response << "Date: " << "Fri, 14 Feb 2025 12:00:00 GMT" << "\r\n";
+    response << GetDate() << "\r\n";
     response << "Content-Type: " << _content_type << "\r\n";
     response << "Content-Length: " << _content_length << "\r\n";
     response << "Connection: close\r\n";
+    response << _real_location << "\r\n";
     response << "\r\n";
     response << _body;
+
+    std::cout << response.str() << std::endl;
     return response.str();
+}
+
+
+const std::map<std::string, std::string>  &Response::SetMIMETypes()
+{
+    static std::map<std::string, std::string>  aux;
+
+    if (aux.empty())
+    {
+        aux[".html"] = "text/html";
+        aux[".css"] = "text/css";
+        aux[".js"] = "application/javascript";
+        aux[".jpg"] = "image/jpeg";
+        aux[".jpeg"] = "image/jpeg";
+        aux[".png"] = "image/png";
+        aux[".gif"] = "image/gif";
+        aux[".mp4"] = "video/mp4";
+        aux[".mp3"] = "audio/mpeg";
+        aux[".txt"] = "text/plain";
+        aux[".json"] = "application/json";
+        aux[".pdf"] = "application/pdf";
+    }
+    return aux;
 }
