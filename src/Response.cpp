@@ -1,6 +1,6 @@
 #include "../inc/Webserv.hpp"
 
-// Las directivas dentro de un bloque location sobrescriben las del bloque 
+// Las directivas dentro de un bloque location sobrescriben las del bloque
 // server si aplican a la misma solicitud.
 
 // Todos los root se asumen NO terminan en / (excepto root "/" propiamente)
@@ -81,7 +81,7 @@ void    Response::CheckMethod(const Location &location)
 
     Dada una location /location1 y una request /location1/file.html. Si en la location1:
     1. root / --> sirve /location1/file.html (empieza desde la raíz del sistema)
-    2. root inexistente --> sirve /html/location1/file.html (empieza desde la raíz del 
+    2. root inexistente --> sirve /html/location1/file.html (empieza desde la raíz del
     server. Ej: /html)
     3. root /html/pages --> sirve /html/pages/file.html (sin location1 en la ruta)
 
@@ -98,7 +98,7 @@ void    Response::CheckMatchingLocation()
     std::vector<Location>::const_iterator it = _server->locations.begin();
     for (; it != _server->locations.end(); ++it)
     {
-        if (_req_path.find(it->path) == 0 && 
+        if (_req_path.find(it->path) == 0 &&
         (_req_path.length() == it->path.length() ||
         _req_path[it->path.length()] == '/'))
         {
@@ -269,20 +269,27 @@ void    Response::InitialStatusCodeCheck()
 }
 
 
+// void	Response::HandleDelete(const std::string &path)
+// {
+// 	return;
+// }
+
+
 void    Response::GenerateResponse()
 {
     try
     {
         InitialStatusCodeCheck();
         CheckMatchingLocation();
-        if (_req_path.find("/cgi-bin") == 0 && parseCgi() == true){
+        if (_req_path.find("/cgi-bin") == 0 && parseCgi() == true)
+		{
             HandleCgi();
             SetResponse(true);
             return ;
         }
-        if (_req_method == "GET")
-        {
-            ExhaustivePathCheck(_real_location);
+        ExhaustivePathCheck(_real_location);
+		if (_req_method == "GET")
+		{
             if (_is_dir == true)
             {
                 if (HandleAutoIndex() == true)
@@ -291,7 +298,13 @@ void    Response::GenerateResponse()
             GetContentType(_real_location);
             GetBody(_real_location);
             SetResponse(true);
-        }
+			return ;
+		}
+		// if (_req_method == "DELETE")
+		// {
+		// 	HandleDelete();
+		// }
+
     }
 	catch (const Response::ResponseErrorException &e)
 	{

@@ -37,17 +37,19 @@ class Response
 		void		GetContentType(const std::string &path);
 		void		GetBody(std::string path);
 		void		SetResponse(bool status);
+		void		HandleDelete(const std::string &path);
 		void		HandleCgi();
+		std::string	getQueryString();
+		bool		parseCgi();
+
 		public:
 		Response(const Request &req, const Server &server, short status);
 		Response(const Response &other);
 		Response &operator=(const Response &other);
 		~Response();
-		
+
 		void		GenerateResponse();
 		std::string	GetResponse();
-		std::string	getQueryString();
-		bool		parseCgi();
 		class ResponseErrorException : public std::exception
 		{
 			private:
