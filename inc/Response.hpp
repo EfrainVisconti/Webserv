@@ -35,7 +35,7 @@ class Response
 		bool		HandleAutoIndex();
 		void		GenerateAutoIndex(const std::string &path);
 		void		GetContentType(const std::string &path);
-		void		GetBody(std::string path);
+		std::string	GetBody(std::string path);
 		void		SetResponse(bool status);
 		void		HandleDelete(const std::string &path);
 		void		HandleCgi();

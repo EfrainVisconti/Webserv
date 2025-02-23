@@ -22,7 +22,7 @@ Response::Response(const Request &req, const Server &server, short status) : _se
     _real_location = ""; // Ubicación del archivo despues de revisar las locations
     _response = ""; // Contenido de la respuesta (incluidos headers)
     _content_length = 0; // Tamaño del contenido
-    _content_type = ""; // Tipo de contenido
+    _content_type = "text/plain"; // Tipo de contenido
     _body = ""; // Cuerpo de la respuesta
     _status_message = "OK"; // Mensaje de estado
     _auto_index = false; // off por defecto
@@ -183,7 +183,7 @@ bool    Response::HandleAutoIndex()
 }
 
 
-void    Response::GetBody(std::string path)
+std::string Response::GetBody(std::string path)
 {
     path = path.substr(1);
     std::ifstream file(path.c_str(), std::ios::binary);
@@ -195,6 +195,7 @@ void    Response::GetBody(std::string path)
     file.close();
     _body = content.str();
     _content_length = _body.length();
+    return _body;
 }
 
 
@@ -202,9 +203,7 @@ void    Response::GetContentType(const std::string &path)
 {
     std::string extension = path.substr(path.find_last_of(".") + 1);
     std::map<std::string, std::string>::const_iterator it = _mime_types.find(extension);
-    if (it == _mime_types.end())
-        _content_type = "text/plain";
-    else
+    if (it != _mime_types.end())
         _content_type = it->second;
 }
 
@@ -276,9 +275,9 @@ void	Response::HandleDelete(const std::string &path)
     {
         _status_code = 204;
         _status_message = "No Content";
-        _content_length = 0;
         _content_type = "";
-        _
+        _content_length = 0;
+        _body = "";
     }
     else
         throw Response::ResponseErrorException(500);
@@ -297,8 +296,8 @@ void    Response::GenerateResponse()
             SetResponse(true);
             return ;
         }
-        ExhaustivePathCheck(_real_location);
         CheckMatchingLocation();
+        ExhaustivePathCheck(_real_location);
 		if (_req_method == "GET")
 		{
             if (_is_dir == true)
@@ -316,6 +315,8 @@ void    Response::GenerateResponse()
             if (_is_dir == true)
                 throw Response::ResponseErrorException(403);
 			HandleDelete(_real_location);
+            SetResponse(true);
+            return ;
 		}
 
     }
