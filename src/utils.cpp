@@ -63,7 +63,7 @@ std::string errorResponse(short val) {
     response << body;
 
     if (DEBUG_MODE_RESPONSE)
-    	std::cout << GREEN << "Error response: " << response.str() << RESET <<std::endl;
+        std::cout << GREEN << "Error response: " << response.str() << RESET <<std::endl;
     return response.str();
 }
 

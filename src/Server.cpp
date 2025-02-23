@@ -22,7 +22,7 @@ Server::Server()
     loc2.path = "/location2";
     loc2.methods.push_back("GET");
     loc2.methods.push_back("POST");
-    //location2.root = "/location2";
+    loc2.root = "";
     loc2.index = "";
     loc2.autoindex = true;
 
