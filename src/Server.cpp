@@ -27,12 +27,11 @@ Server::Server()
     loc2.autoindex = true;
 
     Location loc3;
-    loc3.path = "/kapouet";
+    loc3.path = "/cgi-bin";
     loc3.methods.push_back("GET");
     loc3.methods.push_back("POST");
-    loc3.methods.push_back("DELETE");
-    loc3.root = "/tmp/www";
-    loc3.index = "index.html";
+    loc3.root = "./html/cgi-bin";
+    loc3.index = "counter.sh";
     loc3.autoindex = false;
 
     this->locations.push_back(loc1);

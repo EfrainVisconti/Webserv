@@ -6,16 +6,11 @@ ServerManager::ServerManager(std::vector<Server> &servers) : _servers(servers)
 
 }
 
-
 ServerManager::~ServerManager()
 {
 	// Cerrar todos los sockets
 }
 
-
-/*
-
-*/
 void	ServerManager::HandleResponse(int client_fd)
 {
     std::map<int, Response*>::iterator it = _response_map.find(client_fd);
@@ -29,10 +24,6 @@ void	ServerManager::HandleResponse(int client_fd)
     }
 }
 
-
-/*
-
-*/
 void	ServerManager::ResponseManager(int client_fd, Request &req, short status)
 {
 	Response *response = new Response(req, *_client_map.find(client_fd)->second, status);
@@ -50,13 +41,13 @@ void	ServerManager::ResponseManager(int client_fd, Request &req, short status)
 	}
 }
 
-
 /* 
 	Cierra la conexión del socket identificado por fd.
 	Se cierra el socket, se elimina la estructura pollfd vinculada
 	del vector _poll_fds y la posición vinculada
 	del map<fd, Server> _client_map.
 */
+
 void ServerManager::CloseConnection(int fd)
 {
     if (close(fd) == -1)
@@ -75,7 +66,6 @@ void ServerManager::CloseConnection(int fd)
 	}
 }
 
-
 /* 
 	Se llama a recv() para recibir los datos por el socket conectado
 	identificado con client_fd.
@@ -91,6 +81,7 @@ void ServerManager::CloseConnection(int fd)
 
 	NOTA: lanza ErrorException() explícita en caso de error.
 */
+
 void ServerManager::HandleRequest(int client_fd)
 {
 	Server *server = _client_map.find(client_fd)->second;
@@ -114,7 +105,6 @@ void ServerManager::HandleRequest(int client_fd)
 	}
 }
 
-
 /*
 	Se llama a accept(), la cual extrae la primera solicitud de conexión en
 	la cola de conexiones para el socket de escucha identificado con server_fd.
@@ -132,6 +122,7 @@ void ServerManager::HandleRequest(int client_fd)
 
 	NOTA: lanza ErrorException() explícita en caso de error.
 */
+
 void	ServerManager::AcceptConnection(int server_fd, Server *server)
 {
     struct sockaddr_in	client_addr;
@@ -159,12 +150,12 @@ void	ServerManager::AcceptConnection(int server_fd, Server *server)
 	}
 }
 
-
 /*
 	Configura la estructura sockaddr_in, en la cual se identifica la
 	familia de la dirección, la dirección IPv4 y el puerto (del socket),
 	almacenada en server->server_address). 
 */
+
 void	ServerManager::SetSockaddr_in(Server *server)
 {
 	memset(&(server->server_address), 0, sizeof(server->server_address));
@@ -173,7 +164,6 @@ void	ServerManager::SetSockaddr_in(Server *server)
     server->server_address.sin_addr.s_addr = server->host;
     server->server_address.sin_port = htons(server->port);
 }
-
 
 /*
 	Crea un socket por cada servidor en std::vector<Server>.
@@ -192,6 +182,7 @@ void	ServerManager::SetSockaddr_in(Server *server)
 
 	NOTA: lanza ErrorException() explícita en caso de error.
 */
+
 void	ServerManager::CreateSockets()
 {
 	int opt = 1;
@@ -241,7 +232,6 @@ void	ServerManager::CreateSockets()
     }
 }
 
-
 /*
 	Se inicia el bucle principal de los servidores que monitorea los sockets
 	de escucha creados en la llamada a CreateSockets() y los nuevos
@@ -256,6 +246,7 @@ void	ServerManager::CreateSockets()
 
 	NOTA: lanza ErrorException() explícita en caso de error.
 */
+
 void	ServerManager::LaunchServers()
 {
 	CreateSockets();
