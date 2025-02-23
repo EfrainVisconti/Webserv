@@ -14,6 +14,7 @@ Server::Server()
     loc1.path = "/location1";
     loc1.methods.push_back("GET");
     loc1.methods.push_back("POST");
+    loc1.methods.push_back("DELETE");
     loc1.root = "";
     loc1.index = "index.html";
     loc1.autoindex = true;
@@ -23,14 +24,14 @@ Server::Server()
     loc2.methods.push_back("GET");
     loc2.methods.push_back("POST");
     loc2.root = "";
-    loc2.index = "";
+    loc2.index = "index.html";
     loc2.autoindex = true;
 
     Location loc3;
     loc3.path = "/cgi-bin";
     loc3.methods.push_back("GET");
     loc3.methods.push_back("POST");
-    loc3.root = "./html/cgi-bin";
+    loc3.root = "";
     loc3.index = "counter.sh";
     loc3.autoindex = false;
 

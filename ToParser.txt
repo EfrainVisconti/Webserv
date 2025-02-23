@@ -15,7 +15,7 @@ if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is
 Por otro lado, siempre debe haber root en el bloque server, si no: ERROR.
 
 4. Implementar allow_methods en las location (std::vector<std::string> methods).
-Por defecto siempre permitir "GET" y "POST" aunque no este en el config_file.
+Por defecto siempre permitir "GET" (mejor que permitir POST Y GET) aunque no este en el config_file.
 "DELETE" sera opcional.
 
 PUNTO DEL SUBJECT: Make it work with POST and GET methods.
@@ -31,3 +31,7 @@ PUNTO DEL SUBJECT:  Define a HTTP redirection.
 Si tampoco hay index en el bloque server, definirlo como: "".
 Index siempre debera ser un archivo sin / en ningun lado. Ej. "index.html".
 Un index como "/index.html" o "index.html/": ERROR.
+
+8. Aceptaremos error_page por cada bloque server, no en las location. Parsearlo a std::map<short, std::string>.
+El tipo de error y la ubicacion del archivo /error_pages/404.html por ejemplo (con / al principio pero no
+al final, de lo contrario: ERROR)

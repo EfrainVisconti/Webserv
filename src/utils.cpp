@@ -30,12 +30,13 @@ const std::string errorHtml04 =
     "</body>\n"
     "</html>\n";
 
-std::string errorResponse(short val) {
+std::string errorResponse(short val, std::string error_page)
+{
     char buffer[50];
     sprintf(buffer, "%d", val);
     std::string num(buffer);
 
-    std::string message = "";
+    std::string message;
     if (val == 413)
         message = "Request Entity Too Large.";
     else if (val == 400)
@@ -49,7 +50,11 @@ std::string errorResponse(short val) {
     else if (val == 500)
         message = "Internal Server Error";
 
-    std::string body = errorHtml01 + num + errorHtml02 + "ERROR " + num + errorHtml03 + message + errorHtml04;
+    std::string body;
+    if (error_page != "")
+        body = error_page;
+    else
+        body = errorHtml01 + num + errorHtml02 + "ERROR " + num + errorHtml03 + message + errorHtml04;
     std::size_t contentLength = body.size();
 
     std::ostringstream  response;

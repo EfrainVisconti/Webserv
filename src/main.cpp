@@ -42,6 +42,8 @@ int main() {
         server1.root = "/html";
         server1.client_max_body_size = 1048576;
         server1.index = "index.html";
+        server1.error_pages[404] = "/html/error_pages/404.html";
+        server1.error_pages[500] = "/html/error_pages/500.html";
 
         Server server2;
         server2.host = INADDR_ANY;
@@ -50,6 +52,8 @@ int main() {
         server2.root = "/html";
         server2.client_max_body_size = 2097152;
         server2.index = "index.html";
+        server1.error_pages[404] = "/html/error_pages/404.html";
+        server1.error_pages[500] = "/html/error_pages/500.html";
 
         Server server3;
         server3.host = INADDR_ANY;
@@ -58,6 +62,8 @@ int main() {
         server3.root = "/html";
         server3.client_max_body_size = 5242880;
         server3.index = "index.html";
+        server1.error_pages[404] = "/html/error_pages/404.html";
+        server1.error_pages[500] = "/html/error_pages/500.html";
 
         std::vector<Server> servers;
         servers.push_back(server1);

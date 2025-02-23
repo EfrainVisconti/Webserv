@@ -35,7 +35,7 @@
 
 /* Utils */
 std::string GetDate();
-std::string errorResponse(short val);
+std::string errorResponse(short val, std::string error_page);
 
 # define RED "\033[1;31m"
 # define GREEN "\033[1;32m"

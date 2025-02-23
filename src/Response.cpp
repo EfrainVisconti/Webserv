@@ -269,10 +269,21 @@ void    Response::InitialStatusCodeCheck()
 }
 
 
-// void	Response::HandleDelete(const std::string &path)
-// {
-// 	return;
-// }
+void	Response::HandleDelete(const std::string &path)
+{
+    std::string path_aux = path.substr(1);
+    if (std::remove(path_aux.c_str()) == 0)
+    {
+        _status_code = 204;
+        _status_message = "No Content";
+        _content_length = 0;
+        _content_type = "";
+        _
+    }
+    else
+        throw Response::ResponseErrorException(500);
+
+}
 
 
 void    Response::GenerateResponse()
@@ -280,7 +291,6 @@ void    Response::GenerateResponse()
     try
     {
         InitialStatusCodeCheck();
-        CheckMatchingLocation();
         if (_req_path.find("/cgi-bin") == 0 && parseCgi() == true)
 		{
             HandleCgi();
@@ -288,6 +298,7 @@ void    Response::GenerateResponse()
             return ;
         }
         ExhaustivePathCheck(_real_location);
+        CheckMatchingLocation();
 		if (_req_method == "GET")
 		{
             if (_is_dir == true)
@@ -300,10 +311,12 @@ void    Response::GenerateResponse()
             SetResponse(true);
 			return ;
 		}
-		// if (_req_method == "DELETE")
-		// {
-		// 	HandleDelete();
-		// }
+		if (_req_method == "DELETE")
+		{
+            if (_is_dir == true)
+                throw Response::ResponseErrorException(403);
+			HandleDelete(_real_location);
+		}
 
     }
 	catch (const Response::ResponseErrorException &e)
@@ -334,8 +347,13 @@ void    Response::SetResponse(bool status)
             std::cout << GREEN << "Successful response: " << _response << RESET <<std::endl;
     }
     else
-        _response = errorResponse(_status_code);
-        //TODO Manejar paginas de error desde archivo de conf.
+    {
+        std::map<short, std::string>::const_iterator it = _server->error_pages.find(_status_code);
+        if (it != _server->error_pages.end())
+            _response = errorResponse(_status_code, GetBody(it->second));
+        else
+        _response = errorResponse(_status_code, "");
+    }
 }
 
 
