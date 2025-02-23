@@ -43,7 +43,7 @@ std::string errorResponse(short val);
 
 # define MAX_CONN 512
 # define DEBUG_MODE 0
-# define DEBUG_MODE_RESPONSE 1
+# define DEBUG_MODE_RESPONSE 0
 # define TIMEOUT -1 // 60000 // 60 segs.
 
 #endif
