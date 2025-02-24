@@ -97,12 +97,6 @@ void ServerManager::HandleRequest(int client_fd)
 		short status = req.parseRequest(bufferstr);
 		ResponseManager(client_fd, req, status);
 	}
-
-	if (DEBUG_MODE)
-	{
-		std::cout << GREEN << "Request receive:\n"
-				  << buffer << RESET << std::endl;
-	}
 }
 
 /*

@@ -112,7 +112,7 @@ void    Response::CheckMatchingLocation()
             }
             _auto_index = it->autoindex;
             if (it->index != "")
-                _index = it->root + "/" + it->index;
+                _index = _server->root + it->root + "/" + it->index;
             else
                 _index = "";
             if (it->root == "/")
@@ -186,6 +186,7 @@ bool    Response::HandleAutoIndex()
 std::string Response::GetBody(std::string path)
 {
     path = path.substr(1);
+    std::cout << "Path aux: " << path << std::endl;
     std::ifstream file(path.c_str(), std::ios::binary);
     if (!file)
         throw Response::ResponseErrorException(500);
@@ -330,6 +331,8 @@ void    Response::GenerateResponse()
 
 void    Response::SetResponse(bool status)
 {
+    std::cout << "Req path: " << _req_path << std::endl;
+    std::cout << "Real location: " << _real_location << std::endl;
     if (status)
     {
         std::ostringstream  aux;
@@ -344,7 +347,7 @@ void    Response::SetResponse(bool status)
 
         _response = aux.str();
 
-        if (DEBUG_MODE_RESPONSE)
+        if (DEBUG_MODE)
             std::cout << GREEN << "Successful response: " << _response << RESET <<std::endl;
     }
     else

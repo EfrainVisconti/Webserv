@@ -62,8 +62,8 @@ int main() {
         server3.root = "/html";
         server3.client_max_body_size = 5242880;
         server3.index = "index.html";
-        server1.error_pages[404] = "/html/error_pages/404.html";
-        server1.error_pages[500] = "/html/error_pages/500.html";
+        // server1.error_pages[404] = "/html/error_pages/404.html";
+        // server1.error_pages[500] = "/html/error_pages/500.html";
 
         std::vector<Server> servers;
         servers.push_back(server1);

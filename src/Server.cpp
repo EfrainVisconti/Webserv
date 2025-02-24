@@ -17,15 +17,15 @@ Server::Server()
     loc1.methods.push_back("DELETE");
     loc1.root = "";
     loc1.index = "index.html";
-    loc1.autoindex = true;
+    loc1.autoindex = false;
 
     Location loc2;
     loc2.path = "/location2";
     loc2.methods.push_back("GET");
     loc2.methods.push_back("POST");
-    loc2.root = "";
+    loc2.root = "location2";
     loc2.index = "index.html";
-    loc2.autoindex = true;
+    loc2.autoindex = false;
 
     Location loc3;
     loc3.path = "/cgi-bin";
