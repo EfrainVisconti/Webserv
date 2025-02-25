@@ -52,8 +52,8 @@ int main() {
         server2.root = "/html";
         server2.client_max_body_size = 2097152;
         server2.index = "index.html";
-        server1.error_pages[404] = "/html/error_pages/404.html";
-        server1.error_pages[500] = "/html/error_pages/500.html";
+        //server1.error_pages[404] = "/html/error_pages/404.html";
+        //server1.error_pages[500] = "/html/error_pages/500.html";
 
         Server server3;
         server3.host = INADDR_ANY;

@@ -23,16 +23,16 @@ Server::Server()
     loc2.path = "/location2";
     loc2.methods.push_back("GET");
     loc2.methods.push_back("POST");
-    loc2.root = "location2";
-    loc2.index = "index.html";
-    loc2.autoindex = false;
+    loc2.root = "";
+    loc2.index = "";
+    loc2.autoindex = true;
 
     Location loc3;
     loc3.path = "/cgi-bin";
     loc3.methods.push_back("GET");
     loc3.methods.push_back("POST");
-    loc3.root = "";
-    loc3.index = "counter.sh";
+    loc3.root = "/cgi-bin";
+    loc3.index = "";
     loc3.autoindex = false;
 
     this->locations.push_back(loc1);

@@ -27,11 +27,7 @@ Response::Response(const Request &req, const Server &server, short status) : _se
     _status_message = "OK"; // Mensaje de estado
     _auto_index = false; // off por defecto
     _is_dir = false;
-
-    if (server.index != "")
-        _index = server.root + "/" + server.index;
-    else
-        _index = "";
+    _index = server.index;
 }
 
 Response::~Response()
@@ -90,8 +86,7 @@ void    Response::CheckMethod(const Location &location)
     Si la location tiene una redirección, se establece el status code a 301 y se establece
     la nueva ubicación.
     Se establece el autoindex de la location (false por defecto).
-    Si la location tiene un index, se establece el index de la location para la response,
-    el cual debe estar alojado en la raíz de la location.
+    Si la location tiene un index, se establece el index de la location para la response.
 */
 void    Response::CheckMatchingLocation()
 {
@@ -111,10 +106,7 @@ void    Response::CheckMatchingLocation()
                 return ;
             }
             _auto_index = it->autoindex;
-            if (it->index != "")
-                _index = _server->root + it->root + "/" + it->index;
-            else
-                _index = "";
+            _index = it->index;
             if (it->root == "/")
             {
                 _real_location = _req_path;
@@ -164,11 +156,13 @@ void    Response::GenerateAutoIndex(const std::string &path)
 /*
     En el archivo de configuración se establece index para el server y para cada location. Si no se
     encuentra index en las configuraciones, se establece index inexistente ("").
-    El index debe estar alojado en la raíz de la location o en la raiz del Server si no hay
-    location para esa request.
+    El index debe estar alojado en el directorio al que se esta intentando acceder.
+    Para generar el autoindex debe estar activado el autoindex (true) y estar configurado index
+    inexistente ("").
 */
 bool    Response::HandleAutoIndex()
 {
+    std::cout << _index << std::endl;
     if (_index == "")
     {
         if (_auto_index == true)
@@ -178,7 +172,7 @@ bool    Response::HandleAutoIndex()
         }
         throw Response::ResponseErrorException(403);
     }
-    _real_location = _index;
+    _real_location = _real_location + _index;
     return false;
 }
 
@@ -186,10 +180,9 @@ bool    Response::HandleAutoIndex()
 std::string Response::GetBody(std::string path)
 {
     path = path.substr(1);
-    std::cout << "Path aux: " << path << std::endl;
     std::ifstream file(path.c_str(), std::ios::binary);
     if (!file)
-        throw Response::ResponseErrorException(500);
+        throw Response::ResponseErrorException(404);
 
     std::ostringstream content;
     content << file.rdbuf();
@@ -356,7 +349,7 @@ void    Response::SetResponse(bool status)
         if (it != _server->error_pages.end())
             _response = errorResponse(_status_code, GetBody(it->second));
         else
-        _response = errorResponse(_status_code, "");
+            _response = errorResponse(_status_code, "");
     }
 }
 

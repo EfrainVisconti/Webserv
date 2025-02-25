@@ -84,19 +84,33 @@ void ServerManager::CloseConnection(int fd)
 
 void ServerManager::HandleRequest(int client_fd)
 {
-	Server *server = _client_map.find(client_fd)->second;
+	std::map<int, Server*>::iterator it = _client_map.find(client_fd);
+	if (it == _client_map.end())
+	{
+		CloseConnection(client_fd);
+		return ;
+	}
+
+	Server *server = it->second;
+	if (!server)
+	{
+		CloseConnection(client_fd);
+		return ;
+	}
+
 	Request	req(server->client_max_body_size);
     char buffer[8192];
     memset(buffer, 0, 8192);
     ssize_t bytes_read = recv(client_fd, buffer, 8192, 0);
 	if (bytes_read <= 0)
-		ResponseManager(client_fd, req, 500);
-	else
 	{
-		std::string bufferstr = buffer;
-		short status = req.parseRequest(bufferstr);
-		ResponseManager(client_fd, req, status);
+		CloseConnection(client_fd);
+		return ;
 	}
+
+	std::string bufferstr(buffer, bytes_read);
+	short status = req.parseRequest(bufferstr);
+	ResponseManager(client_fd, req, status);
 }
 
 /*
@@ -221,7 +235,8 @@ void	ServerManager::CreateSockets()
 		{
 			std::cout << GREEN << "Server created[" << ++count << "]"
 					  << " NAME:" << it->server_name
-			          << " HOST:" << it->host << " PORT:" << it->port << RESET <<std::endl;
+			          << " PORT:" << it->port << " Listening Socket: "
+					  << it->listen_socket << RESET <<std::endl;
 		}
     }
 }
@@ -257,7 +272,7 @@ void	ServerManager::LaunchServers()
         for (size_t i = 0; i < _poll_fds.size(); i++)
 		{
 			if (_poll_fds[i].fd <= 0)
-				continue;
+				continue ;
 
 			if (_poll_fds[i].revents & POLLIN)
 			{

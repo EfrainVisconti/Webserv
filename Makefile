@@ -16,7 +16,6 @@ RM             = rm -rf
 SRC_DIR        = src/
 INC_DIR        = inc/
 OBJ_DIR        = obj/
-BIN_DIR        = ./
 
 # Source files
 SRC_FILE       = main.cpp utils.cpp Server.cpp ServerManager.cpp CgiManager.cpp Request.cpp Response.cpp Location.cpp
@@ -27,17 +26,15 @@ INC            = $(addprefix $(INC_DIR), $(INC_FILE))
 OBJ_FILE       = $(SRC_FILE:.cpp=.o)
 OBJ            = $(addprefix $(OBJ_DIR), $(OBJ_FILE))
 
-# Binary name for your program
-CODE_BIN       = $(BIN_DIR)webserv
 
 # Output executable
 NAME           = webserv
 
-all: $(OBJ_DIR) $(CODE_BIN)
+all: $(OBJ_DIR) $(NAME)
 
-$(CODE_BIN): $(OBJ)
-	@echo "Compiling $(CODE_BIN)..."
-	@$(CC) $(CFLAGS) $(OBJ) -o $(CODE_BIN)
+$(NAME): $(OBJ)
+	@echo "Compiling $(NAME)..."
+	@$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
 	@echo "$(GREEN)✔ $(BLUE)$(USER_NAME)'s $(PURPLE)$(NAME)$(BLUE) compilation$(DEF_COLOR)"
 
 # Crear obj/ antes de compilar objetos
@@ -54,7 +51,7 @@ clean:
 	@echo "$(GREEN)✔ $(BLUE)$(USER_NAME)'s $(PURPLE)$(NAME)$(BLUE) .o files removal$(DEF_COLOR)"
 
 fclean: clean
-	@$(RM) $(CODE_BIN)
+	@$(RM) $(NAME)
 	@echo "$(GREEN)✔ $(BLUE)$(USER_NAME)'s $(PURPLE)$(NAME)$(BLUE) executable file removal$(DEF_COLOR)"
 
 re: fclean all
