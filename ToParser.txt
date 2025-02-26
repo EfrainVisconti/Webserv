@@ -22,6 +22,8 @@ PUNTO DEL SUBJECT: Make it work with POST and GET methods.
 
 5. Haremos redirecciones HTTP mediante return en las location. Ej. return /newpath/page.html
 Deben empezar siempre con /. Si no: ERROR. Sin embargo, si no hay return inicializarla "".
+CORRECCION: Aceptamos redirecciones que empiecen con http o https. Ej: http://newblog.com o
+https://www.google.com
 
 PUNTO DEL SUBJECT:  Define a HTTP redirection.
 

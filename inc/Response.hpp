@@ -37,6 +37,7 @@ class Response
 		void		GetContentType(const std::string &path);
 		std::string	GetBody(std::string path);
 		void		SetResponse(bool status);
+		bool		HTTPRedirectionCase();
 		void		HandleDelete(const std::string &path);
 		void		HandleCgi();
 		std::string	getQueryString();

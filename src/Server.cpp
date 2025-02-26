@@ -18,26 +18,37 @@ Server::Server()
     loc1.root = "";
     loc1.index = "index.html";
     loc1.autoindex = false;
+    //loc1.redirection = "/html/redir/hola.html";
 
     Location loc2;
     loc2.path = "/location2";
     loc2.methods.push_back("GET");
     loc2.methods.push_back("POST");
     loc2.root = "";
-    loc2.index = "";
+    loc2.index = "index.html";
     loc2.autoindex = true;
+    //loc2.redirection = "https://github.com/";
 
     Location loc3;
-    loc3.path = "/cgi-bin";
+    loc3.path = "/location3";
     loc3.methods.push_back("GET");
     loc3.methods.push_back("POST");
-    loc3.root = "/cgi-bin";
+    loc3.root = "";
     loc3.index = "";
     loc3.autoindex = false;
+
+    Location loc4;
+    loc4.path = "/cgi-bin";
+    loc4.methods.push_back("GET");
+    loc4.methods.push_back("POST");
+    loc4.root = "";
+    loc4.index = "";
+    loc4.autoindex = true;
 
     this->locations.push_back(loc1);
     this->locations.push_back(loc2);
     this->locations.push_back(loc3);
+    this->locations.push_back(loc4);
 
 }
 

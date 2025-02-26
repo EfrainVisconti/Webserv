@@ -1,10 +1,5 @@
 #include "../inc/Webserv.hpp"
 
-// Las directivas dentro de un bloque location sobrescriben las del bloque
-// server si aplican a la misma solicitud.
-
-// Todos los root se asumen NO terminan en / (excepto root "/" propiamente)
-
     //class Location
 		// std::string			path; DONE
 		// std::string			root; DONE
@@ -27,7 +22,7 @@ Response::Response(const Request &req, const Server &server, short status) : _se
     _status_message = "OK"; // Mensaje de estado
     _auto_index = false; // off por defecto
     _is_dir = false;
-    _index = server.index;
+    _index = _server->index;
 }
 
 Response::~Response()
@@ -72,6 +67,8 @@ void    Response::CheckMethod(const Location &location)
 }
 
 /*
+    Las directivas dentro de un bloque location sobrescriben las del bloque server si aplican a
+    la misma solicitud.
     Establece la ubicación real del recurso solicitado teniendo en cuenta las location en el
     archivo de configuración del server.
 
@@ -134,8 +131,16 @@ void    Response::GenerateAutoIndex(const std::string &path)
 
     while ((entry = readdir(dir)) != NULL)
     {
-        if (std::string(entry->d_name) != "." && std::string(entry->d_name) != "..")
-            files.push_back(entry->d_name);
+        std::string name = entry->d_name;
+        if (name == "." || name == "..")
+            continue ;
+
+        struct stat st;
+        std::string full_path = path_aux + "/" + name;
+        if (stat(full_path.c_str(), &st) == 0 && S_ISDIR(st.st_mode))
+            name += "/";
+
+        files.push_back(name);
     }
     closedir(dir);
 
@@ -157,12 +162,10 @@ void    Response::GenerateAutoIndex(const std::string &path)
     En el archivo de configuración se establece index para el server y para cada location. Si no se
     encuentra index en las configuraciones, se establece index inexistente ("").
     El index debe estar alojado en el directorio al que se esta intentando acceder.
-    Para generar el autoindex debe estar activado el autoindex (true) y estar configurado index
-    inexistente ("").
+    Para generar el autoindex debe estar activado el autoindex (true) y no tener index configu.
 */
 bool    Response::HandleAutoIndex()
 {
-    std::cout << _index << std::endl;
     if (_index == "")
     {
         if (_auto_index == true)
@@ -202,6 +205,20 @@ void    Response::GetContentType(const std::string &path)
 }
 
 
+bool    Response::HTTPRedirectionCase()
+{
+    if (_req_method == "GET" && _status_code == 301
+        && (_real_location.rfind("http://", 0) == 0 ||
+        _real_location.rfind("https://", 0) == 0))
+    {
+        SetResponse(true);
+        return true;
+    }
+    _status_code = 200; // Para redirecciones internas
+    return false;
+}
+
+
 /*
     Revisa exhaustivamente si la ubicación del recurso solicitado existe, es un directorio
     o es un archivo. Se revisa la existencia de la ubicación con stat() y si no es un directorio,
@@ -230,12 +247,8 @@ void    Response::ExhaustivePathCheck(const std::string &path)
     {
         _is_dir = true;
         if (path[path.length() - 1] != '/')
-        {
-            _status_code = 301;
-            _status_message = "Moved Permanently";
             _real_location = path + "/";
-        }
-        return;
+        return ;
     }
 
     int open_return = open(path_aux.c_str(), O_RDONLY);
@@ -291,13 +304,21 @@ void    Response::GenerateResponse()
             return ;
         }
         CheckMatchingLocation();
+        if (HTTPRedirectionCase() == true)
+        {
+            SetResponse(true);
+            return ;
+        }
         ExhaustivePathCheck(_real_location);
 		if (_req_method == "GET")
 		{
             if (_is_dir == true)
             {
                 if (HandleAutoIndex() == true)
+                {
+                    SetResponse(true);
                     return ;
+                }
             }
             GetContentType(_real_location);
             GetBody(_real_location);
@@ -331,6 +352,8 @@ void    Response::SetResponse(bool status)
         std::ostringstream  aux;
         aux << "HTTP/1.1 " << _status_code << " " << _status_message << "\r\n";
         aux << "Server: webserv/1.0\r\n";
+        if (_status_code == 301)
+            aux << "Location: " << _real_location << "\r\n";
         aux << ::GetDate() << "\r\n";
         aux << "Content-Type: " << _content_type << "\r\n";
         aux << "Content-Length: " << _content_length << "\r\n";

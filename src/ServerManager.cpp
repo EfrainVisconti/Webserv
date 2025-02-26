@@ -17,7 +17,11 @@ void	ServerManager::HandleResponse(int client_fd)
     if (it != _response_map.end())
     {
         std::string response_str = it->second->GetResponse();
-        send(client_fd, response_str.c_str(), response_str.size(), 0);
+        if (send(client_fd, response_str.c_str(), response_str.size(), 0) <= 0)
+		{
+			if (DEBUG_MODE)
+				std::cout << RED << "Error sending response. Socket: " << client_fd << RESET << std::endl;
+		}
 		delete it->second;
 		_response_map.erase(it);
         CloseConnection(client_fd);
@@ -26,7 +30,14 @@ void	ServerManager::HandleResponse(int client_fd)
 
 void	ServerManager::ResponseManager(int client_fd, Request &req, short status)
 {
-	Response *response = new Response(req, *_client_map.find(client_fd)->second, status);
+	std::map<int, Server*>::iterator c_it = _client_map.find(client_fd);
+	if (c_it == _client_map.end())
+	{
+		CloseConnection(client_fd);
+		return ;
+	}
+
+	Response *response = new Response(req, *c_it->second, status);
 	_response_map[client_fd] = response;
 
 	response->GenerateResponse();
@@ -47,7 +58,6 @@ void	ServerManager::ResponseManager(int client_fd, Request &req, short status)
 	del vector _poll_fds y la posición vinculada
 	del map<fd, Server> _client_map.
 */
-
 void ServerManager::CloseConnection(int fd)
 {
 	for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end();)
@@ -82,7 +92,6 @@ void ServerManager::CloseConnection(int fd)
 
 	NOTA: lanza ErrorException() explícita en caso de error.
 */
-
 void ServerManager::HandleRequest(int client_fd)
 {
 	std::map<int, Server*>::iterator it = _client_map.find(client_fd);
@@ -131,7 +140,6 @@ void ServerManager::HandleRequest(int client_fd)
 
 	NOTA: lanza ErrorException() explícita en caso de error.
 */
-
 void	ServerManager::AcceptConnection(int server_fd, Server *server)
 {
     struct sockaddr_in	client_addr;
@@ -164,7 +172,6 @@ void	ServerManager::AcceptConnection(int server_fd, Server *server)
 	familia de la dirección, la dirección IPv4 y el puerto (del socket),
 	almacenada en server->server_address). 
 */
-
 void	ServerManager::SetSockaddr_in(Server *server)
 {
 	memset(&(server->server_address), 0, sizeof(server->server_address));
@@ -191,7 +198,6 @@ void	ServerManager::SetSockaddr_in(Server *server)
 
 	NOTA: lanza ErrorException() explícita en caso de error.
 */
-
 void	ServerManager::CreateSockets()
 {
 	int opt = 1;
@@ -256,7 +262,6 @@ void	ServerManager::CreateSockets()
 
 	NOTA: lanza ErrorException() explícita en caso de error.
 */
-
 void	ServerManager::LaunchServers()
 {
 	CreateSockets();
@@ -268,7 +273,7 @@ void	ServerManager::LaunchServers()
 		if (poll_ret == -1)
 			throw ErrorException("poll() error. Stopping execution...");
 		if (poll_ret == 0)
-			throw ErrorException("poll() time-out. Stopping execution...");
+			throw ErrorException("poll() time-out. Stopping execution..."); //Quitar
 
         for (size_t i = 0; i < _poll_fds.size(); i++)
 		{
