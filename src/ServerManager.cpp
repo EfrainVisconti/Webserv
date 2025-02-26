@@ -50,11 +50,6 @@ void	ServerManager::ResponseManager(int client_fd, Request &req, short status)
 
 void ServerManager::CloseConnection(int fd)
 {
-    if (close(fd) == -1)
-		return ;
-
-	_client_map.erase(fd);
-
 	for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end();)
 	{
 		if (it->fd == fd)
@@ -64,6 +59,12 @@ void ServerManager::CloseConnection(int fd)
 		}
 		++it;
 	}
+	
+	_client_map.erase(fd);
+	close(fd);
+
+	if (DEBUG_MODE)
+		std::cout << RED << "Connection closed. Socket: " << fd << RESET << std::endl;
 }
 
 /* 
@@ -99,17 +100,17 @@ void ServerManager::HandleRequest(int client_fd)
 	}
 
 	Request	req(server->client_max_body_size);
-    char buffer[8192];
-    memset(buffer, 0, 8192);
-    ssize_t bytes_read = recv(client_fd, buffer, 8192, 0);
+    char	buffer[REQUEST_SIZE];
+
+    ssize_t	bytes_read = recv(client_fd, buffer, REQUEST_SIZE, 0);
 	if (bytes_read <= 0)
 	{
 		CloseConnection(client_fd);
 		return ;
 	}
 
-	std::string bufferstr(buffer, bytes_read);
-	short status = req.parseRequest(bufferstr);
+	std::string strbuffer(buffer, bytes_read);
+	short status = req.parseRequest(strbuffer);
 	ResponseManager(client_fd, req, status);
 }
 

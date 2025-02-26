@@ -34,6 +34,12 @@ Request::~Request(void) {
 }
 
 short Request::parseRequest(std::string _request) {
+    if (DEBUG_MODE)
+	{
+		std::cout << GREEN << "Request received:\n"
+				  << _request << RESET << std::endl;
+	}
+
     this->parseSetup(_request);
 
     if (this->getMethod() == "POST" && this->getBodySize() > this->getMaxBodySize()) { // check de maxbodysize.

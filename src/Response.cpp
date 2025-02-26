@@ -341,7 +341,7 @@ void    Response::SetResponse(bool status)
         _response = aux.str();
 
         if (DEBUG_MODE)
-            std::cout << GREEN << "Successful response: " << _response << RESET <<std::endl;
+            std::cout << GREEN << "Successful response:\n" << _response << RESET <<std::endl;
     }
     else
     {

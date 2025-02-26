@@ -42,6 +42,7 @@ std::string errorResponse(short val, std::string error_page);
 # define RESET "\033[0m"
 
 # define MAX_CONN 512
+# define REQUEST_SIZE 8192
 # define DEBUG_MODE 1
 # define TIMEOUT 60000 // 60 segs.
 

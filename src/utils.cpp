@@ -68,7 +68,7 @@ std::string errorResponse(short val, std::string error_page)
     response << body;
 
     if (DEBUG_MODE)
-        std::cout << GREEN << "Error response: " << response.str() << RESET <<std::endl;
+        std::cout << GREEN << "Error response:\n" << response.str() << RESET <<std::endl;
     return response.str();
 }
 
