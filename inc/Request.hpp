@@ -19,15 +19,16 @@ class Request
 		std::string							_body;
 		std::string							_content_type;
 		short								_error_type;
-
+		
 		Request();
-	public:
+		public:
 		Request(unsigned long max_body_size);
 		~Request();
-
+		
 		short					parseRequest(std::string _request);
 		void					parseSetup(std::string _request);
 		int						verifyMethod();
+		void					printRequestClass();
 	// getters
 		const std::string& getMethod() const;
 		const std::string& getPath() const;
@@ -58,6 +59,5 @@ class Request
 		void					setBody(std::string &body);
 };
 
-void	printRequestClass(const Request &req);
 
 #endif

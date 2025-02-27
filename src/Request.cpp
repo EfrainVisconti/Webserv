@@ -45,7 +45,7 @@ short Request::parseRequest(std::string _request) {
 	}
 
     this->parseSetup(_request);
-    printRequestClass(*this);
+    printRequestClass();
 
     if (this->getMethod() == "POST" && this->getBodySize() > this->getMaxBodySize()) { // check de maxbodysize.
         this->setErrorType(413); // error de bodysize
@@ -69,6 +69,7 @@ short Request::parseRequest(std::string _request) {
 void Request::parseSetup(std::string _request) {
     std::istringstream stream(_request);
     std::string line;
+
     if (std::getline(stream, line)) {
         std::istringstream request_line(line);
         std::string method, path, version;
@@ -76,17 +77,24 @@ void Request::parseSetup(std::string _request) {
         this->setMethod(method);
         this->setPath(path);
     }
-    while (std::getline(stream, line) && !line.empty()) {
+
+    int content_length = 0;
+    bool has_body = false;
+
+    while (std::getline(stream, line) && line != "\r") {
         std::istringstream header_stream(line);
         std::string header, value;
+
         std::getline(header_stream, header, ':');
         std::getline(header_stream, value);
-        size_t first_non_space = value.find_first_not_of(" \t");
-        size_t last_non_space = value.find_last_not_of(" \t");
+
+        size_t first_non_space = value.find_first_not_of(" \t\r");
+        size_t last_non_space = value.find_last_not_of(" \t\r");
         if (first_non_space != std::string::npos)
             value = value.substr(first_non_space, last_non_space - first_non_space + 1);
         else
             value = "";
+
         if (header == "Host") {
             this->setHost(value);
         } else if (header == "User-Agent") {
@@ -98,17 +106,19 @@ void Request::parseSetup(std::string _request) {
         } else if (header == "Accept-Encoding") {
             this->setEncoding(value);
         } else if (header == "Connection") {
-            if (value == "keep-alive\r") { // Añadí \r para que funcione
-                this->setKeepAlive(1);
-            } else {
-                this->setKeepAlive(0);
-            }
+            this->setKeepAlive(value == "keep-alive");
         } else if (header == "Content-Length") {
-            this->setBodySize(atoi(value.c_str()));
+            content_length = atoi(value.c_str());
+            has_body = (content_length > 0);
         } else if (header == "Content-Type") {
             this->setContentType(value);
-        } else
-            this->setBody(value);
+        }
+    }
+
+    if (has_body) {
+        std::string body(content_length, '\0');
+        stream.read(&body[0], content_length);
+        this->setBody(body);
     }
 }
 
@@ -223,18 +233,18 @@ void    Request::setKeepAlive(bool to){
     this->_keep_alive = to;
 }
 
-void    printRequestClass(const Request &req){
-    std::cout << "Method " << req.getMethod() << std::endl;
-    std::cout << "Path " << req.getPath() << std::endl;
-    std::cout << "Host " << req.getHost() << std::endl;
-    std::cout << "User Agent " << req.getUserAgent() << std::endl;
-    std::cout << "Request format " << req.getRequestFormat() << std::endl;
-    std::cout << "Language " << req.getLanguage() << std::endl;
-    std::cout << "Encoding " << req.getEncoding() << std::endl;
-    std::cout << "Keep Alive val. " << req.getKeepAliveState() << std::endl;
-    std::cout << "Max body size " << req.getMaxBodySize() << std::endl;
-    std::cout << "Body size " << req.getBodySize() << std::endl;
-    std::cout << "Error type " << req.getErrorType() << std::endl;
-    std::cout << "Content type " << req.getContentType() << std::endl;
-    std::cout << "Body " << req.getBody() << std::endl;
+void    Request::printRequestClass(){
+    std::cout << "Method: " << this->getMethod() << std::endl;
+    std::cout << "Path: " << this->getPath() << std::endl;
+    std::cout << "Host: " << this->getHost() << std::endl;
+    std::cout << "User Agent: " << this->getUserAgent() << std::endl;
+    std::cout << "Request format: " << this->getRequestFormat() << std::endl;
+    std::cout << "Language: " << this->getLanguage() << std::endl;
+    std::cout << "Encoding: " << this->getEncoding() << std::endl;
+    std::cout << "Keep Alive: " << this->getKeepAliveState() << std::endl;
+    std::cout << "Max body size: " << this->getMaxBodySize() << std::endl;
+    std::cout << "Body size: " << this->getBodySize() << std::endl;
+    std::cout << "Error type: " << this->getErrorType() << std::endl;
+    std::cout << "Content type: " << this->getContentType() << std::endl;
+    std::cout << "Body: " << this->getBody() << std::endl;
 }
