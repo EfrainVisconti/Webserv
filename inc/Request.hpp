@@ -16,7 +16,9 @@ class Request
 		bool								_keep_alive;
 		size_t								_max_body_size;
 		size_t								_body_size;
-		int									_error_type;
+		std::string							_body;
+		std::string							_content_type;
+		short								_error_type;
 
 		Request();
 	public:
@@ -33,12 +35,14 @@ class Request
 		const std::string& getUserAgent() const;
 		const std::string& getRequestFormat() const;
 		const std::string& getLanguage() const;
-		const std::string& getEncoding() const;	
+		const std::string& getEncoding() const;
+		const std::string& getBody() const;
+		const std::string& getContentType() const;
 	
 		bool					getKeepAliveState() const;
 		size_t					getMaxBodySize() const;
 		size_t					getBodySize() const;
-		int						getErrorType() const;
+		short					getErrorType() const;
 	// setters
 		void					setMethod(std::string &method);
 		void					setEncoding(std::string &encoding);
@@ -50,6 +54,8 @@ class Request
 		void					setBodySize(size_t size);
 		void					setErrorType(int error_type);
 		void					setKeepAlive(bool to);
+		void					setContentType(std::string &content_type);
+		void					setBody(std::string &body);
 };
 
 void	printRequestClass(const Request &req);

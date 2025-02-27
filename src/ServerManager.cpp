@@ -273,7 +273,7 @@ void	ServerManager::LaunchServers()
 		if (poll_ret == -1)
 			throw ErrorException("poll() error. Stopping execution...");
 		if (poll_ret == 0)
-			throw ErrorException("poll() time-out. Stopping execution..."); //Quitar
+			continue ;
 
         for (size_t i = 0; i < _poll_fds.size(); i++)
 		{

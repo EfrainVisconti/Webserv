@@ -9,10 +9,12 @@ Request::Request(void){
     _request_format = ""; // tipos de contenido que espera
 	_language = ""; // idioma preferido del cliente
     _encoding = ""; // tipos de codificacion que maneja el cliente.
-	_keep_alive = 1; // 1 mantener conexion viva 0 cerrarla
+	_keep_alive = 0; // 1 mantener conexion viva 0 cerrarla
 	_max_body_size = 0; // limite de conf.yaml de memoria
 	_body_size = 0; // espacio que ocupa la solicitud
-    _error_type = 400; // error de salida en caso de no estar bien la solicitud.
+    _error_type = -1; // error de salida en caso de no estar bien la solicitud.
+    _content_type = ""; // tipo de contenido
+    _body = ""; // cuerpo de la solicitud
 }
 
 Request::Request(unsigned long max_body_size) {
@@ -27,6 +29,8 @@ Request::Request(unsigned long max_body_size) {
     _max_body_size = max_body_size;
     _body_size = 0;
     _error_type = -1;
+    _body = "";
+    _content_type = "";
 }
 
 Request::~Request(void) {
@@ -41,6 +45,7 @@ short Request::parseRequest(std::string _request) {
 	}
 
     this->parseSetup(_request);
+    printRequestClass(*this);
 
     if (this->getMethod() == "POST" && this->getBodySize() > this->getMaxBodySize()) { // check de maxbodysize.
         this->setErrorType(413); // error de bodysize
@@ -100,9 +105,13 @@ void Request::parseSetup(std::string _request) {
             }
         } else if (header == "Content-Length") {
             this->setBodySize(atoi(value.c_str()));
-        }
+        } else if (header == "Content-Type") {
+            this->setContentType(value);
+        } else
+            this->setBody(value);
     }
 }
+
 
 int Request::verifyMethod(){
     if (getMethod() == "GET")
@@ -154,10 +163,26 @@ size_t  Request::getBodySize(void) const{
     return (this->_body_size);
 }
 
-int Request::getErrorType(void) const{
+short Request::getErrorType(void) const{
     return (this->_error_type);
 }
-        
+
+const std::string&  Request::getContentType(void) const{
+    return (this->_content_type);
+}
+
+const std::string&  Request::getBody(void) const{
+    return (this->_body);
+}
+
+void    Request::setContentType(std::string &content_type){
+    this->_content_type = content_type;
+}
+
+void    Request::setBody(std::string &body){
+    this->_body = body;
+}
+
 void    Request::setMethod(std::string &method){
     this->_method = method;
 }
@@ -210,4 +235,6 @@ void    printRequestClass(const Request &req){
     std::cout << "Max body size " << req.getMaxBodySize() << std::endl;
     std::cout << "Body size " << req.getBodySize() << std::endl;
     std::cout << "Error type " << req.getErrorType() << std::endl;
+    std::cout << "Content type " << req.getContentType() << std::endl;
+    std::cout << "Body " << req.getBody() << std::endl;
 }
