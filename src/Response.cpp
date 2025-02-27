@@ -10,7 +10,7 @@
 
 const std::map<std::string, std::string>    Response::_mime_types = Response::SetMIMETypes();
 
-Response::Response(const Request &req, const Server &server, short status) : _server(&server), _status_code(status)
+Response::Response(const Request &req, const Server &server, short status) : _request(&req) , _server(&server), _status_code(status)
 {
     _req_path = req.getPath(); // path recibido de la request
     _req_method = req.getMethod(); // metodo recibido de la request
@@ -292,6 +292,41 @@ void	Response::HandleDelete(const std::string &path)
 }
 
 
+std::string Response::RemoveBoundary(std::string body, const std::string &boundary)
+{
+    if (body.empty() || boundary.empty())
+        return "";
+
+    if (body.find(boundary) == 0)
+        body.erase(0, boundary.length());
+
+    if (body.length() >= boundary.length() && body.rfind(boundary) == (body.length() - boundary.length()))
+        body.erase(body.length() - boundary.length());
+
+    return body;
+}
+
+
+std::string Response::GetFilename(const std::string &real_body)
+{
+    std::string filename = real_body.substr(real_body.find("filename=\"") + 10);
+    filename = filename.substr(0, filename.find("\""));
+    return filename;
+}
+
+
+void    Response::HandlePost(const std::string &content_type)
+{
+    if (content_type.find("multipart/form-data") != std::string::npos)
+    {
+        std::string boundary = content_type.substr(content_type.find("boundary=") + 9);
+        std::string real_body = RemoveBoundary(_request->getBody(), "--" + boundary + "--");
+
+    }
+    else
+}
+
+
 void    Response::GenerateResponse()
 {
     try
@@ -333,7 +368,12 @@ void    Response::GenerateResponse()
             SetResponse(true);
             return ;
 		}
-
+        if (_req_method == "POST")
+        {
+            HandlePost(_request->getContentType());
+            SetResponse(true);
+            return ;
+        }
     }
 	catch (const Response::ResponseErrorException &e)
 	{

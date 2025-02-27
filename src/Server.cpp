@@ -45,6 +45,14 @@ Server::Server()
     loc4.index = "";
     loc4.autoindex = true;
 
+    Location loc5;
+    loc5.path = "/uploads";
+    loc5.methods.push_back("GET");
+    loc5.methods.push_back("POST");
+    loc5.root = "";
+    loc5.index = "";
+    loc5.autoindex = true;
+
     this->locations.push_back(loc1);
     this->locations.push_back(loc2);
     this->locations.push_back(loc3);

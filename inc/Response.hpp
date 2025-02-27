@@ -13,6 +13,7 @@ class Response
 	private:
 		static const std::map<std::string, std::string> _mime_types;
 		const Server	*_server; // Servidor asociado
+		const Request	*_request; // Petición asociada
         std::string	_req_path;	// path recibido de la request
 		std::string	_req_method; // metodo recibido de la request
         std::string	_real_location; // Ubicación del archivo despues de revisar las locations
@@ -39,6 +40,9 @@ class Response
 		void		SetResponse(bool status);
 		bool		HTTPRedirectionCase();
 		void		HandleDelete(const std::string &path);
+		void		HandlePost(const std::string &content_type);
+		std::string	RemoveBoundary(std::string body, const std::string &boundary);
+		std::string	Response::GetFilename(const std::string &real_body)
 		void		HandleCgi();
 		std::string	getQueryString();
 		bool		parseCgi();

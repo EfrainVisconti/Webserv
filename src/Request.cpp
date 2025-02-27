@@ -45,7 +45,7 @@ short Request::parseRequest(std::string _request) {
 	}
 
     this->parseSetup(_request);
-    printRequestClass();
+    //printRequestClass();
 
     if (this->getMethod() == "POST" && this->getBodySize() > this->getMaxBodySize()) { // check de maxbodysize.
         this->setErrorType(413); // error de bodysize
@@ -121,7 +121,6 @@ void Request::parseSetup(std::string _request) {
         this->setBody(body);
     }
 }
-
 
 int Request::verifyMethod(){
     if (getMethod() == "GET")
