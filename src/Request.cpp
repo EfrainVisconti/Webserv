@@ -14,7 +14,7 @@ Request::Request(void){
 	_body_size = 0; // espacio que ocupa la solicitud
     _error_type = -1; // error de salida en caso de no estar bien la solicitud.
     _content_type = ""; // tipo de contenido
-    _body = ""; // cuerpo de la solicitud
+    _error_flag = false; // flag de error 413
 }
 
 Request::Request(unsigned long max_body_size) {
@@ -29,8 +29,8 @@ Request::Request(unsigned long max_body_size) {
     _max_body_size = max_body_size;
     _body_size = 0;
     _error_type = -1;
-    _body = "";
     _content_type = "";
+    _error_flag = false;
 }
 
 Request::~Request(void) {
@@ -47,21 +47,22 @@ short Request::parseRequest(std::string _request) {
     this->parseSetup(_request);
     //printRequestClass();
 
-    if (this->getMethod() == "POST" && this->getBodySize() > this->getMaxBodySize()) { // check de maxbodysize.
-        this->setErrorType(413); // error de bodysize
-        return (413);
+    if (this->getPath().empty() || this->getHost().empty()) {
+        this->setErrorType(400);
+        return (400);
     }
-    if (this->verifyMethod() == 0) { // check de metodo
-        this->setErrorType(405); // error de metodo
+    if (this->verifyMethod() == 0) {
+        this->setErrorType(405);
         return (405);
     }
-    if (this->getMethod() == "POST" && this->getRequestFormat().empty()) { // si el metodo es post tiene que tener formato
-        this->setErrorType(400); // error de formato de peticion.
-        return (400);
+    if (this->getBodySize() > 0 && this->getBody().empty()) {
+        this->setErrorType(500);
+        return (500);
     }
-    if (this->getUserAgent().empty()) { // userAgent vacio
-        this->setErrorType(400); // error de formato de peticion.
-        return (400);
+    if (this->getMethod() == "POST" && (this->getBodySize() > this->getMaxBodySize()
+        || _error_flag == true)) {
+        this->setErrorType(413);
+        return (413);
     }
     return (200);
 }
@@ -109,6 +110,7 @@ void Request::parseSetup(std::string _request) {
             this->setKeepAlive(value == "keep-alive");
         } else if (header == "Content-Length") {
             content_length = atoi(value.c_str());
+            this->setBodySize(content_length);
             has_body = (content_length > 0);
         } else if (header == "Content-Type") {
             this->setContentType(value);
@@ -116,8 +118,13 @@ void Request::parseSetup(std::string _request) {
     }
 
     if (has_body) {
-        std::string body(content_length, '\0');
-        stream.read(&body[0], content_length);
+        std::vector<char>   body(content_length);
+        stream.read(body.data(), content_length);
+        std::streamsize bytes_read = stream.gcount();
+        if (bytes_read < content_length) {
+            _error_flag = true;
+            body.clear();
+        }
         this->setBody(body);
     }
 }
@@ -180,7 +187,7 @@ const std::string&  Request::getContentType(void) const{
     return (this->_content_type);
 }
 
-const std::string&  Request::getBody(void) const{
+const std::vector<char>&  Request::getBody(void) const{
     return (this->_body);
 }
 
@@ -188,7 +195,7 @@ void    Request::setContentType(std::string &content_type){
     this->_content_type = content_type;
 }
 
-void    Request::setBody(std::string &body){
+void    Request::setBody(std::vector<char> &body){
     this->_body = body;
 }
 
@@ -245,5 +252,5 @@ void    Request::printRequestClass(){
     std::cout << "Body size: " << this->getBodySize() << std::endl;
     std::cout << "Error type: " << this->getErrorType() << std::endl;
     std::cout << "Content type: " << this->getContentType() << std::endl;
-    std::cout << "Body: " << this->getBody() << std::endl;
+    std::cout << "Body: " << this->getBody().data() << std::endl;
 }

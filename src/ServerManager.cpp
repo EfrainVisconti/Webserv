@@ -109,16 +109,16 @@ void ServerManager::HandleRequest(int client_fd)
 	}
 
 	Request	req(server->client_max_body_size);
-    char	buffer[REQUEST_SIZE];
+    std::vector<char>	buffer(REQUEST_SIZE);
 
-    ssize_t	bytes_read = recv(client_fd, buffer, REQUEST_SIZE, 0);
+    ssize_t	bytes_read = recv(client_fd, buffer.data(), REQUEST_SIZE, 0);
 	if (bytes_read <= 0)
 	{
 		CloseConnection(client_fd);
 		return ;
 	}
 
-	std::string strbuffer(buffer, bytes_read);
+	std::string strbuffer(buffer.data(), bytes_read);
 	short status = req.parseRequest(strbuffer);
 	ResponseManager(client_fd, req, status);
 }

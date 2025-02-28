@@ -49,6 +49,8 @@ std::string errorResponse(short val, std::string error_page)
         message = "Forbidden";
     else if (val == 500)
         message = "Internal Server Error";
+    else if (val == 415)
+        message = "Unsupported Media Type";
 
     std::string body;
     if (error_page != "")
