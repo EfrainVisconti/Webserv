@@ -62,6 +62,8 @@ std::string errorResponse(short val, std::string error_page)
     std::ostringstream  response;
     response << "HTTP/1.1 " << val << " " << message << "\r\n";
     response << "Server: webserv/1.0\r\n";
+    if (val == 415)
+        response << "Accept: application/octet-stream, text/plain, multipart/form-data\r\n";
     response << GetDate() << "\r\n";
     response << "Content-Type: text/html\r\n";
     response << "Content-Length: " << contentLength << "\r\n";

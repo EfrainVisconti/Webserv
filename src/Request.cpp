@@ -1,4 +1,3 @@
-
 #include "../inc/Request.hpp"
 
 Request::Request(void){
@@ -14,7 +13,6 @@ Request::Request(void){
 	_body_size = 0; // espacio que ocupa la solicitud
     _error_type = -1; // error de salida en caso de no estar bien la solicitud.
     _content_type = ""; // tipo de contenido
-    _error_flag = false; // flag de error 413
 }
 
 Request::Request(unsigned long max_body_size) {
@@ -30,7 +28,6 @@ Request::Request(unsigned long max_body_size) {
     _body_size = 0;
     _error_type = -1;
     _content_type = "";
-    _error_flag = false;
 }
 
 Request::~Request(void) {
@@ -38,14 +35,14 @@ Request::~Request(void) {
 }
 
 short Request::parseRequest(std::string _request) {
-    if (DEBUG_MODE)
-	{
-		std::cout << GREEN << "Request received:\n"
-				  << _request << RESET << std::endl;
-	}
+    // if (DEBUG_MODE)
+	// {
+	// 	std::cout << GREEN << "Request received:\n"
+	// 			  << _request << RESET << std::endl;
+	// }
 
     this->parseSetup(_request);
-    //printRequestClass();
+    printRequestClass();
 
     if (this->getPath().empty() || this->getHost().empty()) {
         this->setErrorType(400);
@@ -59,8 +56,7 @@ short Request::parseRequest(std::string _request) {
         this->setErrorType(500);
         return (500);
     }
-    if (this->getMethod() == "POST" && (this->getBodySize() > this->getMaxBodySize()
-        || _error_flag == true)) {
+    if (this->getMethod() == "POST" && this->getBodySize() > this->getMaxBodySize()) {
         this->setErrorType(413);
         return (413);
     }
@@ -120,11 +116,6 @@ void Request::parseSetup(std::string _request) {
     if (has_body) {
         std::vector<char>   body(content_length);
         stream.read(body.data(), content_length);
-        std::streamsize bytes_read = stream.gcount();
-        if (bytes_read < content_length) {
-            _error_flag = true;
-            body.clear();
-        }
         this->setBody(body);
     }
 }
@@ -252,5 +243,5 @@ void    Request::printRequestClass(){
     std::cout << "Body size: " << this->getBodySize() << std::endl;
     std::cout << "Error type: " << this->getErrorType() << std::endl;
     std::cout << "Content type: " << this->getContentType() << std::endl;
-    std::cout << "Body: " << this->getBody().data() << std::endl;
+    std::cout << "Body size readed: " << this->getBody().size() << std::endl;
 }

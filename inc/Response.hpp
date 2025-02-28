@@ -26,6 +26,7 @@ class Response
         short		_status_code; // Código de estado
 		bool		_auto_index;
 		bool		_is_dir;
+		std::string _temp_ext;
 
 		Response();
 		static const std::map<std::string, std::string>	&SetMIMETypes();
@@ -41,11 +42,15 @@ class Response
 		bool		HTTPRedirectionCase();
 		void		HandleDelete(const std::string &path);
 		void		HandlePost(const std::string &content_type);
-		std::string	RemoveBoundary(std::string body, const std::string &boundary);
+		std::string	RemoveBoundary(const std::string &body, const std::string &boundary);
+		std::vector<char>	RemoveBoundary(const std::vector<char> &body, const std::string &boundary);
 		std::string	GetFilename(const std::vector<char> &body);
 		void		HandleCgi();
 		std::string	getQueryString();
 		void		parseCgi();
+
+		template <typename T>
+		void	CreateFile(const T &body, const std::string &boundary, const std::string &filename);
 
 		public:
 		Response(const Request &req, const Server &server, short status);

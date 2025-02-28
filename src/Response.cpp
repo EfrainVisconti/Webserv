@@ -14,15 +14,13 @@ Response::Response(const Request &req, const Server &server, short status) : _re
 {
     _req_path = req.getPath(); // path recibido de la request
     _req_method = req.getMethod(); // metodo recibido de la request
-    _real_location = ""; // Ubicación del archivo despues de revisar las locations
-    _response = ""; // Contenido de la respuesta (incluidos headers)
     _content_length = 0; // Tamaño del contenido
     _content_type = "text/plain"; // Tipo de contenido
-    _body = ""; // Cuerpo de la respuesta
     _status_message = "OK"; // Mensaje de estado
     _auto_index = false; // off por defecto
     _is_dir = false;
     _index = _server->index;
+    _temp_ext = "";
 }
 
 Response::~Response()
@@ -39,6 +37,7 @@ Response &Response::operator=(const Response &other)
 {
     if (this != &other)
     {
+        _request = other._request;
         _server = other._server;
         _req_path = other._req_path;
         _req_method = other._req_method;
@@ -48,10 +47,11 @@ Response &Response::operator=(const Response &other)
         _content_type = other._content_type;
         _body = other._body;
         _status_message = other._status_message;
+        _index = other._index;
         _status_code = other._status_code;
         _auto_index = other._auto_index;
         _is_dir = other._is_dir;
-        _index = other._index;
+        _temp_ext = other._temp_ext;
     }
     return *this;
 }
@@ -292,7 +292,7 @@ void	Response::HandleDelete(const std::string &path)
 }
 
 
-std::string Response::RemoveBoundary(std::string body, const std::string &boundary)
+std::string Response::RemoveBoundary(const std::string &body, const std::string &boundary)
 {
     std::string start_boundary = "--" + boundary;
     std::string end_boundary = "--" + boundary + "--";
@@ -310,25 +310,80 @@ std::string Response::RemoveBoundary(std::string body, const std::string &bounda
     if (last_boundary != std::string::npos)
         new_body = new_body.substr(0, last_boundary);
 
-    std::cout << "New body: " << new_body << std::endl;
     return new_body;
+}
+
+
+std::vector<char> Response::RemoveBoundary(const std::vector<char> &body, const std::string &boundary)
+{
+    std::string start_boundary = "--" + boundary;
+    std::string end_boundary = "--" + boundary + "--";
+
+    std::vector<char>::const_iterator start_it = std::search(body.begin(), body.end(), start_boundary.begin(), start_boundary.end());
+    if (start_it == body.end())
+        return std::vector<char>();
+
+    std::vector<char>::const_iterator end_it = std::search(start_it, body.end(), end_boundary.begin(), end_boundary.end());
+    if (end_it == body.end())
+        return std::vector<char>();
+
+    start_it += start_boundary.size();
+
+    const char header_delim[] = "\r\n\r\n";
+    std::vector<char>::const_iterator headers_end = std::search(start_it, end_it, header_delim, header_delim + 4);
+    if (headers_end != end_it)
+        start_it = headers_end + 4;
+
+    // const char newline_delim[] = "\r\n";
+    // std::vector<char>::const_iterator last_boundary = std::search(start_it, end_it, newline_delim, newline_delim + 2);
+    // if (last_boundary != end_it)
+    //     end_it = last_boundary;
+
+    return std::vector<char>(start_it, end_it);
 }
 
 
 std::string Response::GetFilename(const std::vector<char> &r_body)
 {
-    const char* body = r_body.data();
-    const char* start = std::strstr(body, "filename=\"");
+    std::vector<char>::const_iterator it = std::search(r_body.begin(), r_body.end(), "filename=\"", "filename=\"" + 10);
+    if (it == r_body.end()) 
+        throw Response::ResponseErrorException(400);
 
-    if (start != 0)
+    it += 10;
+    std::vector<char>::const_iterator end = std::find(it, r_body.end(), '"');
+    if (end == r_body.end()) 
+        throw Response::ResponseErrorException(400);
+    
+    return std::string(it, end);
+}
+
+
+template <typename T>
+void	Response::CreateFile(const T &body, const std::string &boundary, const std::string &filename)
+{
+    T real_body;
+    std::string path;
+    if (boundary != "")
     {
-        start += 10;
-        const char* end = std::strchr(start, '"');
-        if (end != 0)
-            return std::string(start, end);
+        real_body = RemoveBoundary(body, boundary);
+        path = (_real_location + filename).substr(1);
+    }
+    else
+    {
+        real_body = body;
+        path = (_real_location + "post_temp" + _temp_ext).substr(1);
     }
 
-    throw Response::ResponseErrorException(400);
+    std::ofstream file(path.c_str(), std::ios::binary);
+    if (!file || real_body.empty())
+        throw Response::ResponseErrorException(500);
+
+    file.write(reinterpret_cast<const char*>(&real_body[0]), real_body.size());
+    file.close();
+    _status_code = 201;
+    _status_message = "Created";
+    _body = path + " successfully created.";
+    _content_length = _body.size();
 }
 
 
@@ -336,29 +391,37 @@ void    Response::HandlePost(const std::string &content_type)
 {
     if (content_type.find("multipart/form-data") != std::string::npos)
     {
-        std::string body;
         std::string boundary = content_type.substr(content_type.find("boundary=") + 9);
         std::string filename = GetFilename(_request->getBody());
         std::string type = filename.substr(filename.find_last_of(".") + 1);
         if (_mime_types.find(type) == _mime_types.end())
             throw Response::ResponseErrorException(415);
         if (type == "html" || type == "css" || type == "js" || type == "txt" || type == "json")
-            body = std::string(_request->getBody().begin(), _request->getBody().end());
-        std::string real_body = RemoveBoundary(body, boundary);
-        std::string path = (_real_location + filename).substr(1);
-        std::ofstream file(path.c_str(), std::ios::binary);
-        if (!file)
-            throw Response::ResponseErrorException(500);
-        file << real_body;
-        file.close();
-        _status_code = 201;
-        _status_message = "Created";
-        _body = path + " successfully created.";
-        _content_length = _body.size();
+        {
+            std::string body(_request->getBody().begin(), _request->getBody().end());
+            CreateFile(body, boundary, filename);
+        }
+        else
+            CreateFile(_request->getBody(), boundary, filename);
     }
     else
-        throw Response::ResponseErrorException(400);
-        //TO DO
+    {
+        bool c_flag = false;
+        for (std::map<std::string, std::string>::const_iterator it = _mime_types.begin(); it != _mime_types.end(); ++it)
+        {
+            if (it->second == content_type)
+            {
+                c_flag = true;
+                _temp_ext = "." + it->first;
+                break ;
+            }
+        }
+
+        if (c_flag == true || "plain/text" == content_type || "application/octet-stream" == content_type)
+            CreateFile(_request->getBody(), "", "");
+        else
+            throw Response::ResponseErrorException(415);
+    }
 }
 
 

@@ -19,7 +19,6 @@ class Request
 		std::vector<char>					_body;
 		std::string							_content_type;
 		short								_error_type;
-		bool								_error_flag;
 
 		Request();
 		public:
