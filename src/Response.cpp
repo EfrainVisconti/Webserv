@@ -367,8 +367,10 @@ void    Response::GenerateResponse()
     try
     {
         InitialStatusCodeCheck();
-        if (_req_path.find("/cgi-bin") == 0 && parseCgi() == true)
+        if (_req_path.find("/cgi-bin") == 0)
 		{
+            CheckMatchingLocation();
+            parseCgi();
             HandleCgi();
             SetResponse(true);
             return ;

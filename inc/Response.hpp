@@ -45,7 +45,7 @@ class Response
 		std::string	GetFilename(const std::vector<char> &body);
 		void		HandleCgi();
 		std::string	getQueryString();
-		bool		parseCgi();
+		void		parseCgi();
 
 		public:
 		Response(const Request &req, const Server &server, short status);
