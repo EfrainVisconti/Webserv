@@ -35,14 +35,14 @@ Request::~Request(void) {
 }
 
 short Request::parseRequest(std::string _request) {
-    // if (DEBUG_MODE)
-	// {
-	// 	std::cout << GREEN << "Request received:\n"
-	// 			  << _request << RESET << std::endl;
-	// }
+    if (DEBUG_MODE)
+	{
+		std::cout << GREEN << "Request received:\n"
+				  << _request << RESET << std::endl;
+	}
 
     this->parseSetup(_request);
-    printRequestClass();
+    //printRequestClass();
 
     if (this->getPath().empty() || this->getHost().empty()) {
         this->setErrorType(400);
