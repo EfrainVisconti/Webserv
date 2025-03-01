@@ -63,7 +63,11 @@ std::string errorResponse(short val, std::string error_page)
     response << "HTTP/1.1 " << val << " " << message << "\r\n";
     response << "Server: webserv/1.0\r\n";
     if (val == 415)
-        response << "Accept: application/octet-stream, text/plain, multipart/form-data\r\n";
+    {
+        response << "Accept: multipart/form-data, text/html, text/css, application/javascript, ";
+        response << "image/jpeg, image/png, image/gif, video/mp4, audio/mpeg, ";
+        response << "text/plain, application/json, application/pdf, application/octet-stream\r\n";
+    }
     response << GetDate() << "\r\n";
     response << "Content-Type: text/html\r\n";
     response << "Content-Length: " << contentLength << "\r\n";
