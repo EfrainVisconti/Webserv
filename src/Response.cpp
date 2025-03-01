@@ -1,13 +1,5 @@
 #include "../inc/Webserv.hpp"
 
-    //class Location
-		// std::string			path; DONE
-		// std::string			root; DONE
-		// bool				autoindex; DONE
-		// std::string			index; DONE
-		// std::vector<std::string>	methods; DONE
-		// std::string			redirection; DONE
-
 const std::map<std::string, std::string>    Response::_mime_types = Response::SetMIMETypes();
 
 Response::Response(const Request &req, const Server &server, short status) : _request(&req) , _server(&server), _status_code(status)
@@ -19,6 +11,7 @@ Response::Response(const Request &req, const Server &server, short status) : _re
     _status_message = "OK"; // Mensaje de estado
     _auto_index = false; // off por defecto
     _is_dir = false;
+    _cgi = false;
     _index = _server->index;
 }
 
@@ -50,6 +43,7 @@ Response &Response::operator=(const Response &other)
         _status_code = other._status_code;
         _auto_index = other._auto_index;
         _is_dir = other._is_dir;
+        _cgi = other._cgi;
     }
     return *this;
 }
@@ -93,6 +87,8 @@ void    Response::CheckMatchingLocation()
         _req_path[it->path.length()] == '/'))
         {
             CheckMethod(*it);
+            if (it->path == "/cgi-bin")
+                _cgi = true;
             if (it->redirection != "")
             {
                 _status_code = 301;
@@ -439,15 +435,16 @@ void    Response::GenerateResponse()
     try
     {
         InitialStatusCodeCheck();
-        if (_req_path.find("/cgi-bin") == 0)
+        CheckMatchingLocation();
+        if (_cgi == true)
 		{
-            CheckMatchingLocation();
+            if (_req_method == "DELETE")
+                throw Response::ResponseErrorException(405);
             parseCgi();
             HandleCgi();
             SetResponse(true);
             return ;
         }
-        CheckMatchingLocation();
         if (HTTPRedirectionCase() == true)
         {
             SetResponse(true);

@@ -26,6 +26,7 @@ class Response
         short		_status_code; // Código de estado
 		bool		_auto_index;
 		bool		_is_dir;
+		bool		_cgi;
 
 		Response();
 		static const std::map<std::string, std::string>	&SetMIMETypes();
