@@ -357,16 +357,11 @@ void	Response::CreateFile(const T &body, const std::string &boundary, const std:
     T real_body;
     std::string path;
     if (boundary != "")
-    {
         real_body = RemoveBoundary(body, boundary);
-        path = (_real_location + filename).substr(1);
-    }
     else
-    {
         real_body = body;
-        path = (_real_location + "post_temp" + _temp_ext).substr(1);
-    }
-
+    
+    path = (_real_location + filename).substr(1);
     std::ofstream file(path.c_str(), std::ios::binary);
     if (!file || real_body.empty())
         throw Response::ResponseErrorException(500);
