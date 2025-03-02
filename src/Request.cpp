@@ -42,7 +42,7 @@ short Request::parseRequest(std::string _request) {
 	}
 
     this->parseSetup(_request);
-    printRequestClass();
+    //printRequestClass();
 
     if (this->getPath().empty() || this->getHost().empty()) {
         this->setErrorType(400);
@@ -51,10 +51,10 @@ short Request::parseRequest(std::string _request) {
     if (this->verifyMethod() == 0) {
         this->setErrorType(405);
         return (405);
-        if (this->getMethod() == "POST" && this->getBodySize() > this->getMaxBodySize()) {
-            this->setErrorType(413);
-            return (413);
-        }
+    }
+    if (this->getMethod() == "POST" && this->getBodySize() > this->getMaxBodySize()) {
+        this->setErrorType(413);
+        return (413);
     }
     if (this->getBodySize() > 0 && this->getBody().empty()) {
         this->setErrorType(500);
@@ -120,10 +120,12 @@ void Request::parseSetup(std::string _request) {
         std::streamsize bytes_read = stream.gcount();
         if (bytes_read == 0)
             body.clear();
+        else
+            body.resize(bytes_read);
 
         this->setBody(body);
     }
-    
+
 }
 
 int Request::verifyMethod(){
@@ -250,10 +252,4 @@ void    Request::printRequestClass(){
     std::cout << "Error type: " << this->getErrorType() << std::endl;
     std::cout << "Content type: " << this->getContentType() << std::endl;
     std::cout << "Body size readed: " << this->getBody().size() << std::endl;
-    std::cout << "Body: ";
-    std::vector<char> data = this->getBody();
-    size_t length = data.size() < 250 ? data.size() : 250;
-    for (size_t i = 0; i < length; ++i)
-        std::cout << data[i];
-    std::cout << std::endl;
 }

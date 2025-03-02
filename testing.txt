@@ -1,20 +1,13 @@
 POST
 curl -X POST --data-binary "@archivo_grande.txt" http://localhost:8080 -H "Content-Type: application/octet-stream"
 
-curl -X POST -F "file=@archivo_grande.txt" http://localhost:8080 --trace-ascii curl.log
+curl -X POST -F "file=@archivo_grande.txt" http://localhost:8080
 
-curl -X POST -F "file=@archivo_grande.txt" http://localhost:8080 --limit-rate 1000K
+(nc -l 8080 para ver que se envio)
 
 
 DELETE
 curl -X DELETE http://localhost:8080/archivo.txt
-
-Via consola de Firefox:
-fetch("http://localhost:8080/archivo.txt", {
-    method: "DELETE"
-}).then(response => response.text())
-  .then(data => console.log("Respuesta del servidor:", data))
-  .catch(error => console.error("Error:", error));
 
 
 SIEGE

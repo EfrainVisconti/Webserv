@@ -47,7 +47,7 @@ std::string errorResponse(short val, std::string error_page);
 # define TIMEOUT 60000 // 60 segs.
 
 # ifndef REQUEST_SIZE
-#  define REQUEST_SIZE 1000000
+#  define REQUEST_SIZE 100000
 # endif
 
 #endif
