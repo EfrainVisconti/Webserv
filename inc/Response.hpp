@@ -12,6 +12,8 @@ class Response
 {
 	private:
 		static const std::map<std::string, std::string> _mime_types;
+		static short	post_files;
+
 		const Request	*_request; // Petición asociada
 		const Server	*_server; // Servidor asociado
         std::string	_req_path;	// path recibido de la request

@@ -1,6 +1,7 @@
 #include "../inc/Webserv.hpp"
 
 const std::map<std::string, std::string>    Response::_mime_types = Response::SetMIMETypes();
+short    Response::post_files = 0;
 
 Response::Response(const Request &req, const Server &server, short status) : _request(&req) , _server(&server), _status_code(status)
 {
@@ -377,6 +378,7 @@ void	Response::CreateFile(const T &body, const std::string &boundary, const std:
 
 void    Response::HandlePost(const std::string &content_type)
 {
+    post_files++;
     if (content_type.find("multipart/form-data") != std::string::npos)
     {
         std::string boundary;
@@ -395,7 +397,11 @@ void    Response::HandlePost(const std::string &content_type)
         if (filename != "" && filename.find_last_of(".") != std::string::npos)
             type = filename.substr(filename.find_last_of(".") + 1);
         else
-            filename = "post_file.bin";
+        {
+            std::ostringstream oss;
+            oss << "post_file" << post_files;
+            std::string filename = oss.str();
+        }
 
         if (_mime_types.find(type) == _mime_types.end())
             throw Response::ResponseErrorException(415);
@@ -414,13 +420,15 @@ void    Response::HandlePost(const std::string &content_type)
     else
     {
         bool c_flag = false;
-        std::string filename = "post_file";
+        std::ostringstream oss;
+        oss << "post_file" << post_files;
+        std::string filename = oss.str();
         for (std::map<std::string, std::string>::const_iterator it = _mime_types.begin(); it != _mime_types.end(); ++it)
         {
             if (it->second == content_type)
             {
                 c_flag = true;
-                filename = "post_file." + it->first;
+                filename = filename + it->first;
                 break ;
             }
         }

@@ -35,7 +35,8 @@ int main() {
 
     try {
         Server server1;
-        server1.host = INADDR_ANY;
+        std::string str_host1 = "127.0.0.1";
+        inet_pton(AF_INET, str_host1.c_str(), &server1.host);
         server1.port = 8080;
         server1.server_name = "ServerOne";
         server1.root = "/html";
@@ -45,7 +46,8 @@ int main() {
         server1.error_pages[500] = "/html/error_pages/500.html";
 
         Server server2;
-        server2.host = INADDR_ANY;
+        std::string str_host2 = "127.0.0.2";
+        inet_pton(AF_INET, str_host2.c_str(), &server2.host);
         server2.port = 8081;
         server2.server_name = "ServerTwo";
         server2.root = "/html";
@@ -55,7 +57,8 @@ int main() {
         //server1.error_pages[500] = "/html/error_pages/500.html";
 
         Server server3;
-        server3.host = INADDR_ANY;
+        std::string str_host3 = "127.0.0.3";
+        inet_pton(AF_INET, str_host3.c_str(), &server3.host);
         server3.port = 9090;
         server3.server_name = "ServerThree";
         server3.root = "/html";

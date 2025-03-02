@@ -177,7 +177,6 @@ void	ServerManager::SetSockaddr_in(Server *server)
 {
 	memset(&(server->server_address), 0, sizeof(server->server_address));
 	server->server_address.sin_family = AF_INET;
-    //server->server_address.sin_addr.s_addr = htonl(server->_host); Forma correcta
     server->server_address.sin_addr.s_addr = server->host;
     server->server_address.sin_port = htons(server->port);
 }
