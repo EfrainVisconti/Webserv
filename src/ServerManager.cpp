@@ -1,5 +1,6 @@
 #include "../inc/ServerManager.hpp"
 
+volatile sig_atomic_t sig = 0;
 
 ServerManager::ServerManager(std::vector<Server> &servers) : _servers(servers) 
 {
@@ -8,7 +9,7 @@ ServerManager::ServerManager(std::vector<Server> &servers) : _servers(servers)
 
 ServerManager::~ServerManager()
 {
-	// Cerrar todos los sockets
+
 }
 
 void	ServerManager::HandleResponse(int client_fd)
@@ -248,6 +249,20 @@ void	ServerManager::CreateSockets()
     }
 }
 
+
+static void    SignalHandler(int sig_num)
+{
+    std::cout << RED << "Signal received (" << sig_num << "). Stopping execution..." << RESET << std::endl;
+    sig = 1;
+}
+
+static void    SetSignals()
+{
+    signal(SIGTERM, SignalHandler);
+    signal(SIGINT, SignalHandler);
+    signal(SIGPIPE, SIG_IGN);
+}
+
 /*
 	Se inicia el bucle principal de los servidores que monitorea los sockets
 	de escucha creados en la llamada a CreateSockets() y los nuevos
@@ -264,14 +279,15 @@ void	ServerManager::CreateSockets()
 */
 void	ServerManager::LaunchServers()
 {
+	SetSignals();
 	CreateSockets();
 
 	int	poll_ret = 0;
-	while (true)
+	while (!sig)
 	{
 		poll_ret = poll(_poll_fds.data(), _poll_fds.size(), TIMEOUT);
 		if (poll_ret == -1)
-			throw ErrorException("poll() error. Stopping execution...");
+			break ;
 		if (poll_ret == 0)
 			continue ;
 

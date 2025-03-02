@@ -357,9 +357,11 @@ void	Response::CreateFile(const T &body, const std::string &boundary, const std:
     else
         real_body = body;
     
+    if (real_body.empty())
+        throw Response::ResponseErrorException(400);
     path = (_real_location + filename).substr(1);
     std::ofstream file(path.c_str(), std::ios::binary);
-    if (!file || real_body.empty())
+    if (!file)
         throw Response::ResponseErrorException(500);
 
     file.write(reinterpret_cast<const char*>(&real_body[0]), real_body.size());

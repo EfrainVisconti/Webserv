@@ -15,6 +15,7 @@
 # include <sys/stat.h>
 # include <dirent.h>
 # include <cerrno>
+# include <csignal>
 
 /* STL Containers */
 # include <algorithm>
@@ -46,7 +47,7 @@ std::string errorResponse(short val, std::string error_page);
 # define TIMEOUT 60000 // 60 segs.
 
 # ifndef REQUEST_SIZE
-#  define REQUEST_SIZE 100000
+#  define REQUEST_SIZE 1000000
 # endif
 
 #endif

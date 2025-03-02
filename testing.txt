@@ -5,18 +5,6 @@ curl -X POST -F "file=@archivo_grande.txt" http://localhost:8080 --trace-ascii c
 
 curl -X POST -F "file=@archivo_grande.txt" http://localhost:8080 --limit-rate 1000K
 
-Via consola de Firefox:
-const file = new File(["Hello, world!"], "example.txt", { type: "text/plain" });
-
-const formData = new FormData();
-formData.append("file", file);
-
-fetch("https://example.com/upload", {
-    method: "POST",
-    body: formData
-}).then(response => response.text())
-  .then(data => console.log(data));
-
 
 DELETE
 curl -X DELETE http://localhost:8080/archivo.txt
