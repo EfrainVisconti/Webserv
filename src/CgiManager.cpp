@@ -13,7 +13,6 @@ void    Response::parseCgi(){
     if (!cgiPath.empty() && cgiPath[0] == '/') {
         cgiPath.erase(0, 1);
     }
-    std::cout << cgiPath << std::endl;
     if (access(cgiPath.c_str(), X_OK) == -1 || cgiPath.size() <= 14){
         throw Response::ResponseErrorException(404);
     }
