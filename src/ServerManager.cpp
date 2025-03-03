@@ -109,7 +109,7 @@ void ServerManager::HandleRequest(int client_fd)
 		return ;
 	}
 
-	Request	req(server->client_max_body_size);
+	Request	req(server->getClientMaxBodySize());
     std::vector<char>	buffer(REQUEST_SIZE);
 
     ssize_t	bytes_read = recv(client_fd, buffer.data(), REQUEST_SIZE, 0);
@@ -163,7 +163,7 @@ void	ServerManager::AcceptConnection(int server_fd, Server *server)
 	if (DEBUG_MODE)
 	{
 		std::cout << GREEN << "Connection accepted by "
-				  << server->server_name << " Connected Socket: "
+				  << server->getServerName() << " Connected Socket: "
 				  << connected_socket << RESET << std::endl;
 	}
 }
@@ -173,13 +173,14 @@ void	ServerManager::AcceptConnection(int server_fd, Server *server)
 	familia de la dirección, la dirección IPv4 y el puerto (del socket),
 	almacenada en server->server_address). 
 */
-void	ServerManager::SetSockaddr_in(Server *server)
-{
-	memset(&(server->server_address), 0, sizeof(server->server_address));
-	server->server_address.sin_family = AF_INET;
-    server->server_address.sin_addr.s_addr = server->host;
-    server->server_address.sin_port = htons(server->port);
-}
+//void	ServerManager::SetSockaddr_in(Server *server)
+//{
+//	memset(&(server->server_address), 0, sizeof(server->server_address));
+//	server->server_address.sin_family = AF_INET;
+//    //server->server_address.sin_addr.s_addr = htonl(server->_host); Forma correcta
+//    server->server_address.sin_addr.s_addr = server->host;
+//    server->server_address.sin_port = htons(server->port);
+//}
 
 /*
 	Crea un socket por cada servidor en std::vector<Server>.
@@ -204,46 +205,48 @@ void	ServerManager::CreateSockets()
 	int	count = 0;
 	for (std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); ++it)
 	{
-		if ((it->listen_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+		//EFRAIN: Revisa si me estoy cargando la logica del if
+		it->setListenSocket(socket(AF_INET, SOCK_STREAM, 0));
+		if (it->getListenSocket() == -1)
 			throw ErrorException("socket() error. Stopping execution...");
 
-		if (setsockopt(it->listen_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+		if (setsockopt(it->getListenSocket(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 		{
-			close(it->listen_socket);
+			close(it->getListenSocket());
 			throw ErrorException("setsockopt() error. Stopping execution...");
 		}
 
-		int flags = fcntl(it->listen_socket, F_GETFL, 0);
-		if (flags == -1 || fcntl(it->listen_socket, F_SETFL, flags | O_NONBLOCK) == -1) 
+		int flags = fcntl(it->getListenSocket(), F_GETFL, 0);
+		if (flags == -1 || fcntl(it->getListenSocket(), F_SETFL, flags | O_NONBLOCK) == -1) 
 		{
-			close(it->listen_socket);
+			close(it->getListenSocket());
 			throw ErrorException("fcntl() error. Stopping execution...");
         }
 
-		SetSockaddr_in(&(*it));
-		if (bind(it->listen_socket, (struct sockaddr *) &(it->server_address), sizeof(it->server_address)) == -1)
+		it->setServerAddress();//SetSockaddr_in(&(*it));
+		if (bind(it->getListenSocket(), (struct sockaddr *) &(it->getServerAddress()), sizeof(it->getServerAddress())) == -1)
 		{
-			close(it->listen_socket);
+			close(it->getListenSocket());
 			throw ErrorException("bind() error. Stopping execution...");
 		}
 
-		if (listen(it->listen_socket, MAX_CONN) == -1)
+		if (listen(it->getListenSocket(), MAX_CONN) == -1)
 		{
-			close(it->listen_socket);
+			close(it->getListenSocket());
 			throw ErrorException("listen() error. Stopping execution...");
 
         }
 
-		pollfd listen_pollfd = {it->listen_socket, POLLIN, 0};
+		pollfd listen_pollfd = {it->getListenSocket(), POLLIN, 0};
 		_poll_fds.push_back(listen_pollfd);
-		_server_map[it->listen_socket] = &(*it);
+		_server_map[it->getListenSocket()] = &(*it);
 
 		if (DEBUG_MODE)
 		{
 			std::cout << GREEN << "Server created[" << ++count << "]"
-					  << " NAME:" << it->server_name
-			          << " PORT:" << it->port << " Listening Socket: "
-					  << it->listen_socket << RESET <<std::endl;
+					  << " NAME:" << it->getServerName()
+			          << " PORT:" << it->getPort() << " Listening Socket: "
+					  << it->getListenSocket() << RESET <<std::endl;
 		}
     }
 }

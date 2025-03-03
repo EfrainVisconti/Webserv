@@ -1,4 +1,4 @@
-USER_NAME      = eviscont, jde-orma & adlopez
+USER_NAME      = eviscont, adlopez & jde-orma 
 
 # Colors:
 DEF_COLOR	   = \033[0;39m
@@ -18,8 +18,8 @@ INC_DIR        = inc/
 OBJ_DIR        = obj/
 
 # Source files
-SRC_FILE       = main.cpp utils.cpp Server.cpp ServerManager.cpp CgiManager.cpp Request.cpp Response.cpp Location.cpp
-INC_FILE       = Webserv.hpp Server.hpp ServerManager.hpp CgiManager.hpp Request.hpp Response.hpp Location.hpp
+SRC_FILE       = main.cpp utils.cpp Server.cpp ServerManager.cpp CgiManager.cpp Request.cpp Response.cpp Location.cpp ConfigFile.cpp ConfigParser.cpp Logger.cpp
+INC_FILE       = Webserv.hpp Server.hpp ServerManager.hpp CgiManager.hpp Request.hpp Response.hpp Location.hpp ConfigFile.hpp ConfigParser.hpp Logger.hpp
 
 SRC            = $(addprefix $(SRC_DIR), $(SRC_FILE))
 INC            = $(addprefix $(INC_DIR), $(INC_FILE))
