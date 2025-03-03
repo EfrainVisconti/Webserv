@@ -46,7 +46,7 @@ class ServerManager
 
 		ServerManager();
 		void	CreateSockets();
-		void	SetSockaddr_in(Server *server);
+		//void	SetSockaddr_in(Server *server);
 		void	AcceptConnection(int server_fd, Server *server);
 		void	HandleRequest(int connected_fd);
 		void	CloseConnection(int fd);

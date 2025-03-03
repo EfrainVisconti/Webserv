@@ -12,7 +12,7 @@ Response::Response(const Request &req, const Server &server, short status) : _re
     _auto_index = false; // off por defecto
     _is_dir = false;
     _cgi = false;
-    _index = _server->index;
+    _index = _server->getIndex();
 }
 
 Response::~Response()
@@ -54,7 +54,7 @@ Response &Response::operator=(const Response &other)
 */
 void    Response::CheckMethod(const Location &location)
 {
-    if (std::find(location.methods.begin(), location.methods.end(), _req_method) == location.methods.end())
+    if (std::find(location.getMethods().begin(), location.getMethods().end(), _req_method) == location.getMethods().end())
         throw Response::ResponseErrorException(405);
 }
 
@@ -79,37 +79,37 @@ void    Response::CheckMethod(const Location &location)
 */
 void    Response::CheckMatchingLocation()
 {
-    std::vector<Location>::const_iterator it = _server->locations.begin();
-    for (; it != _server->locations.end(); ++it)
+    std::vector<Location>::const_iterator it = _server->getLocations().begin();
+    for (; it != _server->getLocations().end(); ++it)
     {
-        if (_req_path.find(it->path) == 0 &&
-        (_req_path.length() == it->path.length() ||
-        _req_path[it->path.length()] == '/'))
+        if (_req_path.find(it->getPath()) == 0 &&
+        (_req_path.length() == it->getPath().length() ||
+        _req_path[it->getPath().length()] == '/'))
         {
             CheckMethod(*it);
-            if (it->path == "/cgi-bin")
+            if (it->getPath() == "/cgi-bin")
                 _cgi = true;
-            if (it->redirection != "")
+            if (it->getRedirection() != "") //EFRAIN: No tengo claro como declarar redirection en Location.hpp
             {
                 _status_code = 301;
                 _status_message = "Moved Permanently";
-                _real_location = it->redirection;
+                _real_location = it->getRedirection(); //EFRAIN: No tengo claro como declarar redirection en Location.hpp
                 return ;
             }
-            _auto_index = it->autoindex;
-            _index = it->index;
-            if (it->root == "/")
+            _auto_index = it->getAutoindex();
+            _index = it->getIndexLocation();
+            if (it->getRootLocation() == "/")
             {
                 _real_location = _req_path;
                 return ;
             }
-            if (it->root == "")
+            if (it->getRootLocation() == "")
                 break ;
-            _real_location = it->root + _req_path.substr(it->path.length());
+            _real_location = it->getRootLocation() + _req_path.substr(it->getPath().length());
             return ;
         }
     }
-    _real_location = _server->root + _req_path;
+    _real_location = _server->getRoot() + _req_path;
 }
 
 
@@ -517,8 +517,8 @@ void    Response::SetResponse(bool status)
     }
     else
     {
-        std::map<short, std::string>::const_iterator it = _server->error_pages.find(_status_code);
-        if (it != _server->error_pages.end())
+        std::map<short, std::string>::const_iterator it = _server->getErrorPages().find(_status_code);
+        if (it != _server->getErrorPages().end())
             _response = errorResponse(_status_code, GetBody(it->second));
         else
             _response = errorResponse(_status_code, "");

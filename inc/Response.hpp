@@ -1,9 +1,12 @@
 #ifndef RESPONSE_HPP
 #define RESPONSE_HPP
 
+# include "Request.hpp"
 # include "Webserv.hpp"
 
 class Location;
+class Request;
+class Server;
 
 /* Response es la clase que se encarga de gestionar las respuestas HTTP,
  las construye y prepara para ser usadas */

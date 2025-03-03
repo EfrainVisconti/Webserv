@@ -31,45 +31,33 @@
 //     return 0;
 // }
 
-int main() {
+/**
+ * @brief Signal handler for SIGPIPE signal.
+ * 
+ * This function handles the SIGPIPE signal. It is a placeholder for handling the signal when a broken pipe occurs.
+ * 
+ * @param sig The signal number (usually SIGPIPE).
+ */
+void sigpipeHandle(int sig) 
+{
+	if(sig)
+	 {
+
+	 }
+}
+
+int main(int argc, char **argv) {
 
     try {
-        Server server1;
-        server1.host = INADDR_ANY;
-        server1.port = 8080;
-        server1.server_name = "ServerOne";
-        server1.root = "/html";
-        server1.client_max_body_size = 1048576;
-        server1.index = "index.html";
-        server1.error_pages[404] = "/html/error_pages/404.html";
-        server1.error_pages[500] = "/html/error_pages/500.html";
+		std::string		    config;
+        std::vector<Server> servers;  
+		ConfigParser	    cluster(servers); 
 
-        Server server2;
-        server2.host = INADDR_ANY;
-        server2.port = 8081;
-        server2.server_name = "ServerTwo";
-        server2.root = "/html";
-        server2.client_max_body_size = 2097152;
-        server2.index = "index.html";
-        //server1.error_pages[404] = "/html/error_pages/404.html";
-        //server1.error_pages[500] = "/html/error_pages/500.html";
+		signal(SIGPIPE, sigpipeHandle); 
+		config = (argc == 1 ? "configs/default.conf" : argv[1]);
+		cluster.createCluster(config); 
 
-        Server server3;
-        server3.host = INADDR_ANY;
-        server3.port = 9090;
-        server3.server_name = "ServerThree";
-        server3.root = "/html";
-        server3.client_max_body_size = 5242880;
-        server3.index = "index.html";
-        // server1.error_pages[404] = "/html/error_pages/404.html";
-        // server1.error_pages[500] = "/html/error_pages/500.html";
-
-        std::vector<Server> servers;
-        servers.push_back(server1);
-        servers.push_back(server2);
-        servers.push_back(server3);
-
-        ServerManager serverManager(servers);
+        ServerManager serverManager(cluster.getServers());
         serverManager.LaunchServers();
     } catch (const std::exception &e) {
         std::cerr << RED << e.what() << RESET << std::endl;
