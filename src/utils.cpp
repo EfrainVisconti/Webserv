@@ -51,6 +51,8 @@ std::string errorResponse(short val, std::string error_page)
         message = "Internal Server Error";
     else if (val == 415)
         message = "Unsupported Media Type";
+    else if (val == 414)
+        message = "URI Too Long";
 
     std::string body;
     if (error_page != "")
