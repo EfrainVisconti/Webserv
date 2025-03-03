@@ -56,7 +56,23 @@ short Request::parseRequest(std::string _request) {
         this->setErrorType(413);
         return (413);
     }
+    if (this->getPath().length() > 2048) {
+        this->setErrorType(414);
+        return (414);
+    }
+    if (this->getPath().find("..") != std::string::npos
+        || this->getPath().find("%2E%2E") != std::string::npos
+        || this->getPath().find("%2e%2e") != std::string::npos 
+        || this->getPath().find("%00") != std::string::npos) {
+        this->setErrorType(403);
+        return (403);
+    }
     if (this->getBodySize() > 0 && this->getBody().empty()) {
+        this->setErrorType(400);
+        return (400);
+    }
+    std::string forbidden = "*<>|:\"'\\;&()";
+    if (this->getPath().find_first_of(forbidden) != std::string::npos) {
         this->setErrorType(400);
         return (400);
     }

@@ -280,8 +280,10 @@ void    Response::InitialStatusCodeCheck()
         throw Response::ResponseErrorException(405);
     if (_status_code == 413)
         throw Response::ResponseErrorException(413);
-    if (_status_code == 500)
-        throw Response::ResponseErrorException(500);
+    if (_status_code == 414)
+        throw Response::ResponseErrorException(414);
+    if (_status_code == 403)
+        throw Response::ResponseErrorException(403);
 }
 
 
