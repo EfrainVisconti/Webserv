@@ -57,8 +57,8 @@ short Request::parseRequest(std::string _request) {
         return (413);
     }
     if (this->getBodySize() > 0 && this->getBody().empty()) {
-        this->setErrorType(500);
-        return (500);
+        this->setErrorType(400);
+        return (400);
     }
     return (200);
 }
@@ -125,7 +125,6 @@ void Request::parseSetup(std::string _request) {
 
         this->setBody(body);
     }
-
 }
 
 int Request::verifyMethod(){

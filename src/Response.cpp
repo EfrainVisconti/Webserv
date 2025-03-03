@@ -157,7 +157,8 @@ void    Response::GenerateAutoIndex(const std::string &path)
     En el archivo de configuración se establece index para el server y para cada location. Si no se
     encuentra index en las configuraciones, se establece index inexistente ("").
     El index debe estar alojado en el directorio al que se esta intentando acceder.
-    Para generar el autoindex debe estar activado el autoindex (true) y no tener index configu.
+    Para generar el autoindex debe estar activado el autoindex (true) y no debe haber index en
+    ese directorio.
 */
 bool    Response::HandleAutoIndex()
 {
@@ -170,6 +171,20 @@ bool    Response::HandleAutoIndex()
         }
         throw Response::ResponseErrorException(403);
     }
+
+    std::string path_aux = (_real_location + _index).substr(1);
+    std::ifstream file(path_aux.c_str());
+    if (!file)
+    {
+        if (_auto_index == true)
+        {
+            GenerateAutoIndex(_real_location);
+            return true;
+        }
+        throw Response::ResponseErrorException(404);
+    }
+
+    file.close();
     _real_location = _real_location + _index;
     return false;
 }
@@ -362,6 +377,19 @@ void	Response::CreateFile(const T &body, const std::string &boundary, const std:
         throw Response::ResponseErrorException(400);
 
     path = (_real_location + filename).substr(1);
+    int count = 1;
+    std::ifstream duplicate_file(path.c_str());
+    while (duplicate_file)
+    {
+        std::stringstream new_filename;
+        new_filename << filename << "(" << count << ")";
+        path = (_real_location + new_filename.str()).substr(1);
+        duplicate_file.close();
+        duplicate_file.open(path.c_str());
+        count++;
+    }
+    duplicate_file.close();
+
     std::ofstream file(path.c_str(), std::ios::binary);
     if (!file)
         throw Response::ResponseErrorException(500);
@@ -394,13 +422,16 @@ void    Response::HandlePost(const std::string &content_type)
         std::string filename = GetFilename(_request->getBody());
 
         std::string type = "bin";
-        if (filename != "" && filename.find_last_of(".") != std::string::npos)
-            type = filename.substr(filename.find_last_of(".") + 1);
+        if (filename != "")
+        {
+            if (filename.find_last_of(".") != std::string::npos)
+                type = filename.substr(filename.find_last_of(".") + 1);
+        }
         else
         {
             std::ostringstream oss;
             oss << "post_file" << post_files;
-            std::string filename = oss.str();
+            filename = oss.str();
         }
 
         if (_mime_types.find(type) == _mime_types.end())
