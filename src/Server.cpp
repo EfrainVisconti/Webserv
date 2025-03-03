@@ -191,7 +191,7 @@ void Server::setHost(std::string parametr)
 		parametr = "127.0.0.1";
 	if (!isValidHost(parametr))
 		throw ErrorException("Wrong syntax: host");
-	this->_host = inet_addr(parametr.data());
+	inet_pton(AF_INET, parametr.c_str(), &this->_host);
 }
 
 /**
@@ -517,7 +517,7 @@ void Server::setServerAddress()
 {
     std::memset(&_server_address, 0, sizeof(_server_address));
     _server_address.sin_family = AF_INET;
-    _server_address.sin_addr.s_addr = htonl(_host);
+    _server_address.sin_addr.s_addr = _host;
     _server_address.sin_port = htons(_port);
 }
 
