@@ -18,6 +18,10 @@ void    Response::parseCgi(){
     }
 }
 
+void Response::timeout_handler(int sig){
+    if (sig)
+        throw Response::ResponseErrorException(504);
+}
 /* Esta es la funcion principal y se divide en 2 partes:
  - Crea variables de entorno interactivas con el archivo a ejecutar
  - similar a la ejecucion de comandos en terminal se ejecuta el script
@@ -63,8 +67,14 @@ void Response::HandleCgi() {
         throw Response::ResponseErrorException(500);
     } else {
         close(pipefd[1]);
+        signal(SIGALRM, timeout_handler);
+        alarm(3);
         int status;
-        waitpid(pid, &status, 0);
+        int ret = waitpid(pid, &status, 0);
+        alarm(0);
+        if (ret == -1){
+            throw Response::ResponseErrorException(504);
+        }
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
             char buffer[1024];
             std::string response_body;

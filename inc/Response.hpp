@@ -53,7 +53,7 @@ class Response
 		void		HandleCgi();
 		std::string	getQueryString();
 		void		parseCgi();
-
+		static void	timeout_handler(int sig);
 		template <typename T>
 		void	CreateFile(const T &body, const std::string &boundary, const std::string &filename);
 
