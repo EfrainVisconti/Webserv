@@ -10,9 +10,8 @@ class Location
 		std::string					_root;
 		bool						_autoindex;
 		std::string					_index;
-		std::vector<std::string>	_methods; // GET+ POST- DELETE- PUT- HEAD-
+		std::vector<std::string>	_methods; // GET+ POST- DELETE-
 		std::string					_return;
-		std::string					_redirection;
 		std::string					_alias;
 		std::vector<std::string>	_cgi_path;
 		std::vector<std::string>	_cgi_ext;
@@ -32,7 +31,6 @@ class Location
 		void setIndexLocation(std::string parametr);
 		void setMethods(std::vector<std::string> methods);
 		void setReturn(std::string parametr);
-		void setRedirection(std::string parametr);
 		void setAlias(std::string parametr);
 		void setCgiPath(std::vector<std::string> path);
 		void setCgiExtension(std::vector<std::string> extension);
@@ -45,7 +43,6 @@ class Location
 		const std::string &getIndexLocation() const;
 		const std::vector<std::string> &getMethods() const;
 		const std::string &getReturn() const;
-		const std::string &getRedirection() const;
 		const std::string &getAlias() const;
 		const std::vector<std::string> &getCgiPath() const;
 		const std::vector<std::string> &getCgiExtension() const;

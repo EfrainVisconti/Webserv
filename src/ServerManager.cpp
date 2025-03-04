@@ -41,7 +41,18 @@ void	ServerManager::ResponseManager(int client_fd, Request &req, short status)
 	Response *response = new Response(req, *c_it->second, status);
 	_response_map[client_fd] = response;
 
-	response->GenerateResponse();
+	try
+	{
+		response->GenerateResponse();
+	}
+	catch (const Response::ResponseErrorException &e)
+	{
+        std::cerr << RED << e.what() << RESET << std::endl;
+		delete response;
+		_response_map.erase(client_fd);
+        CloseConnection(client_fd);
+		return ;
+	}
 
 	for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
 	{

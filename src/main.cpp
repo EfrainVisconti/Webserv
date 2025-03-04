@@ -31,20 +31,20 @@
 //     return 0;
 // }
 
-/**
- * @brief Signal handler for SIGPIPE signal.
- * 
- * This function handles the SIGPIPE signal. It is a placeholder for handling the signal when a broken pipe occurs.
- * 
- * @param sig The signal number (usually SIGPIPE).
- */
-void sigpipeHandle(int sig) 
-{
-	if(sig)
-	 {
+// /**
+//  * @brief Signal handler for SIGPIPE signal.
+//  * 
+//  * This function handles the SIGPIPE signal. It is a placeholder for handling the signal when a broken pipe occurs.
+//  * 
+//  * @param sig The signal number (usually SIGPIPE).
+//  */
+// void sigpipeHandle(int sig) 
+// {
+// 	if(sig)
+// 	 {
 
-	 }
-}
+// 	 }
+// }
 
 int main(int argc, char **argv) {
 
@@ -53,9 +53,10 @@ int main(int argc, char **argv) {
         std::vector<Server> servers;  
 		ConfigParser	    cluster(servers); 
 
-		signal(SIGPIPE, sigpipeHandle); 
+		//signal(SIGPIPE, sigpipeHandle); 
 		config = (argc == 1 ? "configs/default.conf" : argv[1]);
-		cluster.createCluster(config); 
+		cluster.createCluster(config);
+        cluster.print();
 
         ServerManager serverManager(cluster.getServers());
         serverManager.LaunchServers();

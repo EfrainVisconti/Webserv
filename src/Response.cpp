@@ -90,11 +90,11 @@ void    Response::CheckMatchingLocation()
             CheckMethod(*it);
             if (it->getPath() == "/cgi-bin")
                 _cgi = true;
-            if (it->getRedirection() != "") //EFRAIN: No tengo claro como declarar redirection en Location.hpp
+            if (it->getReturn() != "")
             {
                 _status_code = 301;
                 _status_message = "Moved Permanently";
-                _real_location = it->getRedirection(); //EFRAIN: No tengo claro como declarar redirection en Location.hpp
+                _real_location = it->getReturn();
                 return ;
             }
             _auto_index = it->getAutoindex();

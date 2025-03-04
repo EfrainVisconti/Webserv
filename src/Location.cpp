@@ -164,16 +164,6 @@ void Location::setReturn(std::string parametr)
 }
 
 /**
- * @brief Sets the redirection URL.
- * 
- * @param parametr The redirection URL to set.
- */
-void Location::setRedirection(std::string parametr)
-{
-	this->_redirection = parametr;
-}
-
-/**
  * @brief Sets the alias for the location.
  * 
  * @param parametr The alias to set.
@@ -315,15 +305,6 @@ const std::string &Location::getReturn() const
 	return (this->_return);
 }
 
-/**
- * @brief Gets the redirection URL
- * 
- * @return A constant reference to the redirection URL string.
- */
-const std::string &Location::getRedirection() const
-{
-	return (this->_redirection);
-}
 
 /**
  * @brief Gets the alias for the location.
