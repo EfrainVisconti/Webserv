@@ -7,13 +7,13 @@ class Server;
 
 class ConfigParser {
 	private:
-		std::vector<Server>			&_servers;
+		std::vector<Server>			_servers;
 		std::vector<std::string>	_server_config;
 		size_t						_nb_server;
 
 	public:
 
-    	ConfigParser(std::vector<Server> &servers);
+    	ConfigParser();
 		~ConfigParser();
 
 		int createCluster(const std::string &config_file);

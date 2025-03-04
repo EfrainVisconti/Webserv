@@ -213,7 +213,9 @@ void Server::setRoot(std::string root)
 	getcwd(dir, 1024);
 	std::string full_root = dir + root;
 	if (ConfigFile::getTypePath(full_root) != 2)
-		throw ErrorException("Wrong syntax: root");
+		throw ErrorException("setRoot: Wrong syntax");
+	if (full_root[full_root.size() - 1] == '/')
+        full_root.erase(full_root.size() -1);
 	this->_root = full_root;
 }
 
@@ -244,11 +246,11 @@ void Server::setPort(std::string parametr)
 	for (size_t i = 0; i < parametr.length(); i++)
 	{
 		if (!std::isdigit(parametr[i]))
-			throw ErrorException("Wrong syntax: port");
+			throw ErrorException("setPort: Wrong syntax. Non digit values where found");
 	}
 	port = ft_stoi((parametr));
 	if (port < 1 || port > 65636)
-		throw ErrorException("Wrong syntax: port");
+		throw ErrorException("setPort: Wrong syntax. Port value is not between 1 and 65636 ");
 	this->_port = (uint16_t) port;
 }
 
@@ -267,11 +269,11 @@ void Server::setClientMaxBodySize(std::string parametr)
 	checkToken(parametr);
 	for (size_t i = 0; i < parametr.length(); i++)
 	{
-		if (parametr[i] < '0' || parametr[i] > '9')
-			throw ErrorException("Wrong syntax: client_max_body_size");
+		if (!std::isdigit(parametr[i]))
+			throw ErrorException("setClientMaxBodySize: Wrong syntax. Non digit values where found");
 	}
 	if (!ft_stoi(parametr))
-		throw ErrorException("Wrong syntax: client_max_body_size");
+		throw ErrorException("setClientMaxBodySize: Wrong syntax. String to integer conversion failed");
 	body_size = ft_stoi(parametr);
 	this->_client_max_body_size = body_size;
 }
@@ -284,6 +286,7 @@ void Server::setClientMaxBodySize(std::string parametr)
 void Server::setIndex(std::string index)
 {
 	checkToken(index);
+	removeSlashes(index);
 	this->_index = index;
 }
 

@@ -43,7 +43,8 @@ std::string GetDate();
 std::string errorResponse(short val, std::string error_page);
 int ft_stoi(std::string str);
 unsigned int fromHexToDec(const std::string& nb);
-void printIPv4(uint32_t ip) ;
+void printIPv4(uint32_t ip);
+void removeSlashes(std::string &str) ;
 
 # define RED "\033[1;31m"
 # define GREEN "\033[1;32m"

@@ -4,8 +4,8 @@
 /**
  * @brief Constructs a ConfigParser object with server vector initialiced.
  */
-ConfigParser::ConfigParser(std::vector<Server>& servers) 
-    : _servers(servers) { }
+ConfigParser::ConfigParser() 
+    : _nb_server(0) { }
 
 /**
  * @brief Destroys the ConfigParser object.
@@ -104,19 +104,19 @@ int ConfigParser::createCluster(const std::string &config_file)
 	ConfigFile		file(config_file);
 
 	if (file.getTypePath(file.getPath()) != 1)
-		throw ErrorException("File is invalid");
+		throw ErrorException("createCluster: Invalid file type '" + config_file + "'");
 	if (file.checkFile(file.getPath(), 4) == -1)
-		throw ErrorException("File is not accessible");
+		throw ErrorException("createCluster: File '" + config_file + "' is not accessible");
 	content = file.readFile(config_file);
 	if (content.empty())
-		throw ErrorException("File is empty");
+		throw ErrorException("createCluster: File '" + config_file + "' is empty");
 
 	removeComments(content);
 	removeWhiteSpace(content);
 	splitServers(content);
 	
 	if (this->_server_config.size() != this->_nb_server)
-		throw ErrorException("The server config size != the number of servers"); 
+    throw ErrorException("createCluster: Mismatch between parsed servers and expected count");
 
 	for (size_t i = 0; i < this->_nb_server; i++)
 	{
@@ -181,13 +181,13 @@ void ConfigParser::splitServers(std::string &content)
 	size_t end = 1;
 
 	if (content.find("server", 0) == std::string::npos)
-		throw ErrorException("Server did not find");
+    	throw ErrorException("splitServers: No 'server' block found in configuration");
 	while (start != end && start < content.length())
 	{
 		start = findStartServer(start, content);
 		end = findEndServer(start, content);
 		if (start == end)
-			throw ErrorException("problem with scope");
+    		throw ErrorException("splitServers: Malformed server block, missing scope '{}'");;
 		this->_server_config.push_back(content.substr(start, end - start + 1));
 		this->_nb_server++;
 		start = end + 1;
@@ -211,20 +211,19 @@ size_t ConfigParser::findStartServer (size_t start, std::string &content)
 		if (content[i] == 's')
 			break ;
 		if (!isspace(content[i]))
-			throw  ErrorException("Wrong character out of server scope{}");
+   			throw ErrorException("findStartServer: Unexpected character before 'server' declaration");
 	}
 	if (!content[i])
 		return (start);
 	if (content.compare(i, 6, "server") != 0)
-		throw ErrorException("Wrong character out of server scope{}");
+    	throw ErrorException("findStartServer: Expected 'server' keyword but found something else");
 	i += 6;
 	while (content[i] && isspace(content[i]))
 		i++;
 	if (content[i] == '{')
 		return (i);
 	else
-		throw  ErrorException("Wrong character out of server scope{}");
-
+    	throw ErrorException("findStartServer: Expected '{' after 'server' declaration");
 }
 
 /**
@@ -298,13 +297,13 @@ void ConfigParser::createServer(std::string &config, Server &server)
 
 	parametrs = splitParametrs(config += ' ', std::string(" \n\t"));
 	if (parametrs.size() < 3)
-		throw  ErrorException("Failed server validation");
+    	throw ErrorException("createServer: Invalid server configuration. Expected at least 3 parameters");
 	for (size_t i = 0; i < parametrs.size(); i++)
 	{
 		if (parametrs[i] == "listen" && (i + 1) < parametrs.size() && flag_loc)
 		{
 			if (server.getPort())
-				throw  ErrorException("Port is duplicated");
+            	throw ErrorException("createServer: Duplicate 'listen' directive. Port is already set.");
 			server.setPort(parametrs[++i]);
 		}
 		else if (parametrs[i] == "location" && (i + 1) < parametrs.size())
@@ -312,29 +311,29 @@ void ConfigParser::createServer(std::string &config, Server &server)
 			std::string	path;
 			i++;
 			if (parametrs[i] == "{" || parametrs[i] == "}")
-				throw  ErrorException("Wrong character in server scope{}");
+            	throw ErrorException("createServer: Invalid 'location' path. Found unexpected '" + parametrs[i] + "'");
 			path = parametrs[i];
 			std::vector<std::string> codes;
 			if (parametrs[++i] != "{")
-				throw  ErrorException("Wrong character in server scope{}");
+          		throw ErrorException("createServer: Expected '{' after 'location' directive but found '" + parametrs[i] + "'");
 			i++;
 			while (i < parametrs.size() && parametrs[i] != "}")
 				codes.push_back(parametrs[i++]);
 			server.setLocation(path, codes);
 			if (i < parametrs.size() && parametrs[i] != "}")
-				throw  ErrorException("Wrong character in server scope{}");
+           		throw ErrorException("createServer: Unexpected token '" + parametrs[i] + "' after 'location' block.");
 			flag_loc = 0;
 		}
 		else if (parametrs[i] == "host" && (i + 1) < parametrs.size() && flag_loc)
 		{
 			if (server.getHost())
-				throw  ErrorException("Host is duplicated");
+	            throw ErrorException("createServer: Duplicate 'host' directive. Already set");
 			server.setHost(parametrs[++i]);
 		}
 		else if (parametrs[i] == "root" && (i + 1) < parametrs.size() && flag_loc)
 		{
 			if (!server.getRoot().empty())
-				throw  ErrorException("Root is duplicated");
+            	throw ErrorException("createServer: Duplicate 'root' directive. Already set to '" + server.getRoot() + "'");
 			server.setRoot(parametrs[++i]);
 		}
 		else if (parametrs[i] == "error_page" && (i + 1) < parametrs.size() && flag_loc)
@@ -345,41 +344,41 @@ void ConfigParser::createServer(std::string &config, Server &server)
 				if (parametrs[i].find(';') != std::string::npos)
 					break ;
 				if (i + 1 >= parametrs.size())
-					throw ErrorException("Wrong character out of server scope{}");
+                	throw ErrorException("createServer: Missing ';' at the end of 'error_page' directive.");
 			}
 		}
 		else if (parametrs[i] == "client_max_body_size" && (i + 1) < parametrs.size() && flag_loc)
 		{
 			if (flag_max_size)
-				throw  ErrorException("Client_max_body_size is duplicated");
+         	   throw ErrorException("createServer: Duplicate 'client_max_body_size' directive.");
 			server.setClientMaxBodySize(parametrs[++i]);
 			flag_max_size = true;
 		}
 		else if (parametrs[i] == "server_name" && (i + 1) < parametrs.size() && flag_loc)
 		{
 			if (!server.getServerName().empty())
-				throw  ErrorException("Server_name is duplicated");
+            	throw ErrorException("createServer: Duplicate 'server_name' directive. Already set to '" + server.getServerName() + "'");
 			server.setServerName(parametrs[++i]);
 		}
 		else if (parametrs[i] == "index" && (i + 1) < parametrs.size() && flag_loc)
 		{
 			if (!server.getIndex().empty())
-				throw  ErrorException("Index is duplicated");
+            	throw ErrorException("createServer: Duplicate 'index' directive. Already set to '" + server.getIndex() + "'");
 			server.setIndex(parametrs[++i]);
 		}
 		else if (parametrs[i] == "autoindex" && (i + 1) < parametrs.size() && flag_loc)
 		{
 			if (flag_autoindex)
-				throw ErrorException("Autoindex of server is duplicated");
+          		throw ErrorException("createServer: Duplicate 'autoindex' directive.");
 			server.setAutoindex(parametrs[++i]);
 			flag_autoindex = true;
 		}
 		else if (parametrs[i] != "}" && parametrs[i] != "{")
 		{
 			if (!flag_loc)
-				throw  ErrorException("Parametrs after location");
+           		throw ErrorException("createServer: Unexpected parameter '" + parametrs[i] + "' after 'location' block.");
 			else
-				throw  ErrorException("Unsupported directive");
+            	throw ErrorException("createServer: Unsupported directive '" + parametrs[i] + "'");
 		}
 	}
 	if (server.getRoot().empty())
@@ -389,14 +388,14 @@ void ConfigParser::createServer(std::string &config, Server &server)
 	if (server.getIndex().empty())
 		server.setIndex("index.html;");
 	if (ConfigFile::isFileExistAndReadable(server.getRoot(), server.getIndex()))
-		throw ErrorException("Index from config file not found or unreadable");
+  		throw ErrorException("createServer: The index file '" + server.getIndex() + "' does not exist or is unreadable in root '" + server.getRoot() + "'");
 	if (server.checkLocations())
-		throw ErrorException("Locaition is duplicated");
+		throw ErrorException("createServer: Duplicate 'location' entries detected.");
 	if (!server.getPort())
-		throw ErrorException("Port not found");
+		throw ErrorException("createServer: 'listen' directive not found. Server port is required.");
 	server.setErrorPages(error_codes);
 	if (!server.isValidErrorPages())
-		throw ErrorException("Incorrect path for error page or number of error");
+		throw ErrorException("createServer: Invalid error page configuration. Check paths and error numbers.");
 }
 
 /**
@@ -436,8 +435,12 @@ void ConfigParser::checkServers()
 	{
 		for (it2 = it1 + 1; it2 != this->_servers.end(); it2++)
 		{
-			if (it1->getPort() == it2->getPort() && it1->getHost() == it2->getHost() && it1->getServerName() == it2->getServerName())
-				throw ErrorException("Failed server validation");
+			if (it1->getPort() == it2->getPort() &&
+				it1->getHost() == it2->getHost() &&
+				it1->getServerName() == it2->getServerName())
+			{
+                throw ErrorException("checkServers: Duplicate server detected");
+			}
 		}
 	}
 }

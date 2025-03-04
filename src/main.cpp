@@ -51,11 +51,12 @@ int main(int argc, char **argv) {
     try {
 		std::string		    config;
         std::vector<Server> servers;  
-		ConfigParser	    cluster(servers); 
+		ConfigParser	    cluster; 
 
 		signal(SIGPIPE, sigpipeHandle); 
 		config = (argc == 1 ? "configs/default.conf" : argv[1]);
 		cluster.createCluster(config); 
+		cluster.print(); 
 
         ServerManager serverManager(cluster.getServers());
         serverManager.LaunchServers();

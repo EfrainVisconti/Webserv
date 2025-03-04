@@ -143,6 +143,8 @@ void Location::setAutoindex(std::string parametr)
 		throw Server::ErrorException("Wrong autoindex");
 }
 
+
+
 /**
  * @brief Sets the index location for the location.
  * 
@@ -150,8 +152,10 @@ void Location::setAutoindex(std::string parametr)
  */
 void Location::setIndexLocation(std::string parametr)
 {
+	removeSlashes(parametr);
 	this->_index = parametr;
 }
+
 
 /**
  * @brief Sets the return URL for the location.

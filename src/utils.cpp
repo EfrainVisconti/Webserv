@@ -243,3 +243,20 @@ void printIPv4(uint32_t ip)
               << static_cast<int>(byte2) << "."
               << static_cast<int>(byte1) << std::endl;
 }
+
+/**
+ * @brief Removes the slash chars from the str string.
+ *
+ * @param index The string to analyze.
+ */
+void removeSlashes(std::string &str)
+{
+    std::string result;
+    for (size_t i = 0; i < str.size(); ++i) 
+	{
+        if (str[i] != '/') {
+            result += str[i];
+        }
+    }
+    str = result;
+}
