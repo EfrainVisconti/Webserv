@@ -57,15 +57,7 @@ void printIPv4(uint32_t ip) ;
 #  define REQUEST_SIZE 100000
 # endif
 
-#define CONNECTION_TIMEOUT 60 // Time in seconds before client get kicked out if no data was sent.
-#ifdef TESTER
-    #define MESSAGE_BUFFER 40000 
-#else
-    #define MESSAGE_BUFFER 40000
-#endif
-
-#define MAX_URI_LENGTH 4096
-#define MAX_CONTENT_LENGTH 30000000
+#define MAX_CONTENT_LENGTH 1000000
 
 
 #endif

@@ -4,7 +4,7 @@
  * @brief Default constructor for the Location class.
  * 
  * Initializes all member variables to their default values. The methods vector
- * is reserved for 5 elements, and the default values for the methods are set
+ * is reserved for 3 elements, and the default values for the methods are set
  * to 0 (inactive).
  */
 Location::Location()
@@ -16,10 +16,8 @@ Location::Location()
 	this->_return = "";
 	this->_alias = "";
 	this->_client_max_body_size = MAX_CONTENT_LENGTH;
-	this->_methods.reserve(5);
+	this->_methods.reserve(3);
 	this->_methods.push_back("GET");
-	this->_methods.push_back("");
-	this->_methods.push_back("");
 	this->_methods.push_back("");
 	this->_methods.push_back("");
 }
@@ -117,7 +115,7 @@ void Location::setMethods(std::vector<std::string> methods)
 
     for (size_t i = 0; i < methods.size(); i++)
     {
-        if (methods[i] == "GET" || methods[i] == "POST" || methods[i] == "DELETE" || methods[i] == "PUT" || methods[i] == "HEAD")
+        if (methods[i] == "GET" || methods[i] == "POST" || methods[i] == "DELETE")
         {
             this->_methods.push_back(methods[i]);
         }
@@ -344,20 +342,8 @@ const unsigned long &Location::getMaxBodySize() const
 std::string Location::getPrintMethods() const
 {
 	std::string res;
-	if (!_methods[4].empty())
-		res.insert(0, "HEAD");
-	if (!_methods[3].empty())
-	{
-		if (!res.empty())
-			res.insert(0, ", ");
-		res.insert(0, "PUT");
-	}
 	if (!_methods[2].empty())
-	{
-		if (!res.empty())
-			res.insert(0, ", ");
 		res.insert(0, "DELETE");
-	}
 	if (!_methods[1].empty())
 	{
 		if (!res.empty())

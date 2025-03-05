@@ -537,6 +537,11 @@ void    Response::GenerateResponse()
 
 void    Response::SetResponse(bool status)
 {
+    if (DEBUG_MODE)
+    {
+        std::cout << GREEN << "Request path:\n" << _req_path << RESET << std::endl;
+        std::cout << GREEN << "Real location:\n" << _real_location << RESET <<std::endl;
+    }
     if (status)
     {
         std::ostringstream  aux;
