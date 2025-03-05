@@ -480,7 +480,7 @@ void    Response::GenerateResponse()
     {
         InitialStatusCodeCheck();
         CheckMatchingLocation();
-        if (_real_location == "/cgi-bin")
+        if (_real_location.find("/cgi-bin/") != std::string::npos && notHtml() == 1)
 		{
             if (_req_method == "DELETE")
                 throw Response::ResponseErrorException(405);
