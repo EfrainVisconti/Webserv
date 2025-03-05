@@ -480,7 +480,7 @@ void    Response::GenerateResponse()
     {
         InitialStatusCodeCheck();
         CheckMatchingLocation();
-        if (parseCgi() == 1)
+        if (_real_location == "/cgi-bin")
 		{
             if (_req_method == "DELETE")
                 throw Response::ResponseErrorException(405);
