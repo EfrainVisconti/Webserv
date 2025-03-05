@@ -116,8 +116,8 @@ void    Response::CheckMatchingLocation()
 
 void    Response::GenerateAutoIndex(const std::string &path)
 {
-    std::string path_aux = path.substr(1);
-    DIR *dir = opendir(path_aux.c_str());
+    //std::string path_aux = path.substr(1);
+    DIR *dir = opendir(path.c_str());
     if (dir == NULL)
         throw Response::ResponseErrorException(500);
 
@@ -131,7 +131,7 @@ void    Response::GenerateAutoIndex(const std::string &path)
             continue ;
 
         struct stat st;
-        std::string full_path = path_aux + "/" + name;
+        std::string full_path = path + "/" + name;
         if (stat(full_path.c_str(), &st) == 0 && S_ISDIR(st.st_mode))
             name += "/";
 
@@ -172,7 +172,7 @@ bool    Response::HandleAutoIndex()
         throw Response::ResponseErrorException(403);
     }
 
-    std::string path_aux = (_real_location + _index).substr(1);
+    std::string path_aux = (_real_location + _index);//.substr(1);
     std::ifstream file(path_aux.c_str());
     if (!file)
     {
@@ -192,7 +192,7 @@ bool    Response::HandleAutoIndex()
 
 std::string Response::GetBody(std::string path)
 {
-    path = path.substr(1);
+    //path = path.substr(1);
     std::ifstream file(path.c_str(), std::ios::binary);
     if (!file)
         throw Response::ResponseErrorException(404);
@@ -242,9 +242,9 @@ bool    Response::HTTPRedirectionCase()
 */
 void    Response::ExhaustivePathCheck(const std::string &path)
 {
-    std::string path_aux = path.substr(1);
+    //std::string path_aux = path.substr(1);
     struct stat buffer;
-    if (stat(path_aux.c_str(), &buffer) == -1)
+    if (stat(path.c_str(), &buffer) == -1)
     {
         if (errno == ENOENT)
             throw Response::ResponseErrorException(404);
@@ -261,7 +261,7 @@ void    Response::ExhaustivePathCheck(const std::string &path)
         return ;
     }
 
-    int open_return = open(path_aux.c_str(), O_RDONLY);
+    int open_return = open(path.c_str(), O_RDONLY);
     if (open_return == -1)
     {
         if (errno == EACCES)
@@ -289,8 +289,8 @@ void    Response::InitialStatusCodeCheck()
 
 void	Response::HandleDelete(const std::string &path)
 {
-    std::string path_aux = path.substr(1);
-    if (std::remove(path_aux.c_str()) == 0)
+    //std::string path_aux = path.substr(1);
+    if (std::remove(path.c_str()) == 0)
     {
         _status_code = 204;
         _status_message = "No Content";
@@ -378,7 +378,7 @@ void	Response::CreateFile(const T &body, const std::string &boundary, const std:
     if (real_body.empty())
         throw Response::ResponseErrorException(400);
 
-    path = (_real_location + filename).substr(1);
+    path = (_real_location + filename);//.substr(1);
     int count = 1;
     std::ifstream duplicate_file(path.c_str());
     while (duplicate_file)
