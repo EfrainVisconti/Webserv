@@ -42,9 +42,8 @@ short Request::parseRequest(std::string _request) {
 	}
 
     this->parseSetup(_request);
-    //printRequestClass();
-
     if (this->getPath().empty() || this->getHost().empty()) {
+        //std::cout << this->getPath() << this->getHost();
         this->setErrorType(400);
         return (400);
     }

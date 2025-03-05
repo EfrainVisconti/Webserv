@@ -4,7 +4,7 @@
 /* En esta primera funcion voy a checkear el acceso a la ruta de cgi pero sin tener
 en cuenta el query_string que en el caso de lo que esta implementado es el nombre.*/
 
-void    Response::parseCgi(){
+int    Response::parseCgi(){
     std::string cgiPath = _real_location;
     size_t pos = cgiPath.find('?');
     if (pos != std::string::npos) {
@@ -13,9 +13,10 @@ void    Response::parseCgi(){
     if (!cgiPath.empty() && cgiPath[0] == '/') {
         cgiPath.erase(0, 1);
     }
-    if (access(cgiPath.c_str(), X_OK) == -1 || cgiPath.size() <= 14){
+    if (access(cgiPath.c_str(), X_OK) == -1){
         throw Response::ResponseErrorException(404);
     }
+    return 1;
 }
 
 void Response::timeout_handler(int sig){
@@ -67,11 +68,11 @@ void Response::HandleCgi() {
         throw Response::ResponseErrorException(500);
     } else {
         close(pipefd[1]);
-        signal(SIGALRM, timeout_handler);
-        alarm(3);
+        //signal(SIGALRM, timeout_handler);
+        //alarm(3);
         int status;
         int ret = waitpid(pid, &status, 0);
-        alarm(0);
+        //alarm(0);
         if (ret == -1){
             throw Response::ResponseErrorException(504);
         }

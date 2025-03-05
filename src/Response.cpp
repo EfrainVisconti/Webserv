@@ -480,7 +480,7 @@ void    Response::GenerateResponse()
     {
         InitialStatusCodeCheck();
         CheckMatchingLocation();
-        if (_cgi == true)
+        if (parseCgi() == 1)
 		{
             if (_req_method == "DELETE")
                 throw Response::ResponseErrorException(405);
@@ -558,11 +558,11 @@ void    Response::SetResponse(bool status)
     }
     else
     {
-        std::map<short, std::string>::const_iterator it = _server->getErrorPages().find(_status_code);
+        /*std::map<short, std::string>::const_iterator it = _server->getErrorPages().find(_status_code);
         if (it != _server->getErrorPages().end())
             _response = errorResponse(_status_code, GetBody(it->second));
-        else
-            _response = errorResponse(_status_code, "");
+        else*/
+        _response = errorResponse(_status_code, "");
     }
 }
 
