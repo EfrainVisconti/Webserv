@@ -558,10 +558,13 @@ void    Response::SetResponse(bool status)
     }
     else
     {
-        /*std::map<short, std::string>::const_iterator it = _server->getErrorPages().find(_status_code);
+        std::map<short, std::string>::const_iterator it = _server->getErrorPages().find(_status_code);
         if (it != _server->getErrorPages().end())
-            _response = errorResponse(_status_code, GetBody(it->second));
-        else*/
+        {
+            std::string path = _server->getRoot() + it->second;
+            _response = errorResponse(_status_code, GetBody(path));
+        }
+        else
         _response = errorResponse(_status_code, "");
     }
 }
