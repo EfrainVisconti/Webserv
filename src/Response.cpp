@@ -14,6 +14,7 @@ Response::Response(const Request &req, const Server &server, short status) : _re
     _is_dir = false;
     _index = _server->getIndex();
 	_is_loc = false;
+    _is_cgi = false;
 }
 
 Response::~Response()
@@ -45,6 +46,7 @@ Response &Response::operator=(const Response &other)
         _auto_index = other._auto_index;
         _is_dir = other._is_dir;
 		_is_loc = other._is_loc;
+        _is_cgi = other._is_cgi;
     }
     return *this;
 }
@@ -90,6 +92,8 @@ void    Response::CheckMatchingLocation()
         {
 			_is_loc = true;
             CheckMethod(*it);
+            if (it->getCgiPath().size() > 0)
+                _is_cgi = true;
             if (it->getReturn() != "")
             {
                 _status_code = 301;
@@ -118,7 +122,6 @@ void    Response::CheckMatchingLocation()
 
 void    Response::GenerateAutoIndex(const std::string &path)
 {
-    //std::string path_aux = path.substr(1);
     DIR *dir = opendir(path.c_str());
     if (dir == NULL)
         throw Response::ResponseErrorException(500);
@@ -194,7 +197,6 @@ bool    Response::HandleAutoIndex()
 
 std::string Response::GetBody(std::string path)
 {
-    //path = path.substr(1);
     std::ifstream file(path.c_str(), std::ios::binary);
     if (!file)
         throw Response::ResponseErrorException(404);
@@ -483,7 +485,7 @@ void    Response::GenerateResponse()
     {
         InitialStatusCodeCheck();
         CheckMatchingLocation();
-        if (_real_location.find("/cgi-bin/") != std::string::npos && notHtml() == 1)
+        if (_is_cgi == true && notHtml() == 1)
 		{
             if (_req_method == "DELETE")
                 throw Response::ResponseErrorException(405);

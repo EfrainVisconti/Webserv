@@ -138,7 +138,7 @@ void Server::setRoot(std::string root)
 {
 	checkToken(root);
 	if (root.find_first_not_of("/") == std::string::npos)
-		throw Server::ErrorException("Invalid location root: \"/\"");
+		throw Server::ErrorException("Invalid location root: \"/\" or empty");
 	if (ConfigFile::getTypePath(root) == 2)
 	{
 		this->_root = root;
@@ -516,18 +516,18 @@ int Server::isValidLocation(Location &location) const
 		if (location.getCgiPath().empty() || location.getCgiExtension().empty() || location.getIndexLocation().empty())
 			return CGI_ISSUE;
 
-		if (ConfigFile::checkFile(location.getIndexLocation(), 4) < 0)
-		{
-			std::string path = location.getRootLocation() + location.getPath() + "/" + location.getIndexLocation();
-			if (ConfigFile::getTypePath(path) != 1)
-			{
-				std::string root = getcwd(NULL, 0);
-				location.setRootLocation(root);
-				path = root + location.getPath() + "/" + location.getIndexLocation();
-			}
-			if (path.empty() || ConfigFile::getTypePath(path) != 1 || ConfigFile::checkFile(path, 4) < 0)
-				return CGI_ISSUE;
-		}
+		// if (ConfigFile::checkFile(location.getIndexLocation(), 4) < 0)
+		// {
+		// 	std::string path = location.getRootLocation() + location.getPath() + "/" + location.getIndexLocation();
+		// 	if (ConfigFile::getTypePath(path) != 1)
+		// 	{
+		// 		std::string root = getcwd(NULL, 0);
+		// 		location.setRootLocation(root);
+		// 		path = root + location.getPath() + "/" + location.getIndexLocation();
+		// 	}
+		// 	if (path.empty() || ConfigFile::getTypePath(path) != 1 || ConfigFile::checkFile(path, 4) < 0)
+		// 		return CGI_ISSUE;
+		// }
 		if (location.getCgiPath().size() != location.getCgiExtension().size())
 			return CGI_ISSUE;
 		std::vector<std::string>::const_iterator it;

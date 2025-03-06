@@ -17,8 +17,6 @@ for param in $query_string; do
     fi
 done
 
-while 1
-
 if [ -z "$name" ]; then
     name="visitante"
 fi
@@ -52,3 +50,4 @@ cat <<EOF
 </body>
 </html>
 EOF
+

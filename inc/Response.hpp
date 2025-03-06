@@ -32,6 +32,7 @@ class Response
 		bool		_auto_index;
 		bool		_is_dir;
 		bool		_is_loc;
+		bool		_is_cgi;
 
 		Response();
 		static const std::map<std::string, std::string>	&SetMIMETypes();

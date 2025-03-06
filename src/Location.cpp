@@ -105,8 +105,10 @@ void Location::setRootLocation(std::string parametr)
 	}
 	if (parametr.find_first_not_of("/") == std::string::npos)
 		throw Server::ErrorException("Invalid location root: \"/\"");
-	// if (ConfigFile::getTypePath(parametr) != 2)
-	// 	throw Server::ErrorException("root of location");
+	if (ConfigFile::getTypePath(parametr) != 2)
+	 	throw Server::ErrorException("root of location");
+	if (parametr[parametr.length() - 1] == '/')
+		parametr = parametr.substr(0, parametr.length() - 1);
 	this->_root = parametr;
 }
 

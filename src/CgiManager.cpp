@@ -10,9 +10,9 @@ int    Response::parseCgi(){
     if (pos != std::string::npos) {
         cgiPath = cgiPath.substr(0, pos);
     }
-    if (!cgiPath.empty() && cgiPath[4] == '/') {
-        cgiPath.erase(4, 1);
-    }
+    // if (!cgiPath.empty() && cgiPath[4] == '/') {
+    //     cgiPath.erase(4, 1);
+    // }
     std::cout << cgiPath << std::endl;
     if (access(cgiPath.c_str(), X_OK) == -1){
         throw Response::ResponseErrorException(404);
