@@ -13,6 +13,7 @@ Response::Response(const Request &req, const Server &server, short status) : _re
     _auto_index = false; // off por defecto
     _is_dir = false;
     _index = _server->getIndex();
+	_is_loc = false;
 }
 
 Response::~Response()
@@ -43,6 +44,7 @@ Response &Response::operator=(const Response &other)
         _status_code = other._status_code;
         _auto_index = other._auto_index;
         _is_dir = other._is_dir;
+		_is_loc = other._is_loc;
     }
     return *this;
 }
@@ -64,7 +66,8 @@ void    Response::CheckMethod(const Location &location)
     archivo de configuración del server.
 
     Dada una location /location1 y una request /location1/file.html. Si en la location1:
-    1. root / --> sirve /location1/file.html (empieza desde la raíz del sistema)
+    1. root / --> sirve /location1/file.html (empieza desde la raíz del sistema, no
+	está permitido desde el parseo)
     2. root inexistente --> sirve /html/location1/file.html (empieza desde la raíz del
     server. Ej: /html)
     3. root /html/pages --> sirve /html/pages/file.html (sin location1 en la ruta)
@@ -85,6 +88,7 @@ void    Response::CheckMatchingLocation()
         (_req_path.length() == it->getPath().length() ||
         _req_path[it->getPath().length()] == '/'))
         {
+			_is_loc = true;
             CheckMethod(*it);
             if (it->getReturn() != "")
             {
@@ -95,18 +99,18 @@ void    Response::CheckMatchingLocation()
             }
             _auto_index = it->getAutoindex();
             _index = it->getIndexLocation();
-            if (it->getRootLocation() == "/")
-            {
-                _real_location = _req_path;
-                return ;
-            }
+            // if (it->getRootLocation() == "/")
+            // {
+            //     _real_location = _req_path;
+            //     return ;
+            // }
             if (it->getRootLocation() == "")
                 break ;
             _real_location = it->getRootLocation() + _req_path.substr(it->getPath().length());
             return ;
         }
     }
-	if (_req_method == "POST" || _req_method == "DELETE")
+	if (_is_loc == false && (_req_method == "POST" || _req_method == "DELETE"))
 		throw Response::ResponseErrorException(405);
     _real_location = _server->getRoot() + _req_path.substr(1);
 }

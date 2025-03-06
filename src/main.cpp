@@ -5,8 +5,8 @@ int main(int argc, char **argv) {
 
     try {
 		std::string		    config;
-        std::vector<Server> servers;  
-		ConfigParser	    cluster(servers); 
+        std::vector<Server> servers;
+		ConfigParser	    cluster(servers);
 
 		config = (argc == 1 ? "configs/default.conf" : argv[1]);
 		cluster.createCluster(config);
@@ -18,6 +18,6 @@ int main(int argc, char **argv) {
         std::cerr << RED << e.what() << RESET << std::endl;
         return EXIT_FAILURE;
     }
-    
+
     return EXIT_SUCCESS;
 }

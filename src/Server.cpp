@@ -296,7 +296,7 @@ void Server::setLocation(std::string path, std::vector<std::string> parametr)
 			if (ConfigFile::getTypePath(parametr[i]) == 2)
 				new_location.setRootLocation(parametr[i]);
 			else
-				new_location.setRootLocation(this->_root + parametr[i]);
+				new_location.setRootLocation(parametr[i]);
 		}
 		else if ((parametr[i] == "allow_methods" || parametr[i] == "methods") && (i + 1) < parametr.size())
 		{
