@@ -12,7 +12,6 @@ Response::Response(const Request &req, const Server &server, short status) : _re
     _status_message = "OK"; // Mensaje de estado
     _auto_index = false; // off por defecto
     _is_dir = false;
-    _cgi = false;
     _index = _server->getIndex();
 }
 
@@ -44,7 +43,6 @@ Response &Response::operator=(const Response &other)
         _status_code = other._status_code;
         _auto_index = other._auto_index;
         _is_dir = other._is_dir;
-        _cgi = other._cgi;
     }
     return *this;
 }
@@ -83,13 +81,12 @@ void    Response::CheckMatchingLocation()
     std::vector<Location>::const_iterator it = _server->getLocations().begin();
     for (; it != _server->getLocations().end(); ++it)
     {
+        std::cout << "Location: " << it->getPath() << std::endl;
         if (_req_path.find(it->getPath()) == 0 &&
         (_req_path.length() == it->getPath().length() ||
         _req_path[it->getPath().length()] == '/'))
         {
             CheckMethod(*it);
-            if (it->getPath() == "/cgi-bin")
-                _cgi = true;
             if (it->getReturn() != "")
             {
                 _status_code = 301;
@@ -110,7 +107,7 @@ void    Response::CheckMatchingLocation()
             return ;
         }
     }
-    _real_location = _server->getRoot() + _req_path;
+    _real_location = _server->getRoot() + _req_path.substr(1);
 }
 
 
@@ -539,8 +536,8 @@ void    Response::SetResponse(bool status)
 {
     if (DEBUG_MODE)
     {
-        std::cout << GREEN << "Request path:\n" << _req_path << RESET << std::endl;
-        std::cout << GREEN << "Real location:\n" << _real_location << RESET <<std::endl;
+        std::cout << GREEN << "Request path: " << _req_path << RESET << std::endl;
+        std::cout << GREEN << "Real location: " << _real_location << RESET <<std::endl;
     }
     if (status)
     {
