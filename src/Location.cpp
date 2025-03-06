@@ -2,11 +2,12 @@
 
 /**
  * @brief Default constructor for the Location class.
- * 
+ *
  * Initializes all member variables to their default values. The methods vector
  * is reserved for 3 elements, and the default values for the methods are set
  * to 0 (inactive).
  */
+
 Location::Location()
 {
 	this->_path = "";
@@ -24,7 +25,7 @@ Location::Location()
 
 /**
  * @brief Copy constructor for the Location class.
- * 
+ *
  * @param other The Location object to copy from.
  * Copies all member variables from the other object to this one.
  */
@@ -45,9 +46,9 @@ Location::Location(const Location &other)
 
 /**
  * @brief Assignment operator for the Location class.
- * 
+ *
  * @param other The Location object to assign to this one.
- * 
+ *
  * @return A reference to this Location object.
  * Assigns all member variables from other to this object if they are not the same
  * object.
@@ -73,14 +74,14 @@ Location &Location::operator=(const Location &other)
 
 /**
  * @brief Destructor for the Location class.
- * 
+ *
  * The destructor cleans up any resources used by the Location object.
  */
 Location::~Location() { }
 
 /**
  * @brief Sets the path for the location.
- * 
+ *
  * @param parametr The path to set.
  */
 void Location::setPath(std::string parametr)
@@ -90,13 +91,20 @@ void Location::setPath(std::string parametr)
 
 /**
  * @brief Sets the root location for the location.
- * 
+ *
  * @param parametr The root location to set.
- * 
+ *
  * @throws Server::ErrorException If the path type is invalid.
  */
 void Location::setRootLocation(std::string parametr)
 {
+	if (parametr.empty())
+	{
+		this->_root = "";
+		return;
+	}
+	if (parametr.find_first_not_of("/") == std::string::npos)
+		throw Server::ErrorException("Invalid location root: \"/\"");
 	if (ConfigFile::getTypePath(parametr) != 2)
 		throw Server::ErrorException("root of location");
 	this->_root = parametr;
@@ -104,9 +112,9 @@ void Location::setRootLocation(std::string parametr)
 
 /**
  * @brief Sets the allowed HTTP methods for this location.
- * 
+ *
  * @param methods A vector of strings representing HTTP methods (e.g., "GET", "POST").
- * 
+ *
  * @throws Server::ErrorException If any method is not supported.
  */
 void Location::setMethods(std::vector<std::string> methods)
@@ -128,9 +136,9 @@ void Location::setMethods(std::vector<std::string> methods)
 
 /**
  * @brief Sets the autoindex setting for the location.
- * 
+ *
  * @param parametr A string representing the autoindex setting ("on" or "off").
- * 
+ *
  * @throws Server::ErrorException If the autoindex setting is invalid.
  */
 void Location::setAutoindex(std::string parametr)
@@ -143,7 +151,7 @@ void Location::setAutoindex(std::string parametr)
 
 /**
  * @brief Sets the index location for the location.
- * 
+ *
  * @param parametr The index location to set.
  */
 void Location::setIndexLocation(std::string parametr)
@@ -153,7 +161,7 @@ void Location::setIndexLocation(std::string parametr)
 
 /**
  * @brief Sets the return URL for the location.
- * 
+ *
  * @param parametr The return URL to set.
  */
 void Location::setReturn(std::string parametr)
@@ -163,7 +171,7 @@ void Location::setReturn(std::string parametr)
 
 /**
  * @brief Sets the alias for the location.
- * 
+ *
  * @param parametr The alias to set.
  */
 void Location::setAlias(std::string parametr)
@@ -173,7 +181,7 @@ void Location::setAlias(std::string parametr)
 
 /**
  * @brief Sets the CGI paths for the location.
- * 
+ *
  * @param path A vector of strings representing the CGI paths.
  */
 void Location::setCgiPath(std::vector<std::string> path)
@@ -183,7 +191,7 @@ void Location::setCgiPath(std::vector<std::string> path)
 
 /**
  * @brief Sets the CGI extensions for the location.
- * 
+ *
  * @param extension A vector of strings representing the CGI extensions.
  */
 void Location::setCgiExtension(std::vector<std::string> extension)
@@ -193,9 +201,9 @@ void Location::setCgiExtension(std::vector<std::string> extension)
 
 /**
  * @brief Sets the maximum body size for client requests.
- * 
+ *
  * @param parametr A string representing the maximum body size.
- * 
+ *
  * @throws Server::ErrorException If the syntax is incorrect or the value is invalid.
  */
 void Location::setMaxBodySize(std::string parametr)
@@ -215,7 +223,7 @@ void Location::setMaxBodySize(std::string parametr)
 
 /**
  * @brief Sets the maximum body size for client requests.
- * 
+ *
  * @param parametr The maximum body size in bytes.
  */
 void Location::setMaxBodySize(unsigned long parametr)
@@ -225,7 +233,7 @@ void Location::setMaxBodySize(unsigned long parametr)
 
 /**
  * @brief Gets the path of the location.
- * 
+ *
  * @return A constant reference to the path string.
  */
 const std::string &Location::getPath() const
@@ -235,7 +243,7 @@ const std::string &Location::getPath() const
 
 /**
  * @brief Gets the root location of the location.
- * 
+ *
  * @return A constant reference to the root location string.
  */
 const std::string &Location::getRootLocation() const
@@ -245,7 +253,7 @@ const std::string &Location::getRootLocation() const
 
 /**
  * @brief Gets the index location of the location.
- * 
+ *
  * @return A constant reference to the index location string.
  */
 const std::string &Location::getIndexLocation() const
@@ -255,7 +263,7 @@ const std::string &Location::getIndexLocation() const
 
 /**
  * @brief Gets the allowed HTTP methods for the location.
- * 
+ *
  * @return A constant reference to the methods vector.
  */
 const std::vector<std::string> &Location::getMethods() const
@@ -265,7 +273,7 @@ const std::vector<std::string> &Location::getMethods() const
 
 /**
  * @brief Gets the CGI paths for the location.
- * 
+ *
  * @return A constant reference to the CGI paths vector.
  */
 const std::vector<std::string> &Location::getCgiPath() const
@@ -275,7 +283,7 @@ const std::vector<std::string> &Location::getCgiPath() const
 
 /**
  * @brief Gets the CGI extensions for the location.
- * 
+ *
  * @return A constant reference to the CGI extensions vector.
  */
 const std::vector<std::string> &Location::getCgiExtension() const
@@ -285,7 +293,7 @@ const std::vector<std::string> &Location::getCgiExtension() const
 
 /**
  * @brief Gets the autoindex setting for the location.
- * 
+ *
  * @return A constant reference to the autoindex boolean.
  */
 const bool &Location::getAutoindex() const
@@ -295,7 +303,7 @@ const bool &Location::getAutoindex() const
 
 /**
  * @brief Gets the return URL for the location.
- * 
+ *
  * @return A constant reference to the return URL string.
  */
 const std::string &Location::getReturn() const
@@ -306,7 +314,7 @@ const std::string &Location::getReturn() const
 
 /**
  * @brief Gets the alias for the location.
- * 
+ *
  * @return A constant reference to the alias string.
  */
 const std::string &Location::getAlias() const
@@ -316,7 +324,7 @@ const std::string &Location::getAlias() const
 
 /**
  * @brief Gets the extension paths for the location.
- * 
+ *
  * @return A constant reference to the extension paths map.
  */
 const std::map<std::string, std::string> &Location::getExtensionPath() const
@@ -326,7 +334,7 @@ const std::map<std::string, std::string> &Location::getExtensionPath() const
 
 /**
  * @brief Gets the maximum body size for client requests.
- * 
+ *
  * @return A constant reference to the maximum body size in bytes.
  */
 const unsigned long &Location::getMaxBodySize() const
@@ -336,7 +344,7 @@ const unsigned long &Location::getMaxBodySize() const
 
 /**
  * @brief Returns a string representation of the allowed HTTP methods.
- * 
+ *
  * @return A string with the allowed methods (e.g., "GET, POST").
  */
 std::string Location::getPrintMethods() const

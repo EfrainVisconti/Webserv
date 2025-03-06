@@ -10,9 +10,6 @@ class Location;
 #define VALID_LOCATION 			0
 #define CGI_ISSUE 				1
 #define INVALID_PATH 			2
-#define INVALID_REDIRECT_FILE 	3
-#define INVALID_ALIAS_FILE 		4
-#define INVALID_INDEX_LOCATION 	5
 
 /* Server es la clase que contiene la información de cada servidor
 individual */
@@ -77,7 +74,7 @@ class Server
 		bool 		checkLocations() const;
 
 		public:
-		
+
 		class ErrorException : public std::exception
 		{
 			private:
@@ -95,7 +92,7 @@ class Server
 		};
 
 		void	setupServer();
-	
+
 };
 
 #endif

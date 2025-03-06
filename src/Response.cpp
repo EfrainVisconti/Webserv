@@ -81,7 +81,6 @@ void    Response::CheckMatchingLocation()
     std::vector<Location>::const_iterator it = _server->getLocations().begin();
     for (; it != _server->getLocations().end(); ++it)
     {
-        std::cout << "Location: " << it->getPath() << std::endl;
         if (_req_path.find(it->getPath()) == 0 &&
         (_req_path.length() == it->getPath().length() ||
         _req_path[it->getPath().length()] == '/'))
@@ -107,6 +106,8 @@ void    Response::CheckMatchingLocation()
             return ;
         }
     }
+	if (_req_method == "POST" || _req_method == "DELETE")
+		throw Response::ResponseErrorException(405);
     _real_location = _server->getRoot() + _req_path.substr(1);
 }
 
@@ -309,7 +310,7 @@ std::string Response::RemoveBoundary(const std::string &body, const std::string 
     size_t end_pos = body.find(end_boundary, start_pos);
     if (start_pos == std::string::npos || end_pos == std::string::npos)
         return "";
-    
+
     std::string new_body = body.substr(start_pos + start_boundary.length(), end_pos - start_pos - start_boundary.length());
     size_t headers_end = new_body.find("\r\n\r\n");
     if (headers_end != std::string::npos)
@@ -349,15 +350,16 @@ std::vector<char> Response::RemoveBoundary(const std::vector<char> &body, const 
 
 std::string Response::GetFilename(const std::vector<char> &body)
 {
-    std::vector<char>::const_iterator it = std::search(body.begin(), body.end(), "filename=\"", "filename=\"" + 10);
-    if (it == body.end()) 
+	char aux[11] = "filename=\"";
+    std::vector<char>::const_iterator it = std::search(body.begin(), body.end(), aux, aux + 10);
+    if (it == body.end())
         return "";
 
     it += 10;
     std::vector<char>::const_iterator end = std::find(it, body.end(), '"');
-    if (end == body.end()) 
+    if (end == body.end())
         return "";
-    
+
     return std::string(it, end);
 }
 
@@ -371,7 +373,7 @@ void	Response::CreateFile(const T &body, const std::string &boundary, const std:
         real_body = RemoveBoundary(body, boundary);
     else
         real_body = body;
-    
+
     if (real_body.empty())
         throw Response::ResponseErrorException(400);
 
@@ -462,7 +464,7 @@ void    Response::HandlePost(const std::string &content_type)
                 break ;
             }
         }
-        
+
         if (c_flag == true || "plain/text" == content_type)
             CreateFile(_request->getBody(), "", filename);
         else

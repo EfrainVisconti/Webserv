@@ -1,65 +1,5 @@
 #include "../inc/Server.hpp"
 
-//Server::Server()
-//{
-//	this->port = 0;
-//	this->host = 0;
-//	this->server_name = "";
-//	this->root = "";
-//	this->client_max_body_size = 50000;
-//	this->index = "";
-//	this->listen_socket = 0;
-//    
-//    Location loc1;
-//    loc1.path = "/location1";
-//    loc1.methods.push_back("GET");
-//    loc1.methods.push_back("POST");
-//    loc1.methods.push_back("DELETE");
-//    loc1.root = "";
-//    loc1.index = "index.html";
-//    loc1.autoindex = false;
-//    //loc1.redirection = "/html/redir/hola.html";
-//
-//    Location loc2;
-//    loc2.path = "/location2";
-//    loc2.methods.push_back("GET");
-//    loc2.methods.push_back("POST");
-//    loc2.root = "";
-//    loc2.index = "index.html";
-//    loc2.autoindex = true;
-//    //loc2.redirection = "https://github.com/";
-//
-//    Location loc3;
-//    loc3.path = "/location3";
-//    loc3.methods.push_back("GET");
-//    loc3.methods.push_back("POST");
-//    loc3.root = "";
-//    loc3.index = "";
-//    loc3.autoindex = false;
-//
-//    Location loc4;
-//    loc4.path = "/cgi-bin";
-//    loc4.methods.push_back("GET");
-//    loc4.methods.push_back("POST");
-//    loc4.root = "";
-//    loc4.index = "";
-//    loc4.autoindex = true;
-//
-//    Location loc5;
-//    loc5.path = "/uploads";
-//    loc5.methods.push_back("GET");
-//    loc5.methods.push_back("POST");
-//    loc5.root = "";
-//    loc5.index = "";
-//    loc5.autoindex = true;
-//
-//    this->locations.push_back(loc1);
-//    this->locations.push_back(loc2);
-//    this->locations.push_back(loc3);
-//    this->locations.push_back(loc4);
-//
-//}
-
 /**
  * @brief Default constructor for the Server class.
  *
@@ -89,7 +29,7 @@ Server::~Server() {}
  * @brief Copy constructor for the Server class.
  *
  * @param other Another instance of the Server class to copy from.
- * 
+ *
  * This constructor performs a deep copy of all member variables from another Server object.
  */
 Server::Server(const Server &other)
@@ -116,9 +56,9 @@ Server::Server(const Server &other)
  * @brief Assignment operator for the Server class.
  *
  * @param other Another instance of the Server class to assign to this one.
- * 
+ *
  * This operator performs a deep copy of all member variables from another Server object.
- * 
+ *
  * @return A reference to the current Server object.
  */
 Server &Server::operator=(const Server &other)
@@ -147,21 +87,14 @@ Server &Server::operator=(const Server &other)
  */
 void Server::initErrorPages(void)
 {
-	_error_pages[301] = "";
-	_error_pages[302] = "";
 	_error_pages[400] = "";
-	_error_pages[401] = "";
-	_error_pages[402] = "";
 	_error_pages[403] = "";
 	_error_pages[404] = "";
 	_error_pages[405] = "";
-	_error_pages[406] = "";
+	_error_pages[413] = "";
+	_error_pages[414] = "";
+	_error_pages[415] = "";
 	_error_pages[500] = "";
-	_error_pages[501] = "";
-	_error_pages[502] = "";
-	_error_pages[503] = "";
-	_error_pages[505] = "";
-	_error_pages[505] = "";
 }
 
 /**
@@ -204,6 +137,8 @@ void Server::setHost(std::string parametr)
 void Server::setRoot(std::string root)
 {
 	checkToken(root);
+	if (root.find_first_not_of("/") == std::string::npos)
+		throw Server::ErrorException("Invalid location root: \"/\"");
 	if (ConfigFile::getTypePath(root) == 2)
 	{
 		this->_root = root;
@@ -238,7 +173,7 @@ void	Server::setSocket(int fd)
 void Server::setPort(std::string parametr)
 {
 	unsigned int port;
-	
+
 	port = 0;
 	checkToken(parametr);
 	for (size_t i = 0; i < parametr.length(); i++)
@@ -262,7 +197,7 @@ void Server::setPort(std::string parametr)
 void Server::setClientMaxBodySize(std::string parametr)
 {
 	unsigned long body_size;
-	
+
 	body_size = 0;
 	checkToken(parametr);
 	for (size_t i = 0; i < parametr.length(); i++)
@@ -332,11 +267,11 @@ void Server::setErrorPages(std::vector<std::string> &parametr)
 
 /**
  * @brief Sets the configuration for a location.
- * 
+ *
  * This function parses the given parameters and configures the `Location` object with attributes such as root, allowed methods,
- * autoindex, index, return, alias, CGI extensions, CGI path, and client max body size. It also performs validation and 
+ * autoindex, index, return, alias, CGI extensions, CGI path, and client max body size. It also performs validation and
  * handles errors for invalid or duplicate parameters.
- * 
+ *
  * @param path The path of the location.
  * @param parametr A vector of strings representing the parameters for configuring the location.
  * @throws ErrorException If there are duplicate parameters or invalid tokens.
@@ -474,8 +409,7 @@ void Server::setLocation(std::string path, std::vector<std::string> parametr)
 		else if (i < parametr.size())
 			throw ErrorException("Parametr in a location is invalid");
 	}
-	if (new_location.getPath() != "/cgi-bin" && new_location.getIndexLocation().empty())
-		new_location.setIndexLocation(this->_index);
+
 	if (!flag_max_size)
 		new_location.setMaxBodySize(this->_client_max_body_size);
 	valid = isValidLocation(new_location);
@@ -483,10 +417,6 @@ void Server::setLocation(std::string path, std::vector<std::string> parametr)
 		throw ErrorException("Failed CGI validation");
 	else if (valid == 2)
 		throw ErrorException("Failed path in location validation");
-	else if (valid == 3)
-		throw ErrorException("Failed redirection file in location validation");
-	else if (valid == 4)
-		throw ErrorException("Failed alias file in location validation");
 	this->_locations.push_back(new_location);
 }
 
@@ -509,11 +439,11 @@ void Server::setAutoindex(std::string autoindex)
 
 /**
  * @brief Sets the server address based on _host and _port.
- * 
+ *
  * This method initializes the _server_address structure using the stored
  * values of _host and _port.
  */
-void Server::setServerAddress() 
+void Server::setServerAddress()
 {
     std::memset(&_server_address, 0, sizeof(_server_address));
     _server_address.sin_family = AF_INET;
@@ -523,10 +453,10 @@ void Server::setServerAddress()
 
 /**
  * @brief Sets the listening socket file descriptor.
- * 
+ *
  * @param socket The file descriptor to be assigned to _listen_socket.
  */
-void Server::setListenSocket(int socket) 
+void Server::setListenSocket(int socket)
 {
     _listen_socket = socket;
 }
@@ -547,10 +477,10 @@ bool Server::isValidHost(std::string host) const
 
 /**
  * @brief Validates the error pages configuration.
- * 
+ *
  * This function checks if the configured error pages (HTTP status codes 100 to 599) are valid and if the associated files exist
  * and are accessible.
- * 
+ *
  * @return True if the error pages configuration is valid, otherwise false.
  */
 bool Server::isValidErrorPages()
@@ -568,19 +498,16 @@ bool Server::isValidErrorPages()
 
 /**
  * @brief Validates the configuration of a location.
- * 
+ *
  * This function checks the validity of a `Location` object by ensuring it has proper file paths, extensions, and other attributes
  * required for correct configuration. It validates CGI-related settings, file paths, redirect files, alias files, and index location,
  * returning specific error codes for different validation failures.
- * 
+ *
  * @param location The location to validate.
  * @return An integer representing the validation result:
  *         - `VALID_LOCATION 			(0)` if the location is valid.
  *         - `CGI_ISSUE 				(1)` if there are CGI-related issues, such as missing or invalid CGI paths or extensions.
  *         - `INVALID_PATH 				(2)` if the path is invalid (doesn't start with a '/').
- *         - `INVALID_REDIRECT_FILE 	(3)` if the redirection file is invalid or inaccessible.
- *         - `INVALID_ALIAS_FILE 		(4)` if the alias file is invalid or inaccessible.
- *         - `INVALID_INDEX_LOCATION 	(5)` if the index location file is invalid or inaccessible.
  */
 int Server::isValidLocation(Location &location) const
 {
@@ -593,7 +520,7 @@ int Server::isValidLocation(Location &location) const
 		{
 			std::string path = location.getRootLocation() + location.getPath() + "/" + location.getIndexLocation();
 			if (ConfigFile::getTypePath(path) != 1)
-			{				
+			{
 				std::string root = getcwd(NULL, 0);
 				location.setRootLocation(root);
 				path = root + location.getPath() + "/" + location.getIndexLocation();
@@ -638,19 +565,7 @@ int Server::isValidLocation(Location &location) const
 		if (location.getPath()[0] != '/')
 			return INVALID_PATH;
 		if (location.getRootLocation().empty()) {
-			location.setRootLocation(this->_root);
-		}
-		if (ConfigFile::isFileExistAndReadable(location.getRootLocation() + location.getPath() + "/", location.getIndexLocation()))
-			return INVALID_INDEX_LOCATION;
-		if (!location.getReturn().empty())
-		{
-			if (ConfigFile::isFileExistAndReadable(location.getRootLocation(), location.getReturn()))
-				return INVALID_REDIRECT_FILE;
-		}
-		if (!location.getAlias().empty())
-		{
-			if (ConfigFile::isFileExistAndReadable(location.getRootLocation(), location.getAlias()))
-			 	return INVALID_ALIAS_FILE;
+			location.setRootLocation("");
 		}
 	}
 	return VALID_LOCATION;
@@ -658,7 +573,7 @@ int Server::isValidLocation(Location &location) const
 
 /**
  * @brief Returns the host address of the server.
- * 
+ *
  * @return A constant reference to the server's host address.
  */
 const in_addr_t &Server::getHost() const
@@ -668,7 +583,7 @@ const in_addr_t &Server::getHost() const
 
 /**
  * @brief Returns the server's port number.
- * 
+ *
  * @return A constant reference to the server's port number.
  */
 const uint16_t &Server::getPort() const
@@ -678,7 +593,7 @@ const uint16_t &Server::getPort() const
 
 /**
  * @brief Returns the server's name.
- * 
+ *
  * @return A constant reference to the server name.
  */
 const std::string &Server::getServerName() const
@@ -688,7 +603,7 @@ const std::string &Server::getServerName() const
 
 /**
  * @brief Returns the root directory of the server.
- * 
+ *
  * @return A constant reference to the root directory.
  */
 const std::string &Server::getRoot() const
@@ -698,7 +613,7 @@ const std::string &Server::getRoot() const
 
 /**
  * @brief Returns the maximum client body size.
- * 
+ *
  * @return A constant reference to the client max body size.
  */
 const size_t &Server::getClientMaxBodySize() const
@@ -708,7 +623,7 @@ const size_t &Server::getClientMaxBodySize() const
 
 /**
  * @brief Returns whether autoindex is enabled.
- * 
+ *
  * @return A constant reference to the autoindex setting.
  */
 const bool &Server::getAutoindex() const
@@ -718,7 +633,7 @@ const bool &Server::getAutoindex() const
 
 /**
  * @brief Returns the list of locations configured for the server.
- * 
+ *
  * @return A constant reference to the vector of locations.
  */
 const std::vector<Location> &Server::getLocations() const
@@ -729,7 +644,7 @@ const std::vector<Location> &Server::getLocations() const
 
 /**
  * @brief Obtains the server address structure.
- * 
+ *
  * @return A reference to the sockaddr_in structure containing the server's address.
  */
 const struct sockaddr_in &Server::getServerAddress() const
@@ -739,7 +654,7 @@ const struct sockaddr_in &Server::getServerAddress() const
 
 /**
  * @brief Returns the default index file name.
- * 
+ *
  * @return A constant reference to the index file name.
  */
 const std::string &Server::getIndex() const
@@ -749,7 +664,7 @@ const std::string &Server::getIndex() const
 
 /**
  * @brief Returns the error pages mapping (HTTP status code -> file path).
- * 
+ *
  * @return A constant reference to the map of error pages.
  */
 const std::map<short, std::string> &Server::getErrorPages() const
@@ -759,29 +674,29 @@ const std::map<short, std::string> &Server::getErrorPages() const
 
 /**
  * @brief Returns the file descriptor for the server's listen socket
- * 
+ *
  * @return A constant reference to the file descriptor.
  */
 const int   &Server::getSocket() const
-{ 
-	return (this->_listen_socket); 
+{
+	return (this->_listen_socket);
 }
 
 /**
  * @brief Returns the file descriptor for the server's listen socket
- * 
+ *
  * @return A constant reference to the file descriptor.
  */
 const int   &Server::getListenSocket() const
-{ 
-	return (this->_listen_socket); 
+{
+	return (this->_listen_socket);
 }
 
 /**
  * @brief Returns the path to the error page for a given status code.
- * 
+ *
  * This function retrieves the file path for the error page corresponding to a given HTTP status code.
- * 
+ *
  * @param key The HTTP status code (e.g., 404 for Not Found).
  * @return A constant reference to the error page's file path.
  * @throws ErrorException If the error page for the given status code does not exist.
@@ -796,9 +711,9 @@ const int   &Server::getListenSocket() const
 
 /**
  * @brief Finds the location by its path.
- * 
+ *
  * This function searches for a location by its path and returns an iterator pointing to it in the list of locations.
- * 
+ *
  * @param key The path of the location.
  * @return An iterator to the location in the list.
  * @throws ErrorException If no location with the specified path is found.
@@ -816,9 +731,9 @@ const std::vector<Location>::iterator Server::getLocationKey(std::string key)
 
 /**
  * @brief Checks if a parameter token ends correctly.
- * 
+ *
  * This function checks if a parameter token ends with a semicolon (`;`). If it does not, it throws an exception.
- * 
+ *
  * @param parametr A string representing the parameter token to check.
  * @throws ErrorException If the token does not end with a semicolon.
  */
@@ -832,9 +747,9 @@ void Server::checkToken(std::string &parametr)
 
 /**
  * @brief Checks for duplicate locations.
- * 
+ *
  * This function checks if there are any duplicate locations in the server's location list. If there are duplicates, it returns true.
- * 
+ *
  * @return True if there are duplicate locations, false otherwise.
  */
 bool Server::checkLocations() const
@@ -850,28 +765,4 @@ bool Server::checkLocations() const
 		}
 	}
 	return (false);
-}
-
-/**
- * @brief Sets up the server socket and binds it to the specified address and port.
- * 
- * This function initializes the server socket, sets socket options, and binds the socket to the server address and port.
- * It throws an error if the socket cannot be created or bound.
- */
-void	Server::setupServer(void)
-{
-	if ((_listen_socket = socket(AF_INET, SOCK_STREAM, 0) )  == -1 )
-    {
-		Logger::logMsg(RED, CONSOLE_OUTPUT, "webserv: socket error %s   Closing ....", strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-
-    int option_value = 1;
-    setsockopt(_listen_socket, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int));
-    setServerAddress();
-    if (bind(_listen_socket, (struct sockaddr *) &_server_address, sizeof(_server_address)) == -1)
-    {
-		Logger::logMsg(RED, CONSOLE_OUTPUT, "webserv: bind error %s   Closing ....", strerror(errno));
-        exit(EXIT_FAILURE);
-    }
 }

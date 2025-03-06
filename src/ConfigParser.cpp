@@ -4,7 +4,7 @@
 /**
  * @brief Constructs a ConfigParser object with server vector initialiced.
  */
-ConfigParser::ConfigParser(std::vector<Server>& servers) 
+ConfigParser::ConfigParser(std::vector<Server>& servers)
     : _servers(servers) { }
 
 /**
@@ -38,11 +38,11 @@ int ConfigParser::print()
 			std::cout << "	" << (*it).first << " - " << it->second << std::endl;
 			++it;
 		}
-		
+
 		std::cout << std::endl;
 		std::cout << "Locations: " << _servers[i].getLocations().size() << std::endl;
 		std::vector<Location>::const_iterator itl = _servers[i].getLocations().begin();
-		
+
 		while (itl != _servers[i].getLocations().end())
 		{
 			std::cout << std::endl;
@@ -114,9 +114,9 @@ int ConfigParser::createCluster(const std::string &config_file)
 	removeComments(content);
 	removeWhiteSpace(content);
 	splitServers(content);
-	
+
 	if (this->_server_config.size() != this->_nb_server)
-		throw ErrorException("The server config size != the number of servers"); 
+		throw ErrorException("The server config size != the number of servers");
 
 	for (size_t i = 0; i < this->_nb_server; i++)
 	{
@@ -131,7 +131,7 @@ int ConfigParser::createCluster(const std::string &config_file)
 
 	if (this->_nb_server > 1)
 		checkServers();
-	
+
 	return (0);
 }
 
@@ -196,7 +196,7 @@ void ConfigParser::splitServers(std::string &content)
 
 /**
  * @brief Finds the start of a server block in the configuration.
- * 
+ *
  * @param start The starting position for searching.
  * @param content The configuration content.
  * @return The index of the opening '{' of the server block.
@@ -229,7 +229,7 @@ size_t ConfigParser::findStartServer (size_t start, std::string &content)
 
 /**
  * @brief Finds the end of a server block in the configuration.
- * 
+ *
  * @param start The starting position for searching.
  * @param content The configuration content.
  * @return The index of the closing '}' of the server block.
@@ -238,7 +238,7 @@ size_t ConfigParser::findEndServer (size_t start, std::string &content)
 {
 	size_t	i;
 	size_t	scope;
-	
+
 	scope = 0;
 	for (i = start + 1; content[i]; i++)
 	{
@@ -256,7 +256,7 @@ size_t ConfigParser::findEndServer (size_t start, std::string &content)
 
 /**
  * @brief Splits a line into parameters based on a separator.
- * 
+ *
  * @param line The input string to be split.
  * @param sep The separator characters.
  * @return A vector of substrings.
@@ -283,7 +283,7 @@ std::vector<std::string> splitParametrs(std::string line, std::string sep)
 
 /**
  * @brief Creates a Server object from a configuration string.
- * 
+ *
  * @param config The configuration string.
  * @param server The Server object to populate.
  * @throws ErrorException if the configuration is invalid.
@@ -383,15 +383,15 @@ void ConfigParser::createServer(std::string &config, Server &server)
 		}
 	}
 	if (server.getRoot().empty())
-		server.setRoot("/;");
+		server.setRoot(";");
 	if (server.getHost() == 0)
 		server.setHost("localhost;");
 	if (server.getIndex().empty())
-		server.setIndex("index.html;");
-	if (ConfigFile::isFileExistAndReadable(server.getRoot(), server.getIndex()))
-		throw ErrorException("Index from config file not found or unreadable");
+		server.setIndex(";");
+	// if (ConfigFile::isFileExistAndReadable(server.getRoot(), server.getIndex()))
+	// 	throw ErrorException("Index from config file not found or unreadable");
 	if (server.checkLocations())
-		throw ErrorException("Locaition is duplicated");
+		throw ErrorException("Location is duplicated");
 	if (!server.getPort())
 		throw ErrorException("Port not found");
 	server.setErrorPages(error_codes);
@@ -401,7 +401,7 @@ void ConfigParser::createServer(std::string &config, Server &server)
 
 /**
  * @brief Compares a substring of str1 with str2.
- * 
+ *
  * @param str1 The first string.
  * @param str2 The second string.
  * @param pos The starting position in str1.
@@ -424,7 +424,7 @@ int	ConfigParser::stringCompare(std::string str1, std::string str2, size_t pos)
 
 /**
  * @brief Checks for duplicate and mandatory server parameters.
- * 
+ *
  * @throws ErrorException if there are duplicate servers.
  */
 void ConfigParser::checkServers()
@@ -444,7 +444,7 @@ void ConfigParser::checkServers()
 
 /**
  * @brief Retrieves the list of servers parsed from the configuration.
- * 
+ *
  * @return A vector containing Server objects.
  */
 std::vector<Server>	&ConfigParser::getServers()
