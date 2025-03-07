@@ -95,6 +95,7 @@ void Server::initErrorPages(void)
 	_error_pages[414] = "";
 	_error_pages[415] = "";
 	_error_pages[500] = "";
+	_error_pages[504] = "";
 }
 
 /**

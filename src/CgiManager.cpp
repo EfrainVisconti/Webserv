@@ -13,7 +13,6 @@ int    Response::parseCgi(){
     // if (!cgiPath.empty() && cgiPath[4] == '/') {
     //     cgiPath.erase(4, 1);
     // }
-    std::cout << cgiPath << std::endl;
     if (access(cgiPath.c_str(), X_OK) == -1){
         throw Response::ResponseErrorException(404);
     }
@@ -70,11 +69,12 @@ void Response::HandleCgi() {
     } else {
         close(pipefd[1]);
         signal(SIGALRM, timeout_handler);
-        alarm(3);
+        alarm(5);
         int status;
         int ret = waitpid(pid, &status, 0);
         alarm(0);
         if (ret == -1){
+            kill(pid, SIGKILL);
             throw Response::ResponseErrorException(504);
         }
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
@@ -87,28 +87,17 @@ void Response::HandleCgi() {
             _body = response_body;
             _content_length = _body.size();
             _status_code = 200;
-            _status_message = "CGI";
+            _status_message = "OK";
             _content_type = "text/html";
             SetResponse(true);
         } else {
             close(pipefd[0]);
+            kill(pid, SIGKILL);
             throw ResponseErrorException(500);
         }
 
         close(pipefd[0]);
     }
-}
-
-int Response::notHtml(){   
-    size_t pos = _req_path.find_last_of('.');
-    if (pos == std::string::npos){
-        return 1;
-    }
-    std::string ext = _req_path.substr(pos + 1);
-    if (ext == "html"){
-        return 0;
-    }
-    return 1;    
 }
 
 std::string Response::getQueryString() {
@@ -118,4 +107,10 @@ std::string Response::getQueryString() {
         return querystring.substr(pos + 1);
     }
     return _real_location;
+}
+
+bool    Response::validExt(const std::string &str, const std::string &suffix)
+{
+    return str.size() >= suffix.size() && 
+           str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }

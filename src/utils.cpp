@@ -53,6 +53,8 @@ std::string errorResponse(short val, std::string error_page)
         message = "Unsupported Media Type";
     else if (val == 414)
         message = "URI Too Long";
+    else if (val == 504)
+        message = "Gateway Timeout";
 
     std::string body;
     if (error_page != "")

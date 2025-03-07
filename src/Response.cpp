@@ -485,7 +485,7 @@ void    Response::GenerateResponse()
     {
         InitialStatusCodeCheck();
         CheckMatchingLocation();
-        if (_is_cgi == true && notHtml() == 1)
+        if (_is_cgi == true && (validExt(_real_location, ".sh") || validExt(_real_location, ".py")))
 		{
             if (_req_method == "DELETE")
                 throw Response::ResponseErrorException(405);

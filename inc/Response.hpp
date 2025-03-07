@@ -54,8 +54,9 @@ class Response
 		void		HandleCgi();
 		std::string	getQueryString();
 		int			parseCgi();
-		int			notHtml();
+		bool		validExt(const std::string &str, const std::string &suffix);
 		static void	timeout_handler(int sig);
+
 		template <typename T>
 		void	CreateFile(const T &body, const std::string &boundary, const std::string &filename);
 
