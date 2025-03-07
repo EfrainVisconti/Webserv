@@ -27,7 +27,7 @@ void Response::timeout_handler(int sig){
  - Crea variables de entorno interactivas con el archivo a ejecutar
  - similar a la ejecucion de comandos en terminal se ejecuta el script
  redirigiendo la salida al body de la respuesta http.
- 
+
  en caso de cualquier error de funciones se lanza error 500*/
 
 void Response::HandleCgi() {
@@ -50,57 +50,70 @@ void Response::HandleCgi() {
     if (pid == -1) {
         throw ResponseErrorException(500);
     }
-    if (pid == 0) {
-        close(pipefd[0]);
-        dup2(pipefd[1], STDOUT_FILENO);
-        close(pipefd[1]);
-        std::string location_without_query = _real_location;
-        size_t pos = location_without_query.find('?');
-        if (pos != std::string::npos) {
-            location_without_query = location_without_query.substr(0, pos);
-        }
-        if (!location_without_query.empty() && location_without_query[0] == '/') {
-            location_without_query.erase(0, 1);
-        }
-        char* argv[] = { const_cast<char*>(location_without_query.c_str()), NULL };
-        extern char** environ;
-        execve(location_without_query.c_str(), argv, environ);
-        throw Response::ResponseErrorException(500);
-    } else {
-        close(pipefd[1]);
-        signal(SIGALRM, timeout_handler);
-        alarm(5);
-        int status;
-        int ret = waitpid(pid, &status, WNOHANG);
-        alarm(0);
-        if (ret == -1){
-            throw Response::ResponseErrorException(505);
-        }
-        if (ret == 0){
-            kill(pid, SIGKILL);
-            throw Response::ResponseErrorException(504);
-        }
-        if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-            char buffer[1024];
-            std::string response_body;
-            ssize_t bytes_read;
-            while ((bytes_read = read(pipefd[0], buffer, sizeof(buffer))) > 0) {
-                response_body.append(buffer, bytes_read);
-            }
-            _body = response_body;
-            _content_length = _body.size();
-            _status_code = 200;
-            _status_message = "OK";
-            _content_type = "text/html";
-            SetResponse(true);
-        } else {
-            close(pipefd[0]);
-            kill(pid, SIGKILL);
-            throw ResponseErrorException(500);
-        }
+	if (pid == 0) {
+    close(pipefd[0]);
+    dup2(pipefd[1], STDOUT_FILENO);
+    close(pipefd[1]);
 
-        close(pipefd[0]);
+    std::string location_without_query = _real_location;
+    size_t pos = location_without_query.find('?');
+    if (pos != std::string::npos) {
+        location_without_query = location_without_query.substr(0, pos);
     }
+    if (!location_without_query.empty() && location_without_query[0] == '/') {
+        location_without_query.erase(0, 1);
+    }
+    char* argv[] = { const_cast<char*>(location_without_query.c_str()), NULL };
+    extern char** environ;
+    execve(location_without_query.c_str(), argv, environ);
+    exit(1);
+	} else {
+		close(pipefd[1]);
+
+		int status;
+		int elapsed_time = 0;
+		const int timeout = 5;
+
+		while (elapsed_time < timeout) {
+			int ret = waitpid(pid, &status, WNOHANG);
+
+			if (ret == -1) {
+				kill(pid, SIGKILL);
+				throw Response::ResponseErrorException(505);
+			}
+			if (ret > 0) {
+				// El proceso terminó
+				if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+					// Leer la salida del CGI
+					char buffer[1024];
+					std::string response_body;
+					ssize_t bytes_read;
+					while ((bytes_read = read(pipefd[0], buffer, sizeof(buffer))) > 0) {
+						response_body.append(buffer, bytes_read);
+					}
+					_body = response_body;
+					_content_length = _body.size();
+					_status_code = 200;
+					_status_message = "OK";
+					_content_type = "text/html";
+					SetResponse(true);
+					close(pipefd[0]);
+					return;
+				} else {
+					kill(pid, SIGKILL);
+					throw Response::ResponseErrorException(500);
+				}
+			}
+
+			sleep(1);
+			elapsed_time++;
+		}
+
+		kill(pid, SIGKILL);
+		throw Response::ResponseErrorException(504);
+
+		close(pipefd[0]);
+	}
 }
 
 std::string Response::getQueryString() {
@@ -114,6 +127,6 @@ std::string Response::getQueryString() {
 
 bool    Response::validExt(const std::string &str, const std::string &suffix)
 {
-    return str.size() >= suffix.size() && 
+    return str.size() >= suffix.size() &&
            str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
