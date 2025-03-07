@@ -71,9 +71,12 @@ void Response::HandleCgi() {
         signal(SIGALRM, timeout_handler);
         alarm(5);
         int status;
-        int ret = waitpid(pid, &status, 0);
+        int ret = waitpid(pid, &status, WNOHANG);
         alarm(0);
         if (ret == -1){
+            throw Response::ResponseErrorException(505);
+        }
+        if (ret == 0){
             kill(pid, SIGKILL);
             throw Response::ResponseErrorException(504);
         }
