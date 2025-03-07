@@ -50,7 +50,7 @@ void printIPv4(uint32_t ip) ;
 # define RESET "\033[0m"
 
 # define MAX_CONN 512
-# define DEBUG_MODE 1
+# define DEBUG_MODE 0
 # define TIMEOUT 60000 // 60 segs.
 
 # ifndef REQUEST_SIZE

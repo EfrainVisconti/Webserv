@@ -1,1 +1,1 @@
-make && valgrind --leak-check=full --log-file=valgrind.log ./webserv configs/test.conf
+make && valgrind --leak-check=full --log-file=valgrind.log ./webserv

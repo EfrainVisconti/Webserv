@@ -177,7 +177,7 @@ bool    Response::HandleAutoIndex()
         throw Response::ResponseErrorException(403);
     }
 
-    std::string path_aux = (_real_location + _index);//.substr(1);
+    std::string path_aux = (_real_location + _index);
     std::ifstream file(path_aux.c_str());
     if (!file)
     {
@@ -293,7 +293,6 @@ void    Response::InitialStatusCodeCheck()
 
 void	Response::HandleDelete(const std::string &path)
 {
-    //std::string path_aux = path.substr(1);
     if (std::remove(path.c_str()) == 0)
     {
         _status_code = 204;
@@ -356,8 +355,10 @@ std::vector<char> Response::RemoveBoundary(const std::vector<char> &body, const 
 
 std::string Response::GetFilename(const std::vector<char> &body)
 {
-	char aux[11] = "filename=\"";
-    std::vector<char>::const_iterator it = std::search(body.begin(), body.end(), aux, aux + 10);
+	const char *pattern = "filename=\"";
+	const size_t pattern_len = 10;
+
+    std::vector<char>::const_iterator it = std::search(body.begin(), body.end(), pattern, pattern + pattern_len);
     if (it == body.end())
         return "";
 
@@ -383,14 +384,14 @@ void	Response::CreateFile(const T &body, const std::string &boundary, const std:
     if (real_body.empty())
         throw Response::ResponseErrorException(400);
 
-    path = (_real_location + filename);//.substr(1);
+    path = (_real_location + filename);
     int count = 1;
     std::ifstream duplicate_file(path.c_str());
     while (duplicate_file)
     {
         std::stringstream new_filename;
         new_filename << filename << "(" << count << ")";
-        path = (_real_location + new_filename.str()).substr(1);
+        path = (_real_location + new_filename.str());
         duplicate_file.close();
         duplicate_file.open(path.c_str());
         count++;

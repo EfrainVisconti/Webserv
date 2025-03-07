@@ -10,7 +10,6 @@ int main(int argc, char **argv) {
 
 		config = (argc == 1 ? "configs/default.conf" : argv[1]);
 		cluster.createCluster(config);
-        cluster.print();
 
         ServerManager serverManager(cluster.getServers());
         serverManager.LaunchServers();
