@@ -10,9 +10,6 @@ int    Response::parseCgi(){
     if (pos != std::string::npos) {
         cgiPath = cgiPath.substr(0, pos);
     }
-    // if (!cgiPath.empty() && cgiPath[4] == '/') {
-    //     cgiPath.erase(4, 1);
-    // }
     if (access(cgiPath.c_str(), X_OK) == -1){
         throw Response::ResponseErrorException(404);
     }
@@ -82,9 +79,7 @@ void Response::HandleCgi() {
 				throw Response::ResponseErrorException(505);
 			}
 			if (ret > 0) {
-				// El proceso terminó
 				if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-					// Leer la salida del CGI
 					char buffer[1024];
 					std::string response_body;
 					ssize_t bytes_read;

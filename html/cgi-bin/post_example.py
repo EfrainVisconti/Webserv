@@ -13,8 +13,6 @@ def get_post_data():
         return post_data
     return ""
 
-while True:
-    1
 # Mostrar los encabezados HTTP para la respuesta
 print("Content-Type: text/html; charset=UTF-8")
 print()  # Línea en blanco para separar los encabezados del cuerpo de la respuesta

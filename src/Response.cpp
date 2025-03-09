@@ -246,7 +246,6 @@ bool    Response::HTTPRedirectionCase()
 */
 void    Response::ExhaustivePathCheck(const std::string &path)
 {
-    //std::string path_aux = path.substr(1);
     struct stat buffer;
     if (stat(path.c_str(), &buffer) == -1)
     {
@@ -486,7 +485,8 @@ void    Response::GenerateResponse()
     {
         InitialStatusCodeCheck();
         CheckMatchingLocation();
-        if (_is_cgi == true && (validExt(_real_location, ".sh") || validExt(_real_location, ".py")))
+        if (_is_cgi == true && (validExt(_real_location, ".sh") || validExt(_real_location, ".py")
+            || _real_location.find("?") != std::string::npos))
 		{
             if (_req_method == "DELETE")
                 throw Response::ResponseErrorException(405);

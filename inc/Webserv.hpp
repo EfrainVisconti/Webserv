@@ -38,7 +38,7 @@
 # include "ServerManager.hpp"
 
 /* Utils */
-std::string statusCodeString(short statusCode);
+//std::string statusCodeString(short statusCode);
 std::string GetDate();
 std::string errorResponse(short val, std::string error_page);
 int ft_stoi(std::string str);

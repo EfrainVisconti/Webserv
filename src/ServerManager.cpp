@@ -205,7 +205,6 @@ void	ServerManager::CreateSockets()
 	int	count = 0;
 	for (std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); ++it)
 	{
-		//EFRAIN: Revisa si me estoy cargando la logica del if
 		it->setListenSocket(socket(AF_INET, SOCK_STREAM, 0));
 		if (it->getListenSocket() == -1)
 			throw ErrorException("socket() error. Stopping execution...");
