@@ -45,7 +45,6 @@ class Logger{
 
         static void         logMsg(const char *, Mode, const char*, ...);
         static void         setPrio(LogPrio);
-        static void         enableFileLog();
         static std::string  getCurrTime();
     private:
         static std::map<LogPrio, std::string> initMap();

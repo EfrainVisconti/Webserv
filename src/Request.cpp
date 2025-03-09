@@ -9,7 +9,7 @@ Request::Request(void){
 	_language = ""; // idioma preferido del cliente
     _encoding = ""; // tipos de codificacion que maneja el cliente.
 	_keep_alive = 0; // 1 mantener conexion viva 0 cerrarla
-	_max_body_size = 0; // limite de conf.yaml de memoria
+	_max_body_size = 0;
 	_body_size = 0; // espacio que ocupa la solicitud
     _error_type = -1; // error de salida en caso de no estar bien la solicitud.
     _content_type = ""; // tipo de contenido

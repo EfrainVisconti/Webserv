@@ -12,66 +12,6 @@ ConfigParser::ConfigParser(std::vector<Server>& servers)
  */
 ConfigParser::~ConfigParser() { }
 
-/**
- * @brief Prints the parsed server configurations to standard output.
- * @return Always returns 0.
- */
-int ConfigParser::print()
-{
-	std::cout << "------------- Config -------------" << std::endl;
-	for (size_t i = 0; i < _servers.size(); i++)
-	{
-		std::cout << "Server #" << i + 1 << std::endl;
-		std::cout << "Server name: " << _servers[i].getServerName() << std::endl;
-		std::cout << "Host: ";
-		printIPv4(_servers[i].getHost());
-		std::cout << "Port: " << _servers[i].getPort() << std::endl;
-		std::cout << "Root: " << _servers[i].getRoot() << std::endl;
-		std::cout << "Max BSize: " << _servers[i].getClientMaxBodySize() << std::endl;
-		std::cout << "Index: " << _servers[i].getIndex() << std::endl;
-		std::cout << "Error pages: " << _servers[i].getErrorPages().size() << std::endl;
-		std::cout << std::endl;
-
-		std::map<short, std::string>::const_iterator it = _servers[i].getErrorPages().begin();
-		while (it != _servers[i].getErrorPages().end())
-		{
-			std::cout << "	" << (*it).first << " - " << it->second << std::endl;
-			++it;
-		}
-
-		std::cout << std::endl;
-		std::cout << "Locations: " << _servers[i].getLocations().size() << std::endl;
-		std::vector<Location>::const_iterator itl = _servers[i].getLocations().begin();
-
-		while (itl != _servers[i].getLocations().end())
-		{
-			std::cout << std::endl;
-			std::cout << "	name location: " << itl->getPath() << std::endl;
-			std::cout << "	methods: " << itl->getPrintMethods() << std::endl;
-			std::cout << "	index: " << itl->getIndexLocation() << std::endl;
-			if (itl->getCgiPath().empty())
-			{
-				std::cout << "	root: " << itl->getRootLocation() << std::endl;
-				if (!itl->getReturn().empty())
-					std::cout << "	return: " << itl->getReturn() << std::endl;
-				if (!itl->getAlias().empty())
-					std::cout << "	alias: " << itl->getAlias() << std::endl;
-			}
-			else
-			{
-				std::cout << "	cgi root: " << itl->getRootLocation() << std::endl;
-				std::cout << "	sgi_path: " << itl->getCgiPath().size() << std::endl;
-				std::cout << "	sgi_ext: " << itl->getCgiExtension().size() << std::endl;
-			}
-			++itl;
-		}
-
-		itl = _servers[i].getLocations().begin();
-		std::cout << "-----------------------------" << std::endl;
-	}
-	return (0);
-}
-
 
 /**
  * @brief Checks if a server with the same host, port, and server name already exists.
@@ -86,10 +26,10 @@ bool ConfigParser::isDuplicateServer(const uint32_t &host, const uint16_t &port)
     {
         if (_servers[i].getHost() == host && _servers[i].getPort() == port)
         {
-            return true; // Duplicate server found
+            return true;
         }
     }
-    return false; // No duplicates
+    return false;
 }
 
 /**
@@ -388,8 +328,6 @@ void ConfigParser::createServer(std::string &config, Server &server)
 		server.setHost("localhost;");
 	if (server.getIndex().empty())
 		server.setIndex(";");
-	// if (ConfigFile::isFileExistAndReadable(server.getRoot(), server.getIndex()))
-	// 	throw ErrorException("Index from config file not found or unreadable");
 	if (server.checkLocations())
 		throw ErrorException("Location is duplicated");
 	if (!server.getPort())

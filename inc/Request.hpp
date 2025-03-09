@@ -7,7 +7,7 @@ class Request
 {
 	private:
 		std::string							_method; // metodo (get, post, delete)
-		std::string							_path_req; // 
+		std::string							_path_req;
 		std::string							_host;
 		std::string							_user_agent;
 		std::string							_request_format;

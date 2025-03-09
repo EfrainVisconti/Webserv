@@ -517,18 +517,6 @@ int Server::isValidLocation(Location &location) const
 		if (location.getCgiPath().empty() || location.getCgiExtension().empty() || location.getIndexLocation().empty())
 			return CGI_ISSUE;
 
-		// if (ConfigFile::checkFile(location.getIndexLocation(), 4) < 0)
-		// {
-		// 	std::string path = location.getRootLocation() + location.getPath() + "/" + location.getIndexLocation();
-		// 	if (ConfigFile::getTypePath(path) != 1)
-		// 	{
-		// 		std::string root = getcwd(NULL, 0);
-		// 		location.setRootLocation(root);
-		// 		path = root + location.getPath() + "/" + location.getIndexLocation();
-		// 	}
-		// 	if (path.empty() || ConfigFile::getTypePath(path) != 1 || ConfigFile::checkFile(path, 4) < 0)
-		// 		return CGI_ISSUE;
-		// }
 		if (location.getCgiPath().size() != location.getCgiExtension().size())
 			return CGI_ISSUE;
 		std::vector<std::string>::const_iterator it;
@@ -693,22 +681,6 @@ const int   &Server::getListenSocket() const
 	return (this->_listen_socket);
 }
 
-/**
- * @brief Returns the path to the error page for a given status code.
- *
- * This function retrieves the file path for the error page corresponding to a given HTTP status code.
- *
- * @param key The HTTP status code (e.g., 404 for Not Found).
- * @return A constant reference to the error page's file path.
- * @throws ErrorException If the error page for the given status code does not exist.
- */
-//const std::string &Server::getPathErrorPage(short key)
-//{
-//	std::map<short, std::string>::iterator it = this->_error_pages.find(key);
-//	if (it == this->_error_pages.end())
-//		throw ErrorException("Error_page does not exist");
-//	return (it->second);
-//}
 
 /**
  * @brief Finds the location by its path.

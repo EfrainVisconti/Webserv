@@ -29,8 +29,6 @@ class ConfigParser {
 		std::vector<Server>	&getServers();
 		int	stringCompare(std::string str1, std::string str2, size_t pos);
 
-		int print();
-
 		public:
 		class ErrorException : public std::exception
 		{

@@ -343,28 +343,3 @@ const unsigned long &Location::getMaxBodySize() const
 {
 	return (this->_client_max_body_size);
 }
-
-/**
- * @brief Returns a string representation of the allowed HTTP methods.
- *
- * @return A string with the allowed methods (e.g., "GET, POST").
- */
-std::string Location::getPrintMethods() const
-{
-	std::string res;
-	if (!_methods[2].empty())
-		res.insert(0, "DELETE");
-	if (!_methods[1].empty())
-	{
-		if (!res.empty())
-			res.insert(0, ", ");
-		res.insert(0, "POST");
-	}
-	if (!_methods[0].empty())
-	{
-		if (!res.empty())
-			res.insert(0, ", ");
-		res.insert(0, "GET");
-	}
-	return (res);
-}

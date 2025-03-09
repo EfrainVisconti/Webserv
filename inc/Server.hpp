@@ -90,9 +90,6 @@ class Server
 				}
 				virtual ~ErrorException() throw() {}
 		};
-
-		void	setupServer();
-
 };
 
 #endif
